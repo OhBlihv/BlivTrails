@@ -1,0 +1,115 @@
+name: ${project.artifactId}
+version: ${project.version}
+author: OhBlihv
+website: http://www.spigotmc.org/resources/blivtrails.4544/
+main: net.auscraft.BlivTrails.BlivTrails
+description: Fancy trails for Fancy people
+softdepend: [VanishNoPacket]
+commands:
+  trail:
+    description: Open the Trails menu
+    aliases: [trails, btrail, btrails]
+  trailadmin:
+    description: Admin commands for BlivTrails
+    permission: blivtrails.admin
+permissions:
+  blivtrails.*:
+    description: Gives access to all BlivTrails commands/menus
+    default: op
+  blivtrails.admin:
+    description: Access to the BlivTrails Admin Panel (Reload/Force Remove Trails)
+    default: op
+  blivtrails.trails:
+    description: Gives access to all Particle Trails
+    default: op
+    children:
+      blivtrails.remove-trail: true
+      blivtrails.angry-villager: true
+      blivtrails.barrier: true
+      blivtrails.cloud: true
+      blivtrails.criticals: true
+      blivtrails.criticals-magic: true
+      blivtrails.drip-lava: true
+      blivtrails.drip-water: true
+      blivtrails.enchant: true
+      blivtrails.explosion-smoke: true
+      blivtrails.firework: true
+      blivtrails.flame: true
+      blivtrails.happy-villager: true
+      blivtrails.hearts: true
+      blivtrails.lava: true
+      blivtrails.note: true
+      blivtrails.portal: true
+      blivtrails.redstone: true
+      blivtrails.slime: true
+      blivtrails.smoke: true
+      blivtrails.snow-ball: true
+      blivtrails.snow-shovel: true
+      blivtrails.spell: true
+      blivtrails.spell-instant: true
+      blivtrails.spell-mob: true
+      blivtrails.spell-witch: true
+      blivtrails.town-aura: true
+      blivtrails.water-drop: true
+      blivtrails.water-splash: true
+  blivtrails.remove-trail:
+    description: Gives access to removing your own trail
+  blivtrails.options-menu:
+    description: Gives access to the trail options menu
+  blivtrails.angry-villager:
+    description: Gives access to the trail
+  blivtrails.barrier:
+    description: Gives access to the trail
+  blivtrails.cloud:
+    description: Gives access to the trail
+  blivtrails.criticals:
+    description: Gives access to the trail
+  blivtrails.criticals-magic:
+    description: Gives access to the trail
+  blivtrails.drip-lava:
+    description: Gives access to the trail
+  blivtrails.drip-water:
+    description: Gives access to the trail
+  blivtrails.enchant:
+    description: Gives access to the trail
+  blivtrails.explosion-smoke:
+    description: Gives access to the trail
+  blivtrails.firework:
+    description: Gives access to the trail
+  blivtrails.flame:
+    description: Gives access to the trail
+  blivtrails.happy-villager:
+    description: Gives access to the trail
+  blivtrails.hearts:
+    description: Gives access to the trail
+  blivtrails.lava:
+    description: Gives access to the trail
+  blivtrails.note:
+    description: Gives access to the trail
+  blivtrails.portal:
+    description: Gives access to the trail
+  blivtrails.redstone:
+    description: Gives access to the trail
+  blivtrails.slime:
+    description: Gives access to the trail
+  blivtrails.smoke:
+    description: Gives access to the trail
+  blivtrails.snow-ball:
+    description: Gives access to the trail
+  blivtrails.snow-shovel:
+    description: Gives access to the trail
+  blivtrails.spell:
+    description: Gives access to the trail
+  blivtrails.spell-instant:
+    description: Gives access to the trail
+  blivtrails.spell-mob:
+    description: Gives access to the trail
+  blivtrails.spell-witch:
+    description: Gives access to the trail
+  blivtrails.town-aura:
+    description: Gives access to the trail
+  blivtrails.water-drop:
+    description: Gives access to the trail
+  blivtrails.water-splash:
+    description: Gives access to the trail
+    

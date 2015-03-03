@@ -1,0 +1,9 @@
+# This was done by me, so expect it to totally not work
+target/
+build.xml
+.classpath
+.gitattributes
+.project
+.settings
+dependency-reduced-pom.xml
+TODO
