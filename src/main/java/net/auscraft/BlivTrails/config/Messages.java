@@ -76,12 +76,16 @@ public class Messages
 
 	public String getString(String path)
 	{
-		String value = translateColours(this.messages.getString(path));
-		if(value == null)
+		try
+		{
+			String value = translateColours(this.messages.getString(path));
+			return value;
+		}
+		catch(NullPointerException e)
 		{
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "You have a missing messages.yml entry! Have you missed an update?");
+			return "";
 		}
-		return value;
 	}
 	
 	public List<String> getStringList(String path)

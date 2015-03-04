@@ -12,6 +12,9 @@ database:                                           #mySQL is required for cross
 misc:
     #Miscellaneous options
     debug: false
+    #Turn on/off configuration checking
+    #May cause stutters/freezes when reloading. If your config is properly set up, you can safely disable this option
+    config-checking: true
 
 menu:
     #Main Menu

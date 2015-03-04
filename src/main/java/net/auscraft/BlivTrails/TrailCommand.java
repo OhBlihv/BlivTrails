@@ -67,10 +67,14 @@ public class TrailCommand implements CommandExecutor
 				{
 					if(args[0].equalsIgnoreCase("reload"))
 					{
-						instance.getCfg().reloadMessages();
+						if(instance.getCfg().reloadMessages())
+						{
+							util.printError(sender, "You have config errors -- See Console for full printout");
+						}
 						instance.getMessages().reloadMessages();
 						instance.getListener().loadDefaultOptions();
 						util.logSuccess("Config and Messages Reloaded!");
+						util.printSuccess(sender, "Config and Messages Reloaded!");
 					}
 				}
 			}

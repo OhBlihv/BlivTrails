@@ -8,9 +8,6 @@ import net.auscraft.BlivTrails.config.ConfigAccessor;
 import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.config.Messages;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.jolbox.bonecp.BoneCPDataSource;
@@ -23,16 +20,14 @@ public class BlivTrails extends JavaPlugin
 	private ConfigAccessor cfg;
 	private FlatFile flatfile = null;
 	private Messages messages;
-	private boolean vanishEnabled;
 	private Utilities util;
 	
 	@Override
 	public void onEnable()
 	{
+		util = new Utilities(this);
 		setupCFG();
 		messages = new Messages(this);
-		util = new Utilities(this);
-		
 		
 		if(cfg.getBoolean("database.mysql"))
 		{
@@ -44,23 +39,21 @@ public class BlivTrails extends JavaPlugin
 			util.logInfo("Using FlatFile as the storage option");
 			flatfile = new FlatFile(this);
 		}
+		getServer().getPluginManager().registerEvents(new TrailListener(this), this);
+		getCommand("trail").setExecutor(new TrailCommand(this));
+		getCommand("trailadmin").setExecutor(new TrailCommand(this));
 		try
 		{
 			if(this.getServer().getPluginManager().getPlugin("VanishNoPacket") != null)
 			{
-				util.logInfo("VanishNoPacket loaded | Hooking...");
 				getServer().getPluginManager().registerEvents(new VanishListener(this), this);
-				vanishEnabled = true;
 			}
 		}
 		catch(NullPointerException e)
 		{
 			util.logInfo("VanishNoPacket not loaded | Not Hooking");
-			vanishEnabled = false;
+			e.printStackTrace();
 		}
-		getServer().getPluginManager().registerEvents(new TrailListener(this), this);
-		getCommand("trail").setExecutor(new TrailCommand(this));
-		getCommand("trailadmin").setExecutor(new TrailCommand(this));
 	}
 	
 	@Override
@@ -92,11 +85,6 @@ public class BlivTrails extends JavaPlugin
 		{
 			return flatfile;
 		}
-	}
-	
-	public boolean isVanishEnabled()
-	{
-		return vanishEnabled;
 	}
 	
 	private void SQLSetup()

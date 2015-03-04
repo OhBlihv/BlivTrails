@@ -13,6 +13,7 @@ public class VanishListener implements Listener
 	{
 		listener = instance.getListener();
 		listener.vanishEnabled(true);
+		instance.getUtil().logInfo("VanishNoPacket loaded | Hooking...");
 	}
 	
 	@EventHandler

@@ -18,7 +18,10 @@ messages:
         no-trail: "&cSet a Trail First!"
         no-permission-options: "&cYou don't have permission to use the options menu!"
         no-permission-trail: "&cYou don't have permission to use that trail!"
-        player-no-trail: "Player doesn't have an active trail, or isn't online."
+        player-no-trail: "&cPlayer doesn't have an active trail, or isn't online."
+        misplaced-gui-option: "&cMisplaced GUI Option! Check that every location is under the gui size, or disabled"
+        player-misplaced-gui-option: "&cThere is a problem with the trails config. Send this to a server operator"
+        option-trail-no-support: "&cYour trail doesn't support this option!"
     generic:
         trail-applied: "&aTrail Applied!"
         trail-removed: "&aTrail Removed"
