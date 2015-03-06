@@ -1,11 +1,15 @@
 package net.auscraft.BlivTrails;
 
+import java.util.UUID;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import com.darkblade12.ParticleEffect.ParticleEffect;
 
 public class TrailCommand implements CommandExecutor
 {
@@ -59,6 +63,25 @@ public class TrailCommand implements CommandExecutor
 						catch(NullPointerException e)
 						{
 							util.logError("Player is not currently online. Cannot remove.");
+						}
+						return true;
+					}
+					else if(args[0].equalsIgnoreCase("add"))
+					{
+						Player player = Bukkit.getPlayer(args[1]);
+						if(player != null)
+						{
+							if(args.length == 3)
+							{
+								sender.sendMessage(util.translateColours(instance.getListener().addTrail(player.getUniqueId().toString(), args[2],
+										"", "", "", "")));
+							}
+							else if(args.length >= 4)
+							{
+								sender.sendMessage(util.translateColours(instance.getListener().addTrail(player.getUniqueId().toString(), args[2],
+										args[3], args[4], args[5], args[6])));
+							}
+								
 						}
 						return true;
 					}

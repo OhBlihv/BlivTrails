@@ -1653,7 +1653,7 @@ public class TrailListener implements Listener
 						//sqlite.query("CREATE TABLE table_name (uuid VARCHAR(50) PRIMARY_KEY, particle VARCHAR(50), type INT, length INT, height INT);");
 						trailMap.put(player.getUniqueId().toString(), new PlayerConfig(player.getUniqueId().toString(), particleEff,
 								rs.getInt("type"), rs.getInt("length"), rs.getInt("height"), rs.getInt("colour")));
-						util.logDebug("[BlivTrails] Loaded " + player.getName());
+						util.logDebug("Loaded " + player.getName());
 						util.logDebug(player.getUniqueId().toString() + particleEff +
 								rs.getInt("type") + rs.getInt("length") + rs.getInt("height") + rs.getInt("colour"));
 					}
@@ -1747,7 +1747,7 @@ public class TrailListener implements Listener
 							st.execute("INSERT INTO bliv_trails(uuid,particle,type,length,height,colour) VALUES('" + pcfg.getUUID() + "', '" + pcfg.getParticle().toString() + "','"
 									+ pcfg.getType() + "','" + pcfg.getLength() + "','" + pcfg.getHeight() + "', '" + pcfg.getColour() + "');");
 						}
-						util.logDebug("[BlivTrails] Saved " + player.getName() + "'s trail config to file");
+						util.logDebug("Saved " + player.getName() + "'s trail config to file");
 						util.logDebug("UPDATE bliv_trails SET particle='" + pcfg.getParticle().toString() + "', type='"
 						+ pcfg.getType() + "', length='" + pcfg.getLength() + "', height='" + pcfg.getHeight() + "', colour='" + pcfg.getColour() + "' WHERE uuid='" + pcfg.getUUID() + "';");
 						conn.close();
@@ -1795,6 +1795,111 @@ public class TrailListener implements Listener
 				//No data
 			}
 		}
+	}
+	
+	/**
+	 * 
+	 * @param uuid UUID String of target player
+	 * @param particleString ENUM name of the particle
+	 * @param typeString String representation of type (from config)
+	 * @param lengthString String representation of length (from config)
+	 * @param heightString String representation of height (from config)
+	 * @param colourString String representation of colour (from config)
+	 * @return Success/Error Message Output
+	 */
+	public String addTrail(String uuid, String particleString, String typeString, String lengthString, String heightString, String colourString)
+	{
+		/*
+		 * Args format:
+		 * args[0] = uuid
+		 * args[0] = particle
+		 * args[1] = type
+		 * args[2] = length
+		 * args[3] = height
+		 * args[4] = colour
+		 */
+		ParticleEffect particleEff = ParticleEffect.FOOTSTEP;
+		for(ParticleEffect pEff : ParticleEffect.values())
+		{
+			if(pEff.toString().equals(particleString))
+			{
+				particleEff = pEff;
+				util.logDebug("Equal to " + pEff.toString());
+				break;
+			}
+		}
+		if(particleEff.equals(ParticleEffect.FOOTSTEP))
+		{
+			return ChatColor.RED + "Trail effect does not exist. (/trailadmin effects)";
+		}
+		int type = 1, length = 1, height = 0, colour = 0;
+		if(typeString.equals("")) //Use Trail Defaults
+		{
+			particleDefaultStorage defaults = trailDefaults.getDefaults(trailDefaults.trailConfigName(particleEff.toString()));
+			type = defaults.getInt("type");
+			length = defaults.getInt("length");
+			height = defaults.getInt("height");
+			colour = defaults.getInt("colour");
+		}
+		else //Use defined inputs
+		{
+			if(typeString != null) //type
+			{
+				switch(typeString)
+				{
+					case "trace": type = 1; break;
+					case "random": type = 2; break;
+					case "dynamic": type = 3; break;
+					default: return "&cInvalid Type | (trace, random, dynamic)";
+				}
+			}
+			if(lengthString != null)
+			{
+				switch(lengthString)
+				{
+					case "short": length = 1; break;
+					case "medium": length = 2; break;
+					case "long": length = 3; break;
+					default: return "&cInvalid Length | (short, medium, long)";
+				}
+			}
+			if(heightString != null)
+			{
+				switch(heightString)
+				{
+					case "feet": height = 0; break;
+					case "waist": height = 1; break;
+					case "halo": height = 2; break;
+					default: return "&cInvalid Height | (feet, waist, halo)";
+				}
+			}
+			if(colourString != null)
+			{
+				switch(colourString)
+				{
+					case "white": colour = 0; break;
+					case "red": colour = 1; break;
+					case "dark green": colour = 2; break;
+					case "brown": colour = 3; break;
+					case "dark blue": colour = 4; break;
+					case "purple": colour = 5; break;
+					case "cyan": colour = 6; break;
+					case "light grey": case "light gray": colour = 7; break;
+					case "grey": case "gray": colour = 8; break;
+					case "pink": colour = 9; break;
+					case "lime": colour = 10; break;
+					case "yellow": colour = 11; break;
+					case "light blue": colour = 12; break;
+					case "magenta": colour = 13; break;
+					case "orange": colour = 14; break;
+					case "black": colour = 15;  break;
+					case "random": colour = 16; break;
+					default: return "&cInvalid Colour. See /trailadmin colours | for colours";
+				}
+			}
+		}
+		trailMap.put(uuid.toString(), new PlayerConfig(uuid.toString(), particleEff, type, length, height, colour));
+		return "&aTrail Successfully Applied";
 	}
 	
 	public String removePlayer(String uuid)

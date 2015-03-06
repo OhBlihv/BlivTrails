@@ -200,7 +200,7 @@ public class TrailDefaults
 		return colour;
 	}
 	
-	private String trailConfigName(String particleString) //TODO:
+	public String trailConfigName(String particleString) //TODO:
 	{
 		switch(particleString)
 		{
@@ -236,41 +236,4 @@ public class TrailDefaults
 		}
 		return particleString;
 	}
-	
-	/*public String trailConfigNameLCase(String particleString)
-	{
-		switch(particleString)
-		{
-			case "barrier": particleString = "barrier"; break;
-			case "cloud": particleString = "cloud"; break;
-			case "crit": particleString = "criticals"; break;
-			case "magicCrit": particleString = "criticals-magic"; break;
-			case "dripLava": particleString = "drip-lava"; break;
-			case "dripWater": particleString = "drip-water"; break;
-			case "enchantmenttable": particleString = "enchant"; break;
-			case "explode": particleString = "explosion-smoke"; break;
-			case "fireworksSpark": particleString = "firework"; break;
-			case "flame": particleString = "flame"; break;
-			case "heart": particleString = "hearts"; break;
-			case "lava": particleString = "lava"; break;
-			case "note": particleString = "note"; break;
-			case "portal": particleString = "portal"; break;
-			case "redstone": particleString = "redstone"; break;
-			case "slime": particleString = "slime"; break;
-			case "largeSmoke": particleString = "smoke"; break;
-			case "snowshovel": particleString = "snow-shovel"; break;
-			case "snowballpoof": particleString = "snow-ball"; break;
-			case "spell": particleString = "spell"; break;
-			case "instantSpell": particleString = "spell-instant"; break;
-			case "mobSpell": particleString = "spell-mob"; break;
-			case "witchMagic": particleString = "spell-witch"; break;
-			case "angryVillager": particleString = "angry-villager"; break;
-			case "happyVillager": particleString = "happy-villager"; break;
-			case "townaura": particleString = "town-aura"; break;
-			case "droplet": particleString = "water-drop"; break;
-			case "splash": particleString = "water-splash"; break;
-			default: particleString = "NULL"; break;
-		}
-		return particleString;
-	}*/
 }

@@ -11,7 +11,7 @@ messages:
         dont-have-permission: "&cNo Permission"
         trail-selected: "&aSelected!"
     error:
-        unexpected: "&cAn unexpected error has occured"
+        unexpected: "&cAn unexpected error has occurred"
         trail-error: "&cYour trail has been causing issues, and was forcibly removed."
         no-exist: "&cError! &fThe item you selected is not attached to any trail."
         no-trail-remove: "&cYou don't have a trail to remove!"
@@ -23,11 +23,12 @@ messages:
         player-misplaced-gui-option: "&cThere is a problem with the trails config. Send this to a server operator"
         option-trail-no-support: "&cYour trail doesn't support this option!"
     generic:
-        trail-applied: "&aTrail Applied!"
-        trail-removed: "&aTrail Removed"
+        trail-applied: "&a%trail% Trail Applied!"
+        trail-removed: "&a%trail% Trail Removed"
         enabled-lore: "&aENABLED"
         force-remove-player: "&cYour trail has been forcefully removed."
-        force-remove-receive: "&aSuccessfully removed player's trail."
+        force-remove-receive: "&aSuccessfully removed %player%'s trail."
+        force-add-trail: "&aSuccessfully added trail to &b%player%"
     options:
         supports-colours: "&aYour trail supports colours"
         doesnt-support-colours: "&cYour trail doesn't support colours!"
