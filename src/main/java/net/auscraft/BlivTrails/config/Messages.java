@@ -26,6 +26,18 @@ public class Messages
 		this.instance = instance;
 		saveDefaultConfig();
 		getMessages();
+		messages.options().copyDefaults(true);
+		doDefaults();
+	}
+	
+	public void doDefaults() //Add in config options which were added in versions newer than 1.0
+	{
+		messages.addDefault("messages.titles.main-menu", "Trail GUI");
+		messages.addDefault("messages.titles.main-options", "Trail Options");
+		messages.addDefault("messages.titles.type", "Type Options");
+		messages.addDefault("messages.titles.length", "Length Options");
+		messages.addDefault("messages.titles.height", "Height Options");
+		messages.addDefault("messages.titles.colours", "Colours Options");
 	}
 	
 	public FileConfiguration getMessages() 
@@ -83,7 +95,7 @@ public class Messages
 		}
 		catch(NullPointerException e)
 		{
-			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "You have a missing messages.yml entry! Have you missed an update?");
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "You have a missing messages.yml entry at |" + path + "| Have you missed an update?");
 			return "";
 		}
 	}

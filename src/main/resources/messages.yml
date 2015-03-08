@@ -6,6 +6,15 @@
 messages:
     #Set prefix to "" to disable
     prefix: ""
+    #Options Menu Titles
+    #Titles should be different for each menu to avoid conflict.
+    titles:
+        main-menu: "Trail GUI"
+        main-options: "Trail Options"
+        type: "Type Options"
+        length: "Length Options"
+        height: "Height Options"
+        colours: "Colour Options"
     indicators:
         have-permission: "&aHave Permission"
         dont-have-permission: "&cNo Permission"
@@ -23,8 +32,8 @@ messages:
         player-misplaced-gui-option: "&cThere is a problem with the trails config. Send this to a server operator"
         option-trail-no-support: "&cYour trail doesn't support this option!"
     generic:
-        trail-applied: "&a%trail% Trail Applied!"
-        trail-removed: "&a%trail% Trail Removed"
+        trail-applied: "&a%trail% &aTrail Applied!"
+        trail-removed: "&aTrail &aRemoved"
         enabled-lore: "&aENABLED"
         force-remove-player: "&cYour trail has been forcefully removed."
         force-remove-receive: "&aSuccessfully removed %player%'s trail."

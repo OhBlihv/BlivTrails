@@ -15,13 +15,16 @@ misc:
     #Turn on/off configuration checking
     #May cause stutters/freezes when reloading. If your config is properly set up, you can safely disable this option
     config-checking: true
+    #Message Printout Options
+    #Whether to keep (true) or strip (false) colours when printing trail name from config
+    trail-name-colour: true
 
 menu:
     #Main Menu
     main:
-        title: "Trails!"
         #size: Must be a multiple of 9
         size: 54
+        minimise-on-select: true
     options:
         #size: Must be a multiple of 9
         size: 18

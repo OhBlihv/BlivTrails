@@ -1,6 +1,6 @@
 package net.auscraft.BlivTrails;
 
-import java.util.UUID;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -34,75 +34,125 @@ public class TrailCommand implements CommandExecutor
 		{
 			if(args.length == 0)
 			{
-				sender.sendMessage(ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
-						ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GOLD + ChatColor.ITALIC + "BlivTrails Admin " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
-						ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
-						ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " -\n"
-						+ ChatColor.GREEN + "| " + ChatColor.AQUA + "/trailadmin remove <player>" + ChatColor.RESET + " - Forcefully remove a players trail\n"
-						+ ChatColor.DARK_GREEN + "| " + ChatColor.AQUA + "/trailadmin reload" + ChatColor.RESET + " - Reload Config and Messages\n"
-						+ ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
-						ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
-						ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
-						ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
-						ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - ");
+				doMainMenu(sender);
+				return true;
 			}
-			else if(args.length == 1)
+			else if(args.length >= 1)
 			{
-				if(args.length >= 2)
+				if(args[0].equalsIgnoreCase("particles")) // /trailadmin particles|types|lengths|heights|colours
 				{
-					if(args[0].equalsIgnoreCase("remove"))
+					String output = "";
+					for(ParticleEffect particleEff : instance.getListener().usedTrails)
 					{
-						try
-						{
-							Player player = Bukkit.getPlayer(args[1]);
-							if(player != null)
-							{
-								sender.sendMessage(instance.getListener().removePlayer(player.getUniqueId().toString()));
-							}
-						}
-						catch(NullPointerException e)
-						{
-							util.logError("Player is not currently online. Cannot remove.");
-						}
-						return true;
+						output += util.trailConfigName(particleEff.toString()) + ", ";
 					}
-					else if(args[0].equalsIgnoreCase("add"))
+					sender.sendMessage(ChatColor.GREEN + "Available Particles:\n" + ChatColor.WHITE + output);
+				}
+				else if(args[0].equalsIgnoreCase("types"))
+				{
+					sender.sendMessage(ChatColor.GREEN + "Available Types:\n"
+							+ ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "trace, random, dynamic");
+				}
+				else if(args[0].equalsIgnoreCase("lengths"))
+				{
+					sender.sendMessage(ChatColor.GREEN + "Available Lengths:\n"
+							+ ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "short, medium, long");
+				}
+				else if(args[0].equalsIgnoreCase("heights"))
+				{
+					sender.sendMessage(ChatColor.GREEN + "Available Heights:\n"
+							+ ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "feet, waist, halo");
+				}
+				else if(args[0].equalsIgnoreCase("colours"))
+				{
+					sender.sendMessage(ChatColor.GREEN + "Available Colours:\n"
+							+ ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "black, red, green, brown, blue, purple, cyan, light-grey/light gray,"
+									+ " grey/gray, pink, lime, yellow, light-blue, magenta, orange, white, random");
+				}
+				else if(args[0].equalsIgnoreCase("remove"))
+				{
+					try
 					{
 						Player player = Bukkit.getPlayer(args[1]);
 						if(player != null)
 						{
+							sender.sendMessage(instance.getListener().removePlayer(player.getUniqueId().toString()));
+						}
+					}
+					catch(NullPointerException e)
+					{
+						util.printError(sender, "Player is not currently online. Cannot remove.");
+					}
+					return true;
+				}
+				else if(args[0].equalsIgnoreCase("add"))
+				{
+					if(args.length >= 3)
+					{
+						Player player = Bukkit.getPlayer(args[1]);
+						if(player != null)
+						{
+							Pattern underscorePattern = Pattern.compile("[_]");
+							String particle = underscorePattern.matcher(args[2]).replaceAll(" ");
+							
 							if(args.length == 3)
 							{
-								sender.sendMessage(util.translateColours(instance.getListener().addTrail(player.getUniqueId().toString(), args[2],
-										"", "", "", "")));
+								util.printPlain(sender, instance.getListener().addTrail(player.getUniqueId().toString(), particle, "", "", "", ""));
 							}
 							else if(args.length >= 4)
 							{
-								sender.sendMessage(util.translateColours(instance.getListener().addTrail(player.getUniqueId().toString(), args[2],
+								util.printPlain(sender, util.translateColours(instance.getListener().addTrail(player.getUniqueId().toString(), particle,
 										args[3], args[4], args[5], args[6])));
 							}
-								
+							return true;
 						}
+					}
+					else
+					{
+						util.printError(sender, "Usage: /trailadmin add <name> <trail> [[type] [length] [height] [colour]]");
 						return true;
 					}
+					
+				}
+				else if(args[0].equalsIgnoreCase("reload"))
+				{
+					if(instance.getCfg().reloadMessages())
+					{
+						util.printError(sender, "You have config errors -- See Console for full printout");
+					}
+					instance.getMessages().reloadMessages();
+					instance.getListener().loadDefaultOptions();
+					util.setConfig(instance.getCfg());
+					util.logSuccess("Config and Messages Reloaded!");
+					util.printSuccess(sender, "Config and Messages Reloaded!");
+					return true;
 				}
 				else
 				{
-					if(args[0].equalsIgnoreCase("reload"))
-					{
-						if(instance.getCfg().reloadMessages())
-						{
-							util.printError(sender, "You have config errors -- See Console for full printout");
-						}
-						instance.getMessages().reloadMessages();
-						instance.getListener().loadDefaultOptions();
-						util.logSuccess("Config and Messages Reloaded!");
-						util.printSuccess(sender, "Config and Messages Reloaded!");
-					}
+					doMainMenu(sender);
 				}
 			}
-			
+			return true;
 		}
 		return true;
+	}
+	
+	private void doMainMenu(CommandSender sender)
+	{
+		sender.sendMessage(ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
+				ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GOLD + ChatColor.ITALIC + "BlivTrails Admin " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
+				ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
+				ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " -\n"
+				+ ChatColor.GREEN + "| " + ChatColor.AQUA + "/trailadmin reload" + ChatColor.RESET + " - Reload Config and Messages\n"
+				+ ChatColor.DARK_GREEN + "| " + ChatColor.AQUA + "/trailadmin <particles|types|lengths|heights|colours>\n"
+				+ ChatColor.GREEN + "| " + ChatColor.AQUA + "/trailadmin remove <player>" + ChatColor.RESET + " - Forcefully remove a players trail\n"
+				+ ChatColor.DARK_GREEN + "| " + ChatColor.AQUA + "/trailadmin add <player> <particle> [type] [length] [height]\n"
+				+ ChatColor.GREEN + "| " +  ChatColor.AQUA + "[colour]" +  ChatColor.RESET + " - Forcefully remove a players trail\n"
+				+ ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "Use an underscore between words when defining a particle\n"
+				+ ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
+				ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
+				ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
+				ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + 
+				ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - ");
 	}
 }

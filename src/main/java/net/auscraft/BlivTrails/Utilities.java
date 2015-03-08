@@ -30,7 +30,11 @@ public class Utilities
 	public void setConfig(ConfigAccessor cfg)
 	{
 		this.cfg = cfg;
-		playerPrefix = plugin.getMessages().getString("messages.prefix");
+		playerPrefix = translateColours(plugin.getMessages().getString("messages.prefix"));
+		if(playerPrefix != "")
+		{
+			playerPrefix += " ";
+		}
 	}
 	
 	
@@ -38,11 +42,18 @@ public class Utilities
 	//String Translation
 	//------------------------------------------------------------------------------------------------------
 	
+	public String stripColours(String toFix)
+	{
+		Pattern chatColorPattern = Pattern.compile("[&](.)");
+		String fixedString = chatColorPattern.matcher(toFix).replaceAll("");
+		return fixedString;
+	}
+	
 	public String translateColours(String toFix)
 	{
 		//Convert every single colour code and formatting code, excluding 'magic' (&k), capitals and lowercase are converted.
-		Pattern chatColorPattern = Pattern.compile("(?i)&([0-9A-Fa-f-l-oL-OrR])"); // Credit to t3hk0d3 in ChatManager(With slight edits)
-		String fixedString = chatColorPattern.matcher(toFix).replaceAll("\u00A7$1"); // And here too
+		Pattern chatColorPattern = Pattern.compile("(?i)&([0-9A-Fa-f-l-oL-OrR])");
+		String fixedString = chatColorPattern.matcher(toFix).replaceAll("\u00A7$1");
 		return fixedString;
 	}
 	
@@ -84,7 +95,7 @@ public class Utilities
 		
 		public void printPlain(CommandSender sender, String message)
 		{
-			sender.sendMessage(translateColours(message));
+			sender.sendMessage(playerPrefix + translateColours(message));
 		}
 		
 		public void printInfo(CommandSender sender, String message)
@@ -148,6 +159,7 @@ public class Utilities
 		//------------------------------------------------------------------------------------------------------
 		//Miscellaneous
 		//------------------------------------------------------------------------------------------------------
+		
 		public BlivTrails getInstance()
 		{
 			return plugin;
@@ -189,5 +201,4 @@ public class Utilities
 			}
 			return particleString;
 		}
-	
 }

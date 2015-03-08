@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 import net.auscraft.BlivTrails.config.ConfigAccessor;
 import net.auscraft.BlivTrails.config.FlatFile;
@@ -41,6 +42,11 @@ import com.jolbox.bonecp.BoneCPDataSource;
 
 public class TrailListener implements Listener
 {
+	public final ParticleEffect[] usedTrails = {ParticleEffect.VILLAGER_ANGRY, ParticleEffect.BARRIER, ParticleEffect.CLOUD, ParticleEffect.CRIT, ParticleEffect.CRIT_MAGIC, ParticleEffect.DRIP_LAVA,
+			ParticleEffect.DRIP_WATER, ParticleEffect.ENCHANTMENT_TABLE, ParticleEffect.EXPLOSION_NORMAL, ParticleEffect.FIREWORKS_SPARK, ParticleEffect.FLAME,
+			ParticleEffect.HEART, ParticleEffect.LAVA, ParticleEffect.NOTE, ParticleEffect.PORTAL, ParticleEffect.REDSTONE, ParticleEffect.SLIME, ParticleEffect.SMOKE_LARGE,
+			ParticleEffect.SNOW_SHOVEL, ParticleEffect.SNOWBALL, ParticleEffect.SPELL, ParticleEffect.SPELL_INSTANT, ParticleEffect.SPELL_MOB, ParticleEffect.SPELL_WITCH,
+			ParticleEffect.TOWN_AURA, ParticleEffect.VILLAGER_HAPPY, ParticleEffect.WATER_DROP, ParticleEffect.WATER_SPLASH};
 	private HashMap<String, PlayerConfig> trailMap;
 	private BlivTrails instance;
 	private Utilities util;
@@ -161,8 +167,13 @@ public class TrailListener implements Listener
 	{
 		if(trailMap.containsKey(event.getPlayer().getUniqueId().toString()))
 		{
+			util.logDebug(event.getPlayer().getName() + " has a trail.");
 			saveTrail(event.getPlayer());
 			trailMap.remove(event.getPlayer().getUniqueId().toString());
+		}
+		else
+		{
+			util.logDebug(event.getPlayer().getName() + " doesn't have an active trail");
 		}
 	}
 	
@@ -179,17 +190,16 @@ public class TrailListener implements Listener
 			           return;
 				}
 				PlayerConfig pcfg = trailMap.get(event.getPlayer().getUniqueId().toString());
-				
-				if(pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
-				{
-					return;
-				}
 				if(vanishEnabled)
 				{
 					if(pcfg.getVanish() == true)
 					{
 						return; //If Vanished, dont do the trail.
-					}	
+					}
+				}
+				if(pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
+				{
+					return;
 				}
 				
 				final ParticleEffect particle = pcfg.getParticle();
@@ -406,19 +416,20 @@ public class TrailListener implements Listener
 		}
 		catch(NullPointerException | ParticleEffect.ParticleVersionException e)
 		{
+			trailMap.remove(event.getPlayer().getUniqueId().toString());
 			removePlayer(event.getPlayer().getUniqueId().toString());
 			if(cfg.getBoolean("misc.debug"))
 			{
 				e.printStackTrace();
 			}
-			event.getPlayer().sendMessage(msg.getString("messages.error.trail-error"));
+			util.printPlain(event.getPlayer(), msg.getString("messages.error.trail-error"));
 		}
 	}
 	
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event)
 	{
-		if(event.getInventory().getTitle().contains(cfg.getString("menu.main.title")))
+		if(util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.main-menu"))))
 		{
 			event.setCancelled(true);
 			Player player = (Player)event.getWhoClicked();
@@ -435,154 +446,18 @@ public class TrailListener implements Listener
 			{
 				if(trailMap.containsKey(player.getUniqueId().toString()))
 				{
-					trailMap.remove(player.getUniqueId().toString());
-					player.sendMessage(msg.getString("messages.generic.trail-removed"));
+					trailMap.put(player.getUniqueId().toString(), new PlayerConfig(player.getUniqueId().toString(), ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
+					util.printPlain(player, msg.getString("messages.generic.trail-removed"));
 				}
 				else
 				{
-					player.sendMessage(msg.getString("messages.error.no-trail-remove"));
+					util.printPlain(player, msg.getString("messages.error.no-trail-remove"));
 				}
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.barrier.material"))) && player.hasPermission("blivtrails.barrier"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.BARRIER);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.cloud.material"))) && player.hasPermission("blivtrails.cloud"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.CLOUD);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.criticals.material"))) && player.hasPermission("blivtrails.criticals"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.CRIT);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.criticals-magic.material"))) && player.hasPermission("blivtrails.criticals-magic"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.CRIT_MAGIC);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.drip-lava.material"))) && player.hasPermission("blivtrails.drip-lava"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.DRIP_LAVA);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.drip-water.material"))) && player.hasPermission("blivtrails.drip-water"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.DRIP_WATER);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.enchant.material"))) && player.hasPermission("blivtrails.enchant"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.ENCHANTMENT_TABLE);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.explosion-smoke.material"))) && player.hasPermission("blivtrails.explosion-smoke"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.EXPLOSION_NORMAL);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.firework.material"))) && player.hasPermission("blivtrails.firework"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.FIREWORKS_SPARK);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.flame.material"))) && player.hasPermission("blivtrails.flame"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.FLAME);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.hearts.material"))) && player.hasPermission("blivtrails.hearts"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.HEART);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.lava.material"))) && player.hasPermission("blivtrails.lava"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.LAVA);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.note.material"))) && player.hasPermission("blivtrails.note"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.NOTE);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.portal.material"))) && player.hasPermission("blivtrails.portal"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.PORTAL);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.redstone.material"))) && player.hasPermission("blivtrails.redstone"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.REDSTONE);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.slime.material"))) && player.hasPermission("blivtrails.slime"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.SLIME);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.smoke.material"))) && player.hasPermission("blivtrails.smoke"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.SMOKE_LARGE);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.snow-shovel.material"))) && player.hasPermission("blivtrails.snow-shovel"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.SNOW_SHOVEL);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.snow-ball.material"))) && player.hasPermission("blivtrails.snow-ball"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.SNOWBALL);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.spell.material"))) && player.hasPermission("blivtrails.spell"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.SPELL);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.spell-instant.material"))) && player.hasPermission("blivtrails.spell-instant"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.SPELL_INSTANT);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.spell-mob.material"))) && player.hasPermission("blivtrails.spell-mob"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.SPELL_MOB);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.spell-witch.material"))) && player.hasPermission("blivtrails.spell-witch"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.SPELL_WITCH);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.angry-villager.material"))) && player.hasPermission("blivtrails.angry-villager"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.VILLAGER_ANGRY);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.happy-villager.material"))) && player.hasPermission("blivtrails.happy-villager"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.VILLAGER_HAPPY);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.town-aura.material"))) && player.hasPermission("blivtrails.town-aura"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.TOWN_AURA);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.water-drop.material"))) && player.hasPermission("blivtrails.water-drop"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.WATER_DROP);
-				player.closeInventory();
-			}
-			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.water-splash.material"))) && player.hasPermission("blivtrails.water-splash"))
-			{
-				doDefaultTrail(player.getUniqueId(), ParticleEffect.WATER_SPLASH);
-				player.closeInventory();
+				if(cfg.getBoolean("menu.main.minimise-on-select"))
+				{
+					player.closeInventory();
+				}
+				
 			}
 			else if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.options-menu.material"))))
 			{
@@ -594,20 +469,40 @@ public class TrailListener implements Listener
 					}
 					catch(NullPointerException e)
 					{
-						((Player) event.getWhoClicked()).sendMessage(msg.getString("messages.error.no-trail"));
+						e.printStackTrace();
+						util.printPlain(((Player) event.getWhoClicked()), msg.getString("messages.error.no-trail"));
 					}
 				}
 				else
 				{
-					player.sendMessage(msg.getString("messages.error.no-permission.options"));
+					util.printPlain(player, msg.getString("messages.error.no-permission.options"));
 				}
 			}
 			else
 			{
-				player.sendMessage(msg.getString("messages.error.no-permission-trail"));
+				String particleString = null;
+				for(ParticleEffect particleEff : usedTrails)
+				{
+					particleString = util.trailConfigName(particleEff.toString());
+					if(event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails." + particleString + ".material"))))
+					{
+						if(player.hasPermission("blivtrails." + particleString))
+						{
+							doDefaultTrail(player.getUniqueId(), particleEff);
+							if(cfg.getBoolean("menu.main.minimise-on-select"))
+							{
+								player.closeInventory();
+							}
+						}
+						else
+						{
+							util.printPlain(player, msg.getString("messages.error.no-permission-trail"));
+						}
+					}
+				}
 			}
 		}
-		else if(event.getInventory().getTitle().contains("Trail Options"))
+		else if(util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.main-options"))))
 		{
 			event.setCancelled(true);
 			Player player = (Player)event.getWhoClicked();
@@ -654,13 +549,13 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				player.sendMessage(msg.getString("messages.error.no-exist"));
+				util.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
 		/*
 		 * Sub-Options-Menu Handling
 		 */
-		else if(event.getInventory().getTitle().contains("Type Options"))
+		else if(util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.type"))))
 		{
 			event.setCancelled(true);
 			Player player = (Player)event.getWhoClicked();
@@ -683,7 +578,7 @@ public class TrailListener implements Listener
 			{
 				if(pcfg.getParticle().hasProperty(ParticleProperty.COLORABLE)) //If the particle is colourable, it is not directional/support randomisation
 		        {
-		        	util.logError(msg.getString("option-trail-no-support"));
+		        	util.printError(player, msg.getString("messages.error.option-trail-no-support"));
 		        	return;
 		        }
 				pcfg.setType(2);
@@ -693,7 +588,7 @@ public class TrailListener implements Listener
 			{
 				if(pcfg.getParticle().hasProperty(ParticleProperty.COLORABLE)) //If the particle is colourable, it is not directional/support randomisation
 		        {
-		        	util.logError(msg.getString("option-trail-no-support"));
+		        	util.printError(player, msg.getString("messages.error.option-trail-no-support"));
 		        	return;
 		        }
 				pcfg.setType(3);
@@ -709,10 +604,10 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				player.sendMessage(msg.getString("messages.error.no-exist"));
+				util.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
-		else if(event.getInventory().getTitle().contains("Length Options"))
+		else if(util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.length"))))
 		{
 			event.setCancelled(true);
 			Player player = (Player)event.getWhoClicked();
@@ -751,10 +646,10 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				player.sendMessage(msg.getString("messages.error.no-exist"));
+				util.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
-		else if(event.getInventory().getTitle().contains("Height Options"))
+		else if(util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.height"))))
 		{
 			event.setCancelled(true);
 			Player player = (Player)event.getWhoClicked();
@@ -793,10 +688,10 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				player.sendMessage(msg.getString("messages.error.no-exist"));
+				util.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
-		else if(event.getInventory().getTitle().contains("Colour Options")) //TODO:American Translation
+		else if(util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.colours"))))
 		{
 			event.setCancelled(true);
 			Player player = (Player)event.getWhoClicked();
@@ -820,7 +715,7 @@ public class TrailListener implements Listener
 		        {
 		        	switch(event.getCurrentItem().getDurability())
 		        	{
-		        		case 0: case 3: case 7: case 8: case 15: util.logError(msg.getString("option-trail-no-support"));
+		        		case 0: case 3: case 7: case 8: case 15: util.printError(player, msg.getString("messages.error.option-trail-no-support"));
 		        			return;
 		        	}
 		        }
@@ -834,7 +729,7 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				player.sendMessage(msg.getString("messages.error.no-exist"));
+				util.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
 	}
@@ -846,7 +741,7 @@ public class TrailListener implements Listener
 			PlayerConfig pcfg = null;
 			if(trailMap.containsKey(player.getUniqueId().toString()))
 			{
-				 pcfg = trailMap.get(player.getUniqueId().toString());
+				pcfg = trailMap.get(player.getUniqueId().toString());
 			}
 			else //Put a temp entry in
 			{
@@ -854,17 +749,22 @@ public class TrailListener implements Listener
 			}
 			try
 			{
-				Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.main.size"), cfg.getString("menu.main.title"));
+				Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.main.size"), msg.getString("messages.titles.main-menu"));
 				if(cfg.getBoolean("trails.remove-trail.display"))
 			    {
 					inv.setItem(cfg.getInt("trails.remove-trail.position"), menuItem(cfg.getString("trails.remove-trail.material"), util.translateColours(cfg.getString("trails.remove-trail.name")),
 							util.translateColours(cfg.getStringList("trails.remove-trail.lore")), player.hasPermission("blivtrails.remove-trail"), false));
 			    }
-				if(cfg.getBoolean("trails.angry-villager.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.angry-villager.position"), menuItem(cfg.getString("trails.angry-villager.material"), util.translateColours(cfg.getString("trails.angry-villager.name")),
-							util.translateColours(cfg.getStringList("trails.angry-villager.lore")), player.hasPermission("blivtrails.angry-villager"), pcfg.getParticle() == ParticleEffect.VILLAGER_ANGRY));
-			    }
+				String particleString;
+				for(ParticleEffect particleEff : usedTrails)
+				{
+					particleString = util.trailConfigName(particleEff.toString());
+					if(!particleString.equals("barrier"))
+					{
+						inv.setItem(cfg.getInt("trails." + particleString + ".position"), menuItem(cfg.getString("trails." + particleString + ".material"), util.translateColours(cfg.getString("trails." + particleString + ".name")),
+								util.translateColours(cfg.getStringList("trails." + particleString + ".lore")), player.hasPermission("blivtrails." + particleString), pcfg.getParticle() == particleEff));
+					}
+				}
 				if(player.hasPermission("blivtrails.trail.barrier"))
 			    {
 					if(cfg.getBoolean("trails.barrier.display"))
@@ -872,136 +772,6 @@ public class TrailListener implements Listener
 						inv.setItem(cfg.getInt("trails.barrier.position"), menuItem(cfg.getString("trails.barrier.material"), util.translateColours(cfg.getString("trails.barrier.name")),
 								util.translateColours(cfg.getStringList("trails.barrier.lore")), player.hasPermission("blivtrails.barrier"), pcfg.getParticle() == ParticleEffect.BARRIER));
 				    }
-			    }
-				if(cfg.getBoolean("trails.cloud.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.cloud.position"), menuItem(cfg.getString("trails.cloud.material"), util.translateColours(cfg.getString("trails.cloud.name")),
-							util.translateColours(cfg.getStringList("trails.cloud.lore")), player.hasPermission("blivtrails.cloud"), pcfg.getParticle() == ParticleEffect.CLOUD));
-			    }
-				if(cfg.getBoolean("trails.criticals.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.criticals.position"), menuItem(cfg.getString("trails.criticals.material"), util.translateColours(cfg.getString("trails.criticals.name")),
-							util.translateColours(cfg.getStringList("trails.criticals.lore")), player.hasPermission("blivtrails.criticals"), pcfg.getParticle() == ParticleEffect.CRIT));
-			    }
-				if(cfg.getBoolean("trails.criticals-magic.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.criticals-magic.position"), menuItem(cfg.getString("trails.criticals-magic.material"), util.translateColours(cfg.getString("trails.criticals-magic.name")),
-							util.translateColours(cfg.getStringList("trails.criticals-magic.lore")), player.hasPermission("blivtrails.criticals-magic"), pcfg.getParticle() == ParticleEffect.CRIT_MAGIC));
-			    }
-				if(cfg.getBoolean("trails.drip-lava.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.drip-lava.position"), menuItem(cfg.getString("trails.drip-lava.material"), util.translateColours(cfg.getString("trails.drip-lava.name")),
-							util.translateColours(cfg.getStringList("trails.drip-lava.lore")), player.hasPermission("blivtrails.drip-lava"), pcfg.getParticle() == ParticleEffect.DRIP_LAVA));
-			    }
-				if(cfg.getBoolean("trails.drip-water.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.drip-water.position"), menuItem(cfg.getString("trails.drip-water.material"), util.translateColours(cfg.getString("trails.drip-water.name")),
-							util.translateColours(cfg.getStringList("trails.drip-water.lore")), player.hasPermission("blivtrails.drip-water"), pcfg.getParticle() == ParticleEffect.DRIP_WATER));
-			    }
-				if(cfg.getBoolean("trails.enchant.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.enchant.position"), menuItem(cfg.getString("trails.enchant.material"), util.translateColours(cfg.getString("trails.enchant.name")),
-							util.translateColours(cfg.getStringList("trails.enchant.lore")), player.hasPermission("blivtrails.enchant"), pcfg.getParticle() == ParticleEffect.ENCHANTMENT_TABLE));
-			    }
-				if(cfg.getBoolean("trails.explosion-smoke.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.explosion-smoke.position"), menuItem(cfg.getString("trails.explosion-smoke.material"), util.translateColours(cfg.getString("trails.explosion-smoke.name")),
-							util.translateColours(cfg.getStringList("trails.explosion-smoke.lore")), player.hasPermission("blivtrails.explosion-smoke"), pcfg.getParticle() == ParticleEffect.EXPLOSION_NORMAL));
-			    }
-				if(cfg.getBoolean("trails.firework.display"))
-			    {
-					inv.setItem(cfg.getInt("trails.firework.position"), menuItem(cfg.getString("trails.firework.material"), util.translateColours(cfg.getString("trails.firework.name")),
-			    		util.translateColours(cfg.getStringList("trails.firework.lore")), player.hasPermission("blivtrails.firework"), pcfg.getParticle() == ParticleEffect.FIREWORKS_SPARK));
-			    }
-			    if(cfg.getBoolean("trails.flame.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.flame.position"), menuItem(cfg.getString("trails.flame.material"), util.translateColours(cfg.getString("trails.flame.name")),
-			    			util.translateColours(cfg.getStringList("trails.flame.lore")), player.hasPermission("blivtrails.flame"), pcfg.getParticle() == ParticleEffect.FLAME));
-			    }
-			    if(cfg.getBoolean("trails.happy-villager.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.happy-villager.position"), menuItem(cfg.getString("trails.happy-villager.material"), util.translateColours(cfg.getString("trails.happy-villager.name")),
-			    		util.translateColours(cfg.getStringList("trails.happy-villager.lore")), player.hasPermission("blivtrails.happy-villager"), pcfg.getParticle() == ParticleEffect.VILLAGER_HAPPY));
-			    }
-			    if(cfg.getBoolean("trails.hearts.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.hearts.position"), menuItem(cfg.getString("trails.hearts.material"), util.translateColours(cfg.getString("trails.hearts.name")),
-			    		util.translateColours(cfg.getStringList("trails.hearts.lore")), player.hasPermission("blivtrails.hearts"), pcfg.getParticle() == ParticleEffect.HEART));
-			    }
-			    if(cfg.getBoolean("trails.lava.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.lava.position"), menuItem(cfg.getString("trails.lava.material"), util.translateColours(cfg.getString("trails.lava.name")),
-			    		util.translateColours(cfg.getStringList("trails.lava.lore")), player.hasPermission("blivtrails.lava"), pcfg.getParticle() == ParticleEffect.LAVA));
-			    }
-			    if(cfg.getBoolean("trails.note.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.note.position"), menuItem(cfg.getString("trails.note.material"), util.translateColours(cfg.getString("trails.note.name")),
-			    		util.translateColours(cfg.getStringList("trails.note.lore")), player.hasPermission("blivtrails.note"), pcfg.getParticle() == ParticleEffect.NOTE));
-			    }
-			    if(cfg.getBoolean("trails.portal.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.portal.position"), menuItem(cfg.getString("trails.portal.material"), util.translateColours(cfg.getString("trails.portal.name")),
-			    		util.translateColours(cfg.getStringList("trails.portal.lore")), player.hasPermission("blivtrails.portal"), pcfg.getParticle() == ParticleEffect.PORTAL));
-			    }
-			    if(cfg.getBoolean("trails.redstone.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.redstone.position"), menuItem(cfg.getString("trails.redstone.material"), util.translateColours(cfg.getString("trails.redstone.name")),
-			    		util.translateColours(cfg.getStringList("trails.redstone.lore")), player.hasPermission("blivtrails.redstone"), pcfg.getParticle() == ParticleEffect.REDSTONE));
-			    }
-			    if(cfg.getBoolean("trails.slime.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.slime.position"), menuItem(cfg.getString("trails.slime.material"), util.translateColours(cfg.getString("trails.slime.name")),
-			    		util.translateColours(cfg.getStringList("trails.slime.lore")), player.hasPermission("blivtrails.slime"), pcfg.getParticle() == ParticleEffect.SLIME));
-			    }
-			    if(cfg.getBoolean("trails.smoke.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.smoke.position"), menuItem(cfg.getString("trails.smoke.material"), util.translateColours(cfg.getString("trails.smoke.name")),
-			    		util.translateColours(cfg.getStringList("trails.smoke.lore")), player.hasPermission("blivtrails.smoke"), pcfg.getParticle() == ParticleEffect.SMOKE_NORMAL));
-			    }
-			    if(cfg.getBoolean("trails.snow-ball.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.snow-ball.position"), menuItem(cfg.getString("trails.snow-ball.material"), util.translateColours(cfg.getString("trails.snow-ball.name")),
-			    		util.translateColours(cfg.getStringList("trails.snow-ball.lore")), player.hasPermission("blivtrails.snow-ball"), pcfg.getParticle() == ParticleEffect.SNOWBALL));
-			    }
-			    if(cfg.getBoolean("trails.snow-shovel.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.snow-shovel.position"), menuItem(cfg.getString("trails.snow-shovel.material"), util.translateColours(cfg.getString("trails.snow-shovel.name")),
-			    		util.translateColours(cfg.getStringList("trails.snow-shovel.lore")), player.hasPermission("blivtrails.snow-shovel"), pcfg.getParticle() == ParticleEffect.SNOW_SHOVEL));
-			    }
-			    if(cfg.getBoolean("trails.spell.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.spell.position"), menuItem(cfg.getString("trails.spell.material"), util.translateColours(cfg.getString("trails.spell.name")),
-			    		util.translateColours(cfg.getStringList("trails.slime.lore")), player.hasPermission("blivtrails.spell"), pcfg.getParticle() == ParticleEffect.SPELL));
-			    }
-			    if(cfg.getBoolean("trails.spell-instant.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.spell-instant.position"), menuItem(cfg.getString("trails.spell-instant.material"), util.translateColours(cfg.getString("trails.spell-instant.name")),
-			    		util.translateColours(cfg.getStringList("trails.spell-instant.lore")), player.hasPermission("blivtrails.spell-instant"), pcfg.getParticle() == ParticleEffect.SPELL_INSTANT));
-			    }
-			    if(cfg.getBoolean("trails.spell-mob.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.spell-mob.position"), menuItem(cfg.getString("trails.spell-mob.material"), util.translateColours(cfg.getString("trails.spell-mob.name")),
-			    		util.translateColours(cfg.getStringList("trails.spell-mob.lore")), player.hasPermission("blivtrails.spell-mob"), pcfg.getParticle() == ParticleEffect.SPELL_MOB));
-			    }
-			    if(cfg.getBoolean("trails.spell-witch.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.spell-witch.position"), menuItem(cfg.getString("trails.spell-witch.material"), util.translateColours(cfg.getString("trails.spell-witch.name")),
-			    		util.translateColours(cfg.getStringList("trails.spell-witch.lore")), player.hasPermission("blivtrails.spell-witch"), pcfg.getParticle() == ParticleEffect.SPELL_WITCH));
-			    }
-			    if(cfg.getBoolean("trails.town-aura.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.town-aura.position"), menuItem(cfg.getString("trails.town-aura.material"), util.translateColours(cfg.getString("trails.town-aura.name")),
-			    		util.translateColours(cfg.getStringList("trails.town-aura.lore")), player.hasPermission("blivtrails.town-aura"), pcfg.getParticle() == ParticleEffect.TOWN_AURA));
-			    }
-			    if(cfg.getBoolean("trails.water-drop.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.water-drop.position"), menuItem(cfg.getString("trails.water-drop.material"), util.translateColours(cfg.getString("trails.water-drop.name")),
-			    		util.translateColours(cfg.getStringList("trails.water-drop.lore")), player.hasPermission("blivtrails.water-drop"), pcfg.getParticle() == ParticleEffect.WATER_DROP));
-			    }
-			    if(cfg.getBoolean("trails.water-splash.display"))
-			    {
-			    	inv.setItem(cfg.getInt("trails.water-splash.position"), menuItem(cfg.getString("trails.water-splash.material"), util.translateColours(cfg.getString("trails.water-splash.name")),
-			    		util.translateColours(cfg.getStringList("trails.water-splash.lore")), player.hasPermission("blivtrails.water-splash"), pcfg.getParticle() == ParticleEffect.WATER_SPLASH));
 			    }
 			    if(cfg.getBoolean("trails.options-menu.display"))
 			    {
@@ -1015,12 +785,6 @@ public class TrailListener implements Listener
 				util.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
 				util.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
 			}
-			
-		//}
-		//catch(NullPointerException e)
-		//{
-		//	Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "One of your trails is incorrectly configured. Please check your config.");
-		//}
 	}
 	
 	
@@ -1033,7 +797,7 @@ public class TrailListener implements Listener
 		PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
 		try
 		{
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), "Trail Options");
+			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.main-options"));
 			if(cfg.getBoolean("menu.options.config.type.enabled"))
 			{
 				inv.setItem(cfg.getInt("menu.options.config.type.position"), optionsType());
@@ -1069,7 +833,7 @@ public class TrailListener implements Listener
 		PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
 		try
 		{
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), "Type Options");
+			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.type"));
 			if(cfg.getBoolean("menu.options.config.type.trace"))
 			{
 				inv.setItem(3, optionsTypeTrace(pcfg.getType() == 1));
@@ -1101,7 +865,7 @@ public class TrailListener implements Listener
 		PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
 		try
 		{
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), "Length Options");
+			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.length"));
 			if(cfg.getBoolean("menu.options.config.length.short"))
 			{
 				inv.setItem(3, optionsLengthShort(pcfg.getLength() == 1));
@@ -1130,7 +894,7 @@ public class TrailListener implements Listener
 		try
 		{
 			PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), "Height Options");
+			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.height"));
 			if(cfg.getBoolean("menu.options.config.height.feet"))
 			{
 				inv.setItem(3, optionsHeightFeet(pcfg.getHeight() == 0));
@@ -1159,7 +923,7 @@ public class TrailListener implements Listener
 		try
 		{
 			PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.config.colour.size"), "Colour Options");
+			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.config.colour.size"), msg.getString("messages.titles.colours"));
 			if(cfg.getInt("menu.options.config.colour.black-pos") != -1)
 			{
 				inv.setItem(cfg.getInt("menu.options.config.colour.black-pos"), optionsColourItem(pcfg.getColour() == 0, 0, pcfg.getParticle()));
@@ -1539,6 +1303,19 @@ public class TrailListener implements Listener
         return item;
 	}
 	
+	/**
+	 * 
+	 * @param toReplace The string which includes the variable to be replaced
+	 * @param replacee The string including the variable to be used in the toReplace String
+	 * @return
+	 */
+	public String addVariable(String toReplace, String replacee)
+	{
+		Pattern variablePattern = Pattern.compile("[%](\\S+)[%]");
+		String fixedString = variablePattern.matcher(toReplace).replaceAll(replacee);
+		return fixedString;
+	}
+	
 	public void doDefaultTrail(UUID uuid, ParticleEffect particle)
 	{
 		String particleString = particle.toString();
@@ -1597,7 +1374,7 @@ public class TrailListener implements Listener
 		}
 		
 		
-		//Player has had a trail before
+		/*//Player has had a trail before //TODO: Implement player options that traverse trails
 		if(trailMap.containsKey(uuid))
 		{
 			PlayerConfig pcfg = trailMap.get(uuid);
@@ -1611,15 +1388,17 @@ public class TrailListener implements Listener
 				pcfg.setLength(length);
 			}
 			pcfg.setHeight(height);
-			util.printPlain(Bukkit.getPlayer(uuid), msg.getString("messages.generic.trail-applied"));
-		}
-		//Trail for the first time
-		else
-		{
-			getPlayerConfig().put(uuid.toString(), new PlayerConfig(uuid.toString(), particle, type, length, height, colour));
-			util.printPlain(Bukkit.getPlayer(uuid), msg.getString("messages.generic.trail-applied"));
-		}
+			util.printPlain(Bukkit.getPlayer(uuid), addVariable(msg.getString("messages.generic.trail-applied"), cfg.getString("trails" + util.trailConfigName(particle.toString()) + ".name")));
+		}*/
 		
+		//Trail for the first time
+		String trailName = msg.getString("messages.generic.trail-applied");
+		if(!cfg.getBoolean("misc.trail-name-colour"))
+		{
+			trailName = util.stripColours(trailName);
+		}
+		util.printPlain(Bukkit.getPlayer(uuid), addVariable(trailName, cfg.getString("trails." + util.trailConfigName(particle.toString()) + ".name")));
+		getPlayerConfig().put(uuid.toString(), new PlayerConfig(uuid.toString(), particle, type, length, height, colour));
 	}
 	
 	public void loadTrail(Player player)
@@ -1641,14 +1420,14 @@ public class TrailListener implements Listener
 						{
 							if(pEff.toString().equals(rs.getString("particle")))
 							{
+								if(pEff.equals(ParticleEffect.FOOTSTEP))
+								{
+									return;
+								}
 								particleEff = pEff;
 								util.logDebug("Equal to " + pEff.toString());
 								break;
 							}
-							/*else
-							{
-								Bukkit.getConsoleSender().sendMessage("Not equal to " + pEff.toString());
-							}*/
 						}
 						//sqlite.query("CREATE TABLE table_name (uuid VARCHAR(50) PRIMARY_KEY, particle VARCHAR(50), type INT, length INT, height INT);");
 						trailMap.put(player.getUniqueId().toString(), new PlayerConfig(player.getUniqueId().toString(), particleEff,
@@ -1662,7 +1441,7 @@ public class TrailListener implements Listener
 				catch(SQLException e)
 				{
 					e.printStackTrace();
-					Bukkit.getConsoleSender().sendMessage("SQLException for: " + player.getName());
+					util.logError("SQLException for: " + player.getName());
 					try
 					{
 						conn.close();
@@ -1690,46 +1469,63 @@ public class TrailListener implements Listener
 			 */
 			String data = flatfile.loadEntry(player.getUniqueId().toString());
 			
-			if(data != null || data != "")
+			try
 			{
-				try
+				data.length();
+			}
+			catch(NullPointerException e)
+			{
+				util.logDebug("Player " + player.getName() + " has no trail config.");
+				return;
+			}
+			
+			try
+			{
+				String[] dataSplit = data.split("[,]");
+				ParticleEffect particleEff = null;
+				for(ParticleEffect pEff : ParticleEffect.values())
 				{
-					String[] dataSplit = data.split("[,]");
-					ParticleEffect particleEff = null;
-					for(ParticleEffect pEff : ParticleEffect.values())
+					if(pEff.toString().equals(dataSplit[0]))
 					{
-						if(pEff.toString().equals(dataSplit[0]))
+						if(pEff.equals(ParticleEffect.FOOTSTEP))
 						{
-							particleEff = pEff;
-							util.logDebug("Equal to " + pEff.toString());
-							break;
+							return;
 						}
+						particleEff = pEff;
+						util.logDebug("Equal to " + pEff.toString());
+						break;
 					}
-					trailMap.put(player.getUniqueId().toString(), new PlayerConfig(player.getUniqueId().toString(), particleEff,
-							Integer.parseInt(dataSplit[1]), Integer.parseInt(dataSplit[2]), Integer.parseInt(dataSplit[3]), Integer.parseInt(dataSplit[4])));
 				}
-				catch(NullPointerException e)
+				trailMap.put(player.getUniqueId().toString(), new PlayerConfig(player.getUniqueId().toString(), particleEff,
+						Integer.parseInt(dataSplit[1]), Integer.parseInt(dataSplit[2]), Integer.parseInt(dataSplit[3]), Integer.parseInt(dataSplit[4])));
+			}
+			catch(NullPointerException e)
+			{
+				util.logDebug("Player failed loading: (NPE) " + player.getName());
+				if(cfg.getBoolean("misc.debug"))
 				{
-					util.logDebug("Player failed loading: (NPE) " + player.getName());
-					if(cfg.getBoolean("misc.debug"))
-					{
-						e.printStackTrace();
-					}
-					//Player is not in the file
+					e.printStackTrace();
 				}
-				
+				//Player is not in the file
 			}
 		}
 	}
 	
 	public void saveTrail(OfflinePlayer player)
 	{
-		if(flatfile == null)
+		PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
+		if(pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
 		{
-			try
+			removePlayer(player.getUniqueId().toString());
+			return;
+		}
+		if(pcfg != null)
+		{
+			util.logDebug(player.getName() + "'s trail config is not null");
+			if(flatfile == null)
 			{
-				PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
-				if(cfg != null)
+				util.logDebug("Using MySQL to save " + player.getName() + "'s trail data");
+				try
 				{
 					Connection conn = null;
 					try
@@ -1737,6 +1533,11 @@ public class TrailListener implements Listener
 						conn = sql.getConnection();
 						Statement st = conn.createStatement();
 						ResultSet rs = st.executeQuery("SELECT uuid FROM bliv_trails WHERE uuid='" + player.getUniqueId() + "';");
+						if(pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
+						{
+							removePlayer(player.getUniqueId().toString());
+							return;
+						}
 						if(rs.next())
 						{
 							st.execute("UPDATE bliv_trails SET particle='" + pcfg.getParticle().toString() + "', type='"
@@ -1763,36 +1564,37 @@ public class TrailListener implements Listener
 							//Give up
 							e2.printStackTrace();
 							e3.printStackTrace();
-							Bukkit.getConsoleSender().sendMessage("SQLException for: " + player.getName());
+							util.logError("SQLException for: " + player.getName());
 						}
 					}
 				}
+				catch(NullPointerException e)
+				{
+					//Player has no trail config
+					e.printStackTrace();
+				}
 			}
-			catch(NullPointerException e)
+			else
 			{
-				//Player has no trail config
-				e.printStackTrace();
-			}
-		}
-		else
-		{
-			/*
-			 * dataSplit[0] == UUID
-			 * dataSplit[1] == Particle String
-			 * dataSplit[2] == Type
-			 * dataSplit[3] == Length
-			 * dataSplit[4] == Height
-			 * dataSplit[5] == Colour
-			 */
-			try
-			{
-				PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
-				String data = pcfg.getParticle().toString() + "," + pcfg.getType() + "," + pcfg.getLength() + "," + pcfg.getHeight() + "," + pcfg.getColour();
-				flatfile.saveEntry(player.getUniqueId().toString(), data);
-			}
-			catch(NullPointerException e)
-			{
-				//No data
+				/*
+				 * dataSplit[0] == UUID
+				 * dataSplit[1] == Particle String
+				 * dataSplit[2] == Type
+				 * dataSplit[3] == Length
+				 * dataSplit[4] == Height
+				 * dataSplit[5] == Colour
+				 */
+				try
+				{
+					String data = pcfg.getParticle().toString() + "," + pcfg.getType() + "," + pcfg.getLength() + "," + pcfg.getHeight() + "," + pcfg.getColour();
+					flatfile.saveEntry(player.getUniqueId().toString(), data);
+					util.logDebug(pcfg.getParticle().toString() + "," + pcfg.getType() + "," + pcfg.getLength() + "," + pcfg.getHeight() + "," + pcfg.getColour());
+					util.logDebug("Successfully saved " + player.getName() + "'s trail config to file");
+				}
+				catch(NullPointerException e)
+				{
+					//No data
+				}
 			}
 		}
 	}
@@ -1819,21 +1621,32 @@ public class TrailListener implements Listener
 		 * args[4] = colour
 		 */
 		ParticleEffect particleEff = ParticleEffect.FOOTSTEP;
-		for(ParticleEffect pEff : ParticleEffect.values())
+		String particleStringLoop = "";
+		for(ParticleEffect pEff : usedTrails)
 		{
-			if(pEff.toString().equals(particleString))
+			particleStringLoop = util.stripColours(cfg.getString("trails." + util.trailConfigName(pEff.toString()) + ".name"));
+			if(particleStringLoop.equalsIgnoreCase(particleString))
 			{
 				particleEff = pEff;
-				util.logDebug("Equal to " + pEff.toString());
+				util.logDebug(particleString + " equal to " + particleStringLoop);
 				break;
+			}
+			else
+			{
+				util.logDebug(particleString + " not equal to " + particleStringLoop);
 			}
 		}
 		if(particleEff.equals(ParticleEffect.FOOTSTEP))
 		{
-			return ChatColor.RED + "Trail effect does not exist. (/trailadmin effects)";
+			return ChatColor.RED + "Trail effect does not exist. (/trailadmin particles)";
 		}
+		
 		int type = 1, length = 1, height = 0, colour = 0;
-		if(typeString.equals("")) //Use Trail Defaults
+		if(particleEff.equals(ParticleEffect.BARRIER)) 
+		{
+			//Barriers dont support anything. Give up. Leave everything default
+		}
+		if(typeString.toLowerCase().equals("")) //Use Trail Defaults
 		{
 			particleDefaultStorage defaults = trailDefaults.getDefaults(trailDefaults.trailConfigName(particleEff.toString()));
 			type = defaults.getInt("type");
@@ -1845,7 +1658,7 @@ public class TrailListener implements Listener
 		{
 			if(typeString != null) //type
 			{
-				switch(typeString)
+				switch(typeString.toLowerCase())
 				{
 					case "trace": type = 1; break;
 					case "random": type = 2; break;
@@ -1855,7 +1668,7 @@ public class TrailListener implements Listener
 			}
 			if(lengthString != null)
 			{
-				switch(lengthString)
+				switch(lengthString.toLowerCase())
 				{
 					case "short": length = 1; break;
 					case "medium": length = 2; break;
@@ -1865,7 +1678,7 @@ public class TrailListener implements Listener
 			}
 			if(heightString != null)
 			{
-				switch(heightString)
+				switch(heightString.toLowerCase())
 				{
 					case "feet": height = 0; break;
 					case "waist": height = 1; break;
@@ -1875,7 +1688,7 @@ public class TrailListener implements Listener
 			}
 			if(colourString != null)
 			{
-				switch(colourString)
+				switch(colourString.toLowerCase())
 				{
 					case "white": colour = 0; break;
 					case "red": colour = 1; break;
@@ -1899,6 +1712,7 @@ public class TrailListener implements Listener
 			}
 		}
 		trailMap.put(uuid.toString(), new PlayerConfig(uuid.toString(), particleEff, type, length, height, colour));
+		util.logDebug("Trail Successfully Applied");
 		return "&aTrail Successfully Applied";
 	}
 	
@@ -1907,19 +1721,22 @@ public class TrailListener implements Listener
 		PlayerConfig pcfg = trailMap.get(uuid);
 		if(pcfg != null)
 		{
+			util.logDebug(Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s trail config is not null");
 			if(flatfile == null)
 			{
+				util.logDebug("Using MySQL to remove " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s trail data");
 				Connection conn = null;
 				try
 				{
 					conn = sql.getConnection();
 					Statement st = conn.createStatement();
-					trailMap.remove(uuid);
+					trailMap.put(uuid.toString(), new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
 					boolean rs = st.execute("DELETE FROM bliv_trails WHERE uuid='" + uuid + "';");
 					conn.close();
 					if(rs == true) //If player has SQL Entry and HashMap Entry
 					{
-						Bukkit.getPlayer(java.util.UUID.fromString(uuid)).sendMessage(msg.getString("messages.generic.force-remove-player"));
+						util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)), addVariable(msg.getString("messages.generic.force-remove-player"), Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
+						util.logDebug("Player " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + " was removed from the db");
 						return msg.getString("messages.generic.force-remove-receive");
 					}
 					else //If player only has HashMap entry
@@ -1947,8 +1764,10 @@ public class TrailListener implements Listener
 			{
 				try
 				{
+					util.logDebug("Using Flatfile to remove " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s trail data");
 					flatfile.removeEntry(uuid);
-					Bukkit.getPlayer(java.util.UUID.fromString(uuid)).sendMessage(msg.getString("messages.generic.force-remove-player"));
+					flatfile.saveToFile();
+					util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)), addVariable(msg.getString("messages.generic.force-remove-player"), Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
 				}
 				catch(NullPointerException e)
 				{
@@ -2021,6 +1840,7 @@ public class TrailListener implements Listener
 		}
 		catch(NullPointerException | NoClassDefFoundError e)
 		{
+			util.logDebug("VanishNoPacket was called, but isn't loaded.");
 			//VanishNoPacket isnt loaded on the server
 		}
         return isVanished;
