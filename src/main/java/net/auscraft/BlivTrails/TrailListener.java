@@ -58,6 +58,13 @@ public class TrailListener implements Listener
 	private double option[];
 	private TrailDefaults trailDefaults;
 	private boolean vanishEnabled;
+	/*
+	 * vanishHook
+	 * 0 = disabled
+	 * 1 = VanishNoPacket
+	 * 2 = Essentials Vanish
+	 */
+	private int vanishHook;
 	
 	public TrailListener(BlivTrails instance)
 	{
@@ -69,6 +76,7 @@ public class TrailListener implements Listener
 		instance.setListener(this);
 		rand = new Random(System.currentTimeMillis());
 		vanishEnabled = false;
+		vanishHook = 0;
 		trailMap = new HashMap<String, PlayerConfig>();
 		Object saveLoc = instance.getSave();
 		if(saveLoc instanceof BoneCPDataSource)
@@ -134,30 +142,34 @@ public class TrailListener implements Listener
 		{
 			if(vanishEnabled)
 			{
-				if(isVanished(event.getPlayer()))
+				if(vanishHook == 1) //VanishNoPacket
 				{
-					if(trailMap.containsKey(event.getPlayer().getUniqueId().toString()))
+					if(isVanished(event.getPlayer()))
 					{
-						trailMap.get(event.getPlayer().getUniqueId().toString()).setVanish(true);
+						if(trailMap.containsKey(event.getPlayer().getUniqueId().toString()))
+						{
+							trailMap.get(event.getPlayer().getUniqueId().toString()).setVanish(true);
+						}
+						else
+						{
+							util.logDebug("Player doesnt have a trail to hide");
+						}
 					}
 					else
 					{
-						util.logDebug("Player doesnt have a trail to hide");
+						util.logDebug("Player is not vanished");
 					}
 				}
 				else
 				{
-					util.logDebug("Player is not vanished");
+					//Essentials Vanish does not have vanish join
+					//Else, do nothing
 				}
-			}
-			else
-			{
-				util.logDebug("Vanish is not loaded?");
 			}
 		}
 		catch(ClassNotFoundException e)
 		{
-			util.logDebug("VanishNoPacket should be loaded, but isn't.");
+			util.logDebug("Vanish Hooking Failed. Did you unload a plugin?");
 		}
 		
 	}
@@ -187,7 +199,7 @@ public class TrailListener implements Listener
 				//Stop the trail from working while the player isnt technically moving
 				if(event.getFrom().getX() == event.getTo().getX() && event.getFrom().getY() == event.getTo().getY() && event.getFrom().getZ() == event.getTo().getZ())
 				{
-			           return;
+					return;
 				}
 				PlayerConfig pcfg = trailMap.get(event.getPlayer().getUniqueId().toString());
 				if(vanishEnabled)
@@ -1831,24 +1843,37 @@ public class TrailListener implements Listener
         return item;
 	}
 	
-	public boolean isVanished(Player player) throws ClassNotFoundException 
+	public boolean isVanished(Player player) throws ClassNotFoundException //TODO: Add Essentials Vanish
 	{
 		boolean isVanished = false;
-		try
+		if(vanishHook == 1) //VanishNoPacket
 		{
-			isVanished = ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player);
+			try
+			{
+				isVanished = ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player);
+			}
+			catch(NullPointerException | NoClassDefFoundError e)
+			{
+				util.logDebug("VanishNoPacket was called, but isn't loaded.");
+				//VanishNoPacket isnt loaded on the server
+			}
 		}
-		catch(NullPointerException | NoClassDefFoundError e)
+		else if(vanishHook == 2) //Essentials Vanish
 		{
-			util.logDebug("VanishNoPacket was called, but isn't loaded.");
-			//VanishNoPacket isnt loaded on the server
+			
 		}
+		
         return isVanished;
     }
 	
 	public void vanishEnabled(boolean enabled)
 	{
 		vanishEnabled = enabled;
+	}
+	
+	public void vanishHook(int i)
+	{
+		vanishHook = i;
 	}
 	
 	public HashMap<String, PlayerConfig> getPlayerConfig()

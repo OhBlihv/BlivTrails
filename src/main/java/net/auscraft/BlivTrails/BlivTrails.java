@@ -7,6 +7,8 @@ import java.sql.Statement;
 import net.auscraft.BlivTrails.config.ConfigAccessor;
 import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.config.Messages;
+import net.auscraft.BlivTrails.hooks.EssentialsListener;
+import net.auscraft.BlivTrails.hooks.VanishListener;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,20 +42,10 @@ public class BlivTrails extends JavaPlugin
 			flatfile = new FlatFile(this);
 		}
 		getServer().getPluginManager().registerEvents(new TrailListener(this), this);
+		getServer().getPluginManager().registerEvents(new ItemListener(this), this);
 		getCommand("trail").setExecutor(new TrailCommand(this));
 		getCommand("trailadmin").setExecutor(new TrailCommand(this));
-		try
-		{
-			if(this.getServer().getPluginManager().getPlugin("VanishNoPacket") != null)
-			{
-				getServer().getPluginManager().registerEvents(new VanishListener(this), this);
-			}
-		}
-		catch(NullPointerException e)
-		{
-			util.logInfo("VanishNoPacket not loaded | Not Hooking");
-			e.printStackTrace();
-		}
+		doHooks();
 	}
 	
 	@Override
@@ -84,6 +76,29 @@ public class BlivTrails extends JavaPlugin
 		else
 		{
 			return flatfile;
+		}
+	}
+	
+	private void doHooks()
+	{
+		try
+		{
+			if(this.getServer().getPluginManager().getPlugin("VanishNoPacket") != null)
+			{
+				getServer().getPluginManager().registerEvents(new VanishListener(this), this);
+			}
+			else if(this.getServer().getPluginManager().getPlugin("Essentials") != null)
+			{
+				getServer().getPluginManager().registerEvents(new EssentialsListener(this), this);
+			}
+			else
+			{
+				util.logInfo("No Vanish Plugin Hooked.");
+			}
+		}
+		catch(NullPointerException e)
+		{
+			e.printStackTrace();
 		}
 	}
 	

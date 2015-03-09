@@ -18,6 +18,18 @@ misc:
     #Message Printout Options
     #Whether to keep (true) or strip (false) colours when printing trail name from config
     trail-name-colour: true
+    
+    #GUI Item
+    #This item can be given to players on join,
+    #and when right clicked (used), will open the gui
+    gui-item:
+        position: 0
+        material: REDSTONE
+        name: "&eTrail GUI"
+        lore: {}
+    #Will only give to players with permission blivtrails.gui-item
+    #MAKE ME FALSE
+    gui-give-on-join: false
 
 menu:
     #Main Menu

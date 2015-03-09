@@ -1,0 +1,72 @@
+package net.auscraft.BlivTrails;
+
+import net.auscraft.BlivTrails.config.ConfigAccessor;
+
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+public class ItemListener implements Listener
+{
+	
+	private ConfigAccessor cfg;
+	private TrailListener listener;
+	private Utilities util;
+	
+	public ItemListener(BlivTrails instance)
+	{
+		cfg = instance.getCfg();
+		listener = instance.getListener();
+		util = instance.getUtil();
+	}
+	
+	@EventHandler(priority=EventPriority.HIGH)
+	public void onPlayerUse(PlayerInteractEvent event)
+	{
+	    if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+	    {
+	    	Player player = event.getPlayer();
+	    	if(player.getItemInHand() == null || player.getItemInHand().getType().equals(Material.AIR))
+			{
+	            return;
+			}
+		    else if(player.getItemInHand().getType() == Material.getMaterial(cfg.getString("misc.gui-item.material")) && player.getItemInHand().getItemMeta().getDisplayName().contains(util.stripColours(cfg.getString("misc.gui-item.name"))))
+		    {
+		    	event.setCancelled(true);
+		        listener.mainMenu(player);
+		    }
+	    }
+	}
+	
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent event)
+	{
+		if(cfg.getBoolean("misc.gui-give-on-join"))
+		{
+			ItemStack item = new ItemStack(Material.getMaterial(cfg.getString("misc.gui-item.material")));
+			ItemMeta meta = item.getItemMeta();
+			meta.setDisplayName(util.translateColours(cfg.getString("misc.gui-item.name")));
+			meta.setLore(util.translateColours(cfg.getStringList("misc.gui-item.lore")));
+			item.setItemMeta(meta);
+			
+			if(!event.getPlayer().getInventory().contains(item)) //Can only have one
+			{
+				if(event.getPlayer().getInventory().getItem(cfg.getInt("misc.gui-item.position")) != null) //If there is already an item in its place
+				{
+					event.getPlayer().getInventory().addItem(item);
+				}
+				else
+				{
+					event.getPlayer().getInventory().setItem(cfg.getInt("misc.gui-item.position"), item);
+				}
+			}
+		}
+	}
+}

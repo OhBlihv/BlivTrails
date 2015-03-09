@@ -71,6 +71,21 @@ public class ConfigAccessor
 				}
 			}
 		}
+		if((this.getInt("misc.gui-item.position") >= 36) || (this.getInt("misc.gui-item.position") < 0))
+		{
+			util.logError("The GUI Item's location is outside the inventory bounds: " + this.getString("misc.gui-item.position"));
+			invalid = true;
+		}
+		try
+		{
+			Material.getMaterial(this.getString("misc.gui-item.material")).isBlock();
+		}
+		catch(NullPointerException e)
+		{
+			util.logError("GUI Item has an invalid material: " + this.getString("misc.gui-item.material"));
+			invalid = true;
+		}
+		
 		util.logInfo("Config Checking is enabled. If you encounter any freezes/stutters, turns this off once you've hit a stable config.");
 		return invalid;
 	}

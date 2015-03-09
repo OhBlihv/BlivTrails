@@ -4,7 +4,7 @@
 
   <groupId>net.auscraft</groupId>
   <artifactId>BlivTrails</artifactId>
-  <version>1.0.7</version>
+  <version>1.0.8</version>
   <packaging>jar</packaging>
 
   <name>BlivTrails</name>
@@ -14,6 +14,10 @@
      	    <id>md_5-snapshots</id>
       		<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
        </repository>
+       <repository>
+    		<id>ess-repo</id>
+    		<url>http://repo.ess3.net/content/groups/essentials</url>
+  		</repository>
   </repositories>
 
   <properties>
@@ -27,6 +31,11 @@
       		<version>1.8-R0.1-SNAPSHOT</version>
       		<scope>provided</scope>
        </dependency>
+       <dependency>
+    		<groupId>net.ess3</groupId>
+   			<artifactId>Essentials</artifactId>
+    		<version>2.13-SNAPSHOT</version>
+ 	    </dependency>
        <dependency>
             <groupId>org.kitteh</groupId>
     		<artifactId>vanish</artifactId>
