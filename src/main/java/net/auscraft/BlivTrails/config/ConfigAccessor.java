@@ -170,6 +170,12 @@ public class ConfigAccessor
 		double value = this.config.getDouble(path);
 		return value;
 	}
+	
+	public float getFloat(String path)
+	{
+		double value = this.config.getDouble(path);
+		return (float)value;
+	}
 
 	public String getString(String path)
 	{

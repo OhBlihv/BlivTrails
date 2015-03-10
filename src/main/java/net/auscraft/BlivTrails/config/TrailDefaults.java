@@ -72,7 +72,7 @@ public class TrailDefaults
 		}
 	}
 	
-	private HashMap<String, particleDefaultStorage> particleDefaults;
+	private static HashMap<String, particleDefaultStorage> particleDefaults;
 	
 	public TrailDefaults(ConfigAccessor cfg)
 	{
@@ -108,7 +108,7 @@ public class TrailDefaults
 		}
 	}
 	
-	public particleDefaultStorage getDefaults(String particle)
+	public static particleDefaultStorage getDefaults(String particle)
 	{
 		return particleDefaults.get(particle);
 	}

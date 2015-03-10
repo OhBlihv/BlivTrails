@@ -3,6 +3,9 @@ package net.auscraft.BlivTrails;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Random;
+import java.util.UUID;
 
 import net.auscraft.BlivTrails.config.ConfigAccessor;
 import net.auscraft.BlivTrails.config.FlatFile;
@@ -10,7 +13,9 @@ import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.hooks.EssentialsListener;
 import net.auscraft.BlivTrails.hooks.VanishListener;
 
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
 import com.jolbox.bonecp.BoneCPDataSource;
 
@@ -23,6 +28,7 @@ public class BlivTrails extends JavaPlugin
 	private FlatFile flatfile = null;
 	private Messages messages;
 	private Utilities util;
+	private Random rand;
 	
 	@Override
 	public void onEnable()
@@ -46,6 +52,12 @@ public class BlivTrails extends JavaPlugin
 		getCommand("trail").setExecutor(new TrailCommand(this));
 		getCommand("trailadmin").setExecutor(new TrailCommand(this));
 		doHooks();
+		rand = new Random(System.currentTimeMillis());
+		
+		if(!cfg.getBoolean("trails.misc.display-when-still"))
+		{
+			doTrailTimeouts();
+		}
 	}
 	
 	@Override
@@ -65,6 +77,11 @@ public class BlivTrails extends JavaPlugin
 	public Utilities getUtil()
 	{
 		return util;
+	}
+	
+	public Random getRand()
+	{
+		return rand;
 	}
 	
 	public Object getSave()
@@ -145,6 +162,50 @@ public class BlivTrails extends JavaPlugin
 				e2.printStackTrace();
 			}
 		}
+	}
+	
+	private void doTrailTimeouts()
+	{
+		final int checkTime = cfg.getInt("trails.scheduler.check-time");
+		
+		Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
+		{
+			public void run()
+			{
+				BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+				HashMap<String, Integer> trailTasks = listener.getActiveTrails();
+				HashMap<String, Float> trailTime = listener.getTrailTimeLeft();
+				
+				int taskId = 0;
+				float resultingTime = 0;
+				
+				for(String uuid : trailTasks.keySet())
+				{
+					taskId = trailTasks.get(uuid);
+					if(scheduler.isQueued(taskId) || scheduler.isCurrentlyRunning(taskId)) //If trail is active for given player
+					{
+						resultingTime = trailTime.get(uuid) - checkTime;
+						if(resultingTime > 0)
+						{
+							trailTime.replace(uuid, resultingTime);
+							//util.logDebug("Reduced " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s trail time by " + checkTime + " to equal " + (trailTime.get(uuid) - checkTime) + " seconds left");
+						}
+						else
+						{
+							trailTime.remove(uuid);
+							//util.logDebug("Removed " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + " from the trailTime Map");
+							//util.logDebug("Trail should now be disabled");
+						}
+					}
+					else
+					{
+						trailTasks.remove(uuid); //TaskID is stale and not in use anymore. Cleanup.
+						//util.logDebug("Cleaned Up " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s task, which wasn't attached to a trail.");
+					}
+				}
+			}
+		}, 0L, checkTime * 20);
+		
 	}
 	
 	public void setupCFG()

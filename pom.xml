@@ -53,17 +53,6 @@
             <artifactId>slf4j-jdk14</artifactId>
             <version>1.7.5</version>
         </dependency>
-	    <dependency>
-	        <groupId>net.openhft</groupId>
-	        <artifactId>koloboke-api-jdk6-7</artifactId>
-	        <version>0.6.6</version>
-	    </dependency>
-	    <dependency>
-	        <groupId>net.openhft</groupId>
-	        <artifactId>koloboke-impl-jdk6-7</artifactId>
-	        <version>0.6.6</version>
-	        <scope>runtime</scope>
-	    </dependency>
   </dependencies>
   
   <build>

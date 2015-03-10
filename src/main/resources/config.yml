@@ -9,6 +9,13 @@ database:                                           #mySQL is required for cross
     username: minecraft
     password: minecraft1
 
+hooks:
+    #By default, true will attempt to hook.
+    #If the plugin is not found, will continue down the
+    #list to find an enabled/hook-enabled plugin
+    vanishnopacket: true
+    essentials: true
+    
 misc:
     #Miscellaneous options
     debug: false
@@ -90,6 +97,18 @@ menu:
                 random-pos: 22
                 back-button-pos: 31
 trails:
+    scheduler:
+        #These options are relevant to trail display times.
+        #When a player stops moving, the trail has <configurable> seconds before it stops displaying.
+        #How often to check if trails are due to stop displaying
+        check-time: 1.00
+        #How long trails last in seconds
+        trail-length: 3
+    misc:
+        #Disable the trail when not moving
+        #If this is true, trails will not expire
+        #(This option requires a reload of the server, or reload of the plugin (SAFE))
+        display-when-still: false
     #Global Trail Defaults
     defaults:
         #Amplification of Types/Styles

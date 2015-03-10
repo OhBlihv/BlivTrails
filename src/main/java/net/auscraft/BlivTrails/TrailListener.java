@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -15,12 +16,9 @@ import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.particleDefaultStorage;
-import net.openhft.koloboke.collect.map.hash.HashObjObjMap;
-import net.openhft.koloboke.collect.map.hash.HashObjObjMaps;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -33,11 +31,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitScheduler;
 import org.kitteh.vanish.VanishPlugin;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
-import com.darkblade12.ParticleEffect.ParticleEffect.NoteColor;
-import com.darkblade12.ParticleEffect.ParticleEffect.ParticleColor;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleProperty;
 import com.jolbox.bonecp.BoneCPDataSource;
 
@@ -48,17 +45,25 @@ public class TrailListener implements Listener
 			ParticleEffect.HEART, ParticleEffect.LAVA, ParticleEffect.NOTE, ParticleEffect.PORTAL, ParticleEffect.REDSTONE, ParticleEffect.SLIME, ParticleEffect.SMOKE_LARGE,
 			ParticleEffect.SNOW_SHOVEL, ParticleEffect.SNOWBALL, ParticleEffect.SPELL, ParticleEffect.SPELL_INSTANT, ParticleEffect.SPELL_MOB, ParticleEffect.SPELL_WITCH,
 			ParticleEffect.TOWN_AURA, ParticleEffect.VILLAGER_HAPPY, ParticleEffect.WATER_DROP, ParticleEffect.WATER_SPLASH};
-	private HashObjObjMap<String, PlayerConfig> trailMap;
-	private BlivTrails instance;
+	
+	private HashMap<String, PlayerConfig> trailMap;
+	private HashMap<String, Integer> taskMap;
+	private HashMap<String, Float> trailTime;
+	
 	private Utilities util;
-	private Random rand;
 	private BoneCPDataSource sql = null;
 	private FlatFile flatfile = null;
 	private ConfigAccessor cfg;
 	private static Messages msg;
 	private double option[];
+	private float trailLength;
+	
 	private TrailDefaults trailDefaults;
 	private boolean vanishEnabled;
+	private BukkitScheduler scheduler;
+	private BlivTrails instance;
+	private Random rand;
+	
 	/*
 	 * vanishHook
 	 * 0 = disabled
@@ -75,11 +80,17 @@ public class TrailListener implements Listener
 		util.setConfig(cfg);
 		loadDefaultOptions();
 		instance.setListener(this);
+		scheduler = Bukkit.getServer().getScheduler();
 		rand = new Random(System.currentTimeMillis());
+		
+		trailMap = new HashMap<String, PlayerConfig>();
+		taskMap = new HashMap<String, Integer>();
+		trailTime = new HashMap<String, Float>();
+		trailLength = cfg.getFloat("trails.scheduler.trail-length");
+		
 		vanishEnabled = false;
 		vanishHook = 0;
-		//trailMap = new HashMap<String, PlayerConfig>();
-		trailMap = HashObjObjMaps.<String, PlayerConfig>newUpdatableMap();
+		
 		Object saveLoc = instance.getSave();
 		if(saveLoc instanceof BoneCPDataSource)
 		{
@@ -194,16 +205,17 @@ public class TrailListener implements Listener
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event)
 	{
-		try
+		//Stop the trail from working while the player isnt technically moving
+		if(event.getFrom().getX() == event.getTo().getX() && event.getFrom().getY() == event.getTo().getY() && event.getFrom().getZ() == event.getTo().getZ())
 		{
-			if(trailMap.containsKey(event.getPlayer().getUniqueId().toString()))
+			return;
+		}
+		String uuid = event.getPlayer().getUniqueId().toString();
+		if(trailMap.containsKey(uuid))
+		{
+			if(!taskMap.containsKey(uuid))
 			{
-				//Stop the trail from working while the player isnt technically moving
-				if(event.getFrom().getX() == event.getTo().getX() && event.getFrom().getY() == event.getTo().getY() && event.getFrom().getZ() == event.getTo().getZ())
-				{
-					return;
-				}
-				PlayerConfig pcfg = trailMap.get(event.getPlayer().getUniqueId().toString());
+				PlayerConfig pcfg = trailMap.get(uuid);
 				if(vanishEnabled)
 				{
 					if(pcfg.getVanish() == true)
@@ -215,228 +227,19 @@ public class TrailListener implements Listener
 				{
 					return;
 				}
-				
-				final ParticleEffect particle = pcfg.getParticle();
-				
-				int length = pcfg.getLength();
-				particleDefaultStorage pDef = trailDefaults.getDefaults(util.trailConfigName(particle.toString()));
-				
-				double height = 0.00;
-				int type = pcfg.getType();
-				float xOff = (float) 0.0, yOff = (float) 0.0, zOff = (float) 0.0;
-				float speed = (float) 0.0;
-				if(!(type == 2)) //Standard + Dynamic
-				{
-					int heightInt = pcfg.getHeight();
-					if(heightInt == 0) //Feet
-					{
-						//If there isnt trail-given override, use the global value
-						if(pDef.getDouble("feetlocation") != 0.0)
-						{
-							height = pDef.getDouble("feetlocation");
-						}
-						else
-						{
-							height = option[4];
-						}
-						
-					}
-					else if(heightInt == 1) //Waist
-					{
-						if(pDef.getDouble("waistlocation") != 0.0)
-						{
-							height = pDef.getDouble("waistlocation");
-						}
-						else
-						{
-							height = option[5];
-						}
-						
-					}
-					else //Halo
-					{
-						if(pDef.getDouble("halolocation") != 0.0)
-						{
-							height = pDef.getDouble("halolocation");
-						}
-						else
-						{
-							height = option[6];
-						}
-						
-					}
-				}
-				else //Random
-				{
-					//Randomise direction of x and z (Independent of type)
-					//0 = Negative, 1 = Positive
-					int xDir = 1, yDir = 1, zDir = 1;
-					//Properly change the directions
-					if(rand.nextBoolean())
-					{
-						xDir = -1;
-					}
-					if(rand.nextBoolean())
-					{
-						yDir = -1;
-					}
-					if(rand.nextBoolean())
-					{
-						zDir = -1;
-					}
-					
-					//Offset = (0.0-1.0) * (Variation) * (1 or -1)
-					//Gives (0.0-1.0) * (Variation), with either positive
-					//or negative x/y/z co-ordinates relative to the player
-					double xvar = 0.0, yvar = 0.0, zvar = 0.0;
-					if(pDef.getDouble("xvariation") != 0.0)
-					{
-						xvar = pDef.getDouble("xvariation");
-					}
-					else
-					{
-						xvar = option[0];
-					}
-					if(pDef.getDouble("yvariation") != 0.0)
-					{
-						yvar = pDef.getDouble("yvariation");
-					}
-					else
-					{
-						yvar = option[1];
-					}
-					if(pDef.getDouble("zvariation") != 0.0)
-					{
-						zvar = pDef.getDouble("zvariation");
-					}
-					else
-					{
-						zvar = option[2];
-					}
-					xOff = (float) (rand.nextFloat() * xvar * xDir);
-					yOff = (float) (rand.nextFloat() * yvar * yDir);
-					zOff = (float) (rand.nextFloat() * zvar * zDir);
-				}
-				if(type == 3) //Random Directions from feet (Spray)
-				{
-					//(0.0-1.0)/10.00 * variation (Default is 1)
-					double sprayVar = 0.0;
-					if(pDef.getDouble("sprayvariation") != 0.0)
-					{
-						sprayVar = pDef.getDouble("sprayvariation");
-					}
-					else
-					{
-						sprayVar = option[3];
-					}
-					speed = (float) ((rand.nextFloat()/20.00) * sprayVar);
-				}
-				
-				ParticleColor data = null;
-				if(particle.hasProperty(ParticleProperty.COLORABLE))
-				{
-					int colour = pcfg.getColour();
-					if(particle == ParticleEffect.NOTE)
-					{
-						switch(colour)
-						{
-							//CANNOT DO BLACK
-							case 1: data = new NoteColor(7); break; //Red
-							case 2: data = new NoteColor(20); break; //Green
-							//CANNOT DO BROWN
-							case 4: data = new NoteColor(15); break; //Blue
-							case 5: data = new NoteColor(12); break; //Purple
-							case 6: data = new NoteColor(18); break; //Cyan
-							//CANNOT DO LIGHT GREY
-							//CANNOT DO GREY
-							case 9: data = new NoteColor(10); break; //Pink
-							case 10: data = new NoteColor(24); break; //Lime
-							case 11: data = new NoteColor(3); break; //Yellow
-							case 12: data = new NoteColor(17); break; //Light Blue
-							case 13: data = new NoteColor(11); break; //Magenta
-							case 14: data = new NoteColor(5); break; //Orange
-							//CANNOT DO WHITE
-							case 16: data = new NoteColor(rand.nextInt(24)); break; //Random
-							default: data = new NoteColor(24); break;
-						}
-					}
-					else
-					{
-						switch(colour)
-						{
-							case 0: data = new ParticleEffect.OrdinaryColor(0,0,0); break; //Black
-							case 1: data = new ParticleEffect.OrdinaryColor(255,0,0); break; //Red
-							case 2: data = new ParticleEffect.OrdinaryColor(0,128,0); break; //Dark Green
-							case 3: data = new ParticleEffect.OrdinaryColor(128,128,0); break; //Brown
-							case 4: data = new ParticleEffect.OrdinaryColor(0,0,255); break; //Dark Blue
-							case 5: data = new ParticleEffect.OrdinaryColor(128,0,128); break; //Purple
-							case 6: data = new ParticleEffect.OrdinaryColor(0,128,128); break; //Cyan
-							case 7: data = new ParticleEffect.OrdinaryColor(192,192,192); break; //Light Grey
-							case 8: data = new ParticleEffect.OrdinaryColor(128,128,128); break; //Grey
-							case 9: data = new ParticleEffect.OrdinaryColor(235,69,207); break; //Pink
-							case 10: data = new ParticleEffect.OrdinaryColor(0,255,0); break; //Lime
-							case 11: data = new ParticleEffect.OrdinaryColor(255,255,0); break; //Yellow
-							case 12: data = new ParticleEffect.OrdinaryColor(0,255,255); break; //Light Blue
-							case 13: data = new ParticleEffect.OrdinaryColor(255,0,255); break; //magenta
-							case 14: data = new ParticleEffect.OrdinaryColor(255,128,0); break; //Orange
-							case 16: data = new ParticleEffect.OrdinaryColor(rand.nextInt(255),rand.nextInt(255),rand.nextInt(255)); break;
-							default: data = new ParticleEffect.OrdinaryColor(255,255,255); break;
-						}
-					}
-					
-					 particle.display(data, event.getPlayer().getLocation().add(0.0D, height, 0.0D), 64);
-					
-				}
-				else
-				{
-					particle.display(xOff, yOff, zOff, speed, 1, event.getPlayer().getLocation().add(0.0D, height, 0.0D), 64);
-				}
-				
-				
-				//particle.display(offsetX, offsetY, offsetZ, speedInit, amount, center, range);
-				
-				if(length > 1)
-				{
-					final float xOffFinal = xOff, yOffFinal = yOff, zOffFinal = zOff, speedFinal = speed;
-					final Location locFinal = event.getPlayer().getLocation().add(0.0D, height, 0.0D);
-					final ParticleColor dataFinal = data;
-					for(int i = 1;i < (length + 1);i++)
-					{
-						if(particle.hasProperty(ParticleProperty.COLORABLE))
-						{
-							Bukkit.getScheduler().runTaskLater(instance, new Runnable()
-							{
-								public void run() 
-								{
-									particle.display(dataFinal, locFinal, 32);
-									//particle.display(color, center, range);
-								}
-					        }, i * 5);
-						}
-						else
-						{
-							Bukkit.getScheduler().runTaskLater(instance, new Runnable()
-							{
-								public void run() 
-								{
-									particle.display(xOffFinal, yOffFinal, zOffFinal, speedFinal, 1, locFinal, 64);
-									//particle.display(offsetX, offsetY, offsetZ, speed, amount, center, range);
-								}
-					        }, i * 5);
-						}
-					}
-				}
+				//public TrailRunnable(BlivTrails instance, Player player, PlayerConfig pcfg, TrailListener listener, Random rand, double[] option)
+				int pTask = scheduler.scheduleSyncRepeatingTask(instance, 
+						new TrailRunnable(instance, event.getPlayer(), pcfg, this, rand, option), 0L, 1L);
+				util.logDebug("TaskID: " + pTask);
+				taskMap.put(uuid, pTask);
+				trailTime.put(uuid, trailLength);
+				//util.logDebug("Added " + event.getPlayer().getName() + " to the taskMap");
 			}
-		}
-		catch(NullPointerException | ParticleEffect.ParticleVersionException e)
-		{
-			trailMap.remove(event.getPlayer().getUniqueId().toString());
-			removePlayer(event.getPlayer().getUniqueId().toString());
-			if(cfg.getBoolean("misc.debug"))
+			else
 			{
-				e.printStackTrace();
+				//util.logDebug("Reset " + event.getPlayer().getName() + "'s time to " + trailLength);
+				trailTime.replace(uuid, trailLength);
 			}
-			util.printPlain(event.getPlayer(), msg.getString("messages.error.trail-error"));
 		}
 	}
 	
@@ -544,7 +347,7 @@ public class TrailListener implements Listener
 			}
 			else if(event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.categories.colour")))
 			{
-				if(pcfg.getParticle().hasProperty(ParticleProperty.COLORABLE))
+				if(pcfg.getParticle().hasProperty(ParticleProperty.COLORABLE) && !pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
 				{
 					optionsMenuColour(player);
 				}
@@ -1332,6 +1135,7 @@ public class TrailListener implements Listener
 	
 	public void doDefaultTrail(UUID uuid, ParticleEffect particle)
 	{
+		
 		String particleString = particle.toString();
 		particleString = util.trailConfigName(particleString);
 		//Do Particle Defaults
@@ -1406,13 +1210,24 @@ public class TrailListener implements Listener
 		}*/
 		
 		//Trail for the first time
-		String trailName = msg.getString("messages.generic.trail-applied");
+		String trailName = cfg.getString("trails." + util.trailConfigName(particle.toString()) + ".name");
 		if(!cfg.getBoolean("misc.trail-name-colour"))
 		{
 			trailName = util.stripColours(trailName);
 		}
-		util.printPlain(Bukkit.getPlayer(uuid), addVariable(trailName, cfg.getString("trails." + util.trailConfigName(particle.toString()) + ".name")));
-		getPlayerConfig().put(uuid.toString(), new PlayerConfig(uuid.toString(), particle, type, length, height, colour));
+		util.printPlain(Bukkit.getPlayer(uuid), addVariable(msg.getString("messages.generic.trail-applied"), trailName));
+		trailMap.put(uuid.toString(), new PlayerConfig(uuid.toString(), particle, type, length, height, colour));
+		try
+		{
+			scheduler.cancelTask(taskMap.get(uuid.toString()));
+		}
+		catch(NullPointerException e)
+		{
+			//util.logDebug("Task invalid");
+			//Task already cancelled/not active
+		}
+		taskMap.remove(uuid.toString());
+		trailTime.remove(uuid.toString());
 	}
 	
 	public void loadTrail(Player player)
@@ -1749,7 +1564,7 @@ public class TrailListener implements Listener
 					conn.close();
 					if(rs == true) //If player has SQL Entry and HashMap Entry
 					{
-						util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)), addVariable(msg.getString("messages.generic.force-remove-player"), Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
+						//util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)), addVariable(msg.getString("messages.generic.force-remove-player"), Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
 						util.logDebug("Player " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + " was removed from the db");
 						return msg.getString("messages.generic.force-remove-receive");
 					}
@@ -1781,7 +1596,7 @@ public class TrailListener implements Listener
 					util.logDebug("Using Flatfile to remove " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s trail data");
 					flatfile.removeEntry(uuid);
 					flatfile.saveToFile();
-					util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)), addVariable(msg.getString("messages.generic.force-remove-player"), Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
+					//util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)), addVariable(msg.getString("messages.generic.force-remove-player"), Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
 				}
 				catch(NullPointerException e)
 				{
@@ -1878,9 +1693,19 @@ public class TrailListener implements Listener
 		vanishHook = i;
 	}
 	
-	public HashObjObjMap<String, PlayerConfig> getPlayerConfig()
+	public HashMap<String, PlayerConfig> getPlayerConfig()
 	{
 		return trailMap;
+	}
+	
+	public HashMap<String, Integer> getActiveTrails()
+	{
+		return taskMap;
+	}
+	
+	public HashMap<String, Float> getTrailTimeLeft()
+	{
+		return trailTime;
 	}
 	
 }
