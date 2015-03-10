@@ -25,7 +25,6 @@ permissions:
     children:
       blivtrails.remove-trail: true
       blivtrails.angry-villager: true
-      blivtrails.barrier: true
       blivtrails.cloud: true
       blivtrails.criticals: true
       blivtrails.criticals-magic: true

@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -16,6 +15,8 @@ import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.particleDefaultStorage;
+import net.openhft.koloboke.collect.map.hash.HashObjObjMap;
+import net.openhft.koloboke.collect.map.hash.HashObjObjMaps;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -47,7 +48,7 @@ public class TrailListener implements Listener
 			ParticleEffect.HEART, ParticleEffect.LAVA, ParticleEffect.NOTE, ParticleEffect.PORTAL, ParticleEffect.REDSTONE, ParticleEffect.SLIME, ParticleEffect.SMOKE_LARGE,
 			ParticleEffect.SNOW_SHOVEL, ParticleEffect.SNOWBALL, ParticleEffect.SPELL, ParticleEffect.SPELL_INSTANT, ParticleEffect.SPELL_MOB, ParticleEffect.SPELL_WITCH,
 			ParticleEffect.TOWN_AURA, ParticleEffect.VILLAGER_HAPPY, ParticleEffect.WATER_DROP, ParticleEffect.WATER_SPLASH};
-	private HashMap<String, PlayerConfig> trailMap;
+	private HashObjObjMap<String, PlayerConfig> trailMap;
 	private BlivTrails instance;
 	private Utilities util;
 	private Random rand;
@@ -77,7 +78,8 @@ public class TrailListener implements Listener
 		rand = new Random(System.currentTimeMillis());
 		vanishEnabled = false;
 		vanishHook = 0;
-		trailMap = new HashMap<String, PlayerConfig>();
+		//trailMap = new HashMap<String, PlayerConfig>();
+		trailMap = HashObjObjMaps.<String, PlayerConfig>newUpdatableMap();
 		Object saveLoc = instance.getSave();
 		if(saveLoc instanceof BoneCPDataSource)
 		{
@@ -1876,7 +1878,7 @@ public class TrailListener implements Listener
 		vanishHook = i;
 	}
 	
-	public HashMap<String, PlayerConfig> getPlayerConfig()
+	public HashObjObjMap<String, PlayerConfig> getPlayerConfig()
 	{
 		return trailMap;
 	}
