@@ -1,7 +1,7 @@
 package net.auscraft.BlivTrails;
 
-import java.util.HashMap;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.particleDefaultStorage;
@@ -70,7 +70,7 @@ public class TrailRunnable implements Runnable
 	private String uuid;
 	private Player player;
 	private Random rand;
-	private HashMap<String, PlayerConfig> trailMap;
+	private ConcurrentHashMap<String, PlayerConfig> trailMap;
 	private PlayerConfig pcfg;
 	private TrailListener listener;
 	double[] heightCfg = new double[3], variationCfg = new double[3];

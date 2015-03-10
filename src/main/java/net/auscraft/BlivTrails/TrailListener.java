@@ -5,10 +5,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.auscraft.BlivTrails.config.ConfigAccessor;
@@ -46,9 +46,9 @@ public class TrailListener implements Listener
 			ParticleEffect.SNOW_SHOVEL, ParticleEffect.SNOWBALL, ParticleEffect.SPELL, ParticleEffect.SPELL_INSTANT, ParticleEffect.SPELL_MOB, ParticleEffect.SPELL_WITCH,
 			ParticleEffect.TOWN_AURA, ParticleEffect.VILLAGER_HAPPY, ParticleEffect.WATER_DROP, ParticleEffect.WATER_SPLASH};
 	
-	private HashMap<String, PlayerConfig> trailMap;
-	private HashMap<String, Integer> taskMap;
-	private HashMap<String, Float> trailTime;
+	private ConcurrentHashMap<String, PlayerConfig> trailMap;
+	private ConcurrentHashMap<String, Integer> taskMap;
+	private ConcurrentHashMap<String, Float> trailTime;
 	
 	private Utilities util;
 	private BoneCPDataSource sql = null;
@@ -83,9 +83,9 @@ public class TrailListener implements Listener
 		scheduler = Bukkit.getServer().getScheduler();
 		rand = new Random(System.currentTimeMillis());
 		
-		trailMap = new HashMap<String, PlayerConfig>();
-		taskMap = new HashMap<String, Integer>();
-		trailTime = new HashMap<String, Float>();
+		trailMap = new ConcurrentHashMap<String, PlayerConfig>();
+		taskMap = new ConcurrentHashMap<String, Integer>();
+		trailTime = new ConcurrentHashMap<String, Float>();
 		trailLength = cfg.getFloat("trails.scheduler.trail-length");
 		
 		vanishEnabled = false;
@@ -230,7 +230,7 @@ public class TrailListener implements Listener
 				//public TrailRunnable(BlivTrails instance, Player player, PlayerConfig pcfg, TrailListener listener, Random rand, double[] option)
 				int pTask = scheduler.scheduleSyncRepeatingTask(instance, 
 						new TrailRunnable(instance, event.getPlayer(), pcfg, this, rand, option), 0L, 1L);
-				util.logDebug("TaskID: " + pTask);
+				//util.logDebug("TaskID: " + pTask);
 				taskMap.put(uuid, pTask);
 				trailTime.put(uuid, trailLength);
 				//util.logDebug("Added " + event.getPlayer().getName() + " to the taskMap");
@@ -1693,17 +1693,17 @@ public class TrailListener implements Listener
 		vanishHook = i;
 	}
 	
-	public HashMap<String, PlayerConfig> getPlayerConfig()
+	public ConcurrentHashMap<String, PlayerConfig> getPlayerConfig()
 	{
 		return trailMap;
 	}
 	
-	public HashMap<String, Integer> getActiveTrails()
+	public ConcurrentHashMap<String, Integer> getActiveTrails()
 	{
 		return taskMap;
 	}
 	
-	public HashMap<String, Float> getTrailTimeLeft()
+	public ConcurrentHashMap<String, Float> getTrailTimeLeft()
 	{
 		return trailTime;
 	}

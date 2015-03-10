@@ -1,6 +1,6 @@
 package net.auscraft.BlivTrails.config;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
 
@@ -72,12 +72,12 @@ public class TrailDefaults
 		}
 	}
 	
-	private static HashMap<String, particleDefaultStorage> particleDefaults;
+	private static ConcurrentHashMap<String, particleDefaultStorage> particleDefaults;
 	
 	public TrailDefaults(ConfigAccessor cfg)
 	{
 		String particleString = "NULL";
-		particleDefaults = new HashMap<String, particleDefaultStorage>();
+		particleDefaults = new ConcurrentHashMap<String, particleDefaultStorage>();
 		for(ParticleEffect particle : ParticleEffect.values())
 		{
 			particleString = particle.toString();

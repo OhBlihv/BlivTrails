@@ -3,9 +3,8 @@ package net.auscraft.BlivTrails;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Random;
-import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.auscraft.BlivTrails.config.ConfigAccessor;
 import net.auscraft.BlivTrails.config.FlatFile;
@@ -173,8 +172,8 @@ public class BlivTrails extends JavaPlugin
 			public void run()
 			{
 				BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-				HashMap<String, Integer> trailTasks = listener.getActiveTrails();
-				HashMap<String, Float> trailTime = listener.getTrailTimeLeft();
+				ConcurrentHashMap<String, Integer> trailTasks = listener.getActiveTrails();
+				ConcurrentHashMap<String, Float> trailTime = listener.getTrailTimeLeft();
 				
 				int taskId = 0;
 				float resultingTime = 0;
