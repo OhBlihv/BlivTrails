@@ -2,6 +2,8 @@ package net.auscraft.BlivTrails;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import net.auscraft.BlivTrails.config.ConfigAccessor;
@@ -17,10 +19,20 @@ public class Utilities
 	private ConfigAccessor cfg;
 	private final String prefix = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "BlivTrails" + ChatColor.WHITE + "] ";
 	private String playerPrefix = "";
+	private Logger log = Logger.getLogger("Minecraft");
+	private boolean debug;
 	
-	public Utilities(BlivTrails instance)
+	public Utilities()
 	{
-		plugin = instance;
+		//Empty
+		debug = cfg.getBoolean("misc.debug");
+	}
+	
+	//Used in Async methods where Bukkit is inaccessible.
+	//Variables are assumed in this mode.
+	public Utilities(boolean isAsync)
+	{
+		debug = true;
 	}
 	
 	//------------------------------------------------------------------------------------------------------
@@ -124,36 +136,35 @@ public class Utilities
 		
 		public void logSuccess(String message)
 		{
-			//b.getServer().getConsoleCommandSender().sendMessage(ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "" + ChatColor.ITALIC + "SUCCESS: " + ChatColor.GREEN + message);
-			plugin.getServer().getConsoleSender().sendMessage(prefix + ChatColor.DARK_GREEN + "SUCCESS: " + ChatColor.GREEN + translateColours(message));
+			log.log(Level.INFO, prefix + ChatColor.DARK_GREEN + "SUCCESS: " + ChatColor.GREEN + translateColours(message));
 		}
 		
 		public void logPlain(String message)
 		{
-			plugin.getServer().getConsoleSender().sendMessage(prefix + message);
+			log.log(Level.INFO, prefix + message);
 		}
 		
 		public void logInfo(String message)
 		{
-			plugin.getServer().getConsoleSender().sendMessage(prefix + ChatColor.DARK_AQUA + "" + "INFO: " + ChatColor.BLUE + translateColours(message));
+			log.log(Level.INFO, prefix + ChatColor.DARK_AQUA + "" + "INFO: " + ChatColor.BLUE + translateColours(message));
 		}
 		
 		public void logError(String message)
 		{
-			plugin.getServer().getConsoleSender().sendMessage(prefix + ChatColor.DARK_RED + "ERROR: " + ChatColor.RED + translateColours(message));
+			log.log(Level.WARNING, prefix + ChatColor.DARK_RED + "ERROR: " + ChatColor.RED + translateColours(message));
 		}
 		
 		public void logDebug(String message)
 		{
-			if(cfg.getBoolean("misc.debug"))
+			if(debug)
 			{
-				plugin.getServer().getConsoleSender().sendMessage(prefix + ChatColor.GREEN + "DEBUG: " + ChatColor.RED + translateColours(message));
+				log.log(Level.FINE, prefix + ChatColor.GREEN + "DEBUG: " + ChatColor.RED + translateColours(message));
 			}
 		}
 		
 		public void logSevere(String message)
 		{
-			plugin.getServer().getConsoleSender().sendMessage(prefix + ChatColor.DARK_RED + "SEVERE: " + ChatColor.RED + translateColours(message));
+			log.log(Level.SEVERE, prefix + ChatColor.DARK_RED + "SEVERE: " + ChatColor.RED + translateColours(message));
 		}
 		
 		//------------------------------------------------------------------------------------------------------
