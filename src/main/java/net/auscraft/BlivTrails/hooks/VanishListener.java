@@ -3,6 +3,7 @@ package net.auscraft.BlivTrails.hooks;
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.TrailListener;
 
+import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.kitteh.vanish.event.VanishStatusChangeEvent;
@@ -26,6 +27,10 @@ public class VanishListener implements Listener
 		if(listener.getPlayerConfig().containsKey(event.getPlayer().getUniqueId().toString()))
 		{
 			listener.getPlayerConfig().get(event.getPlayer().getUniqueId().toString()).setVanish(event.isVanishing());
+			if(event.isVanishing())
+			{
+				Bukkit.getScheduler().cancelTask(listener.getActiveTrails().get(event.getPlayer().getUniqueId().toString()));
+			}
 		}
 	}
 	

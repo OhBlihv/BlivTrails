@@ -1,9 +1,5 @@
 package net.auscraft.BlivTrails;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -16,6 +12,8 @@ import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.particleDefaultStorage;
+import net.auscraft.BlivTrails.runnables.MySQLRunnable;
+import net.auscraft.BlivTrails.runnables.TrailRunnable;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -1236,50 +1234,7 @@ public class TrailListener implements Listener
 		{
 			try
 			{
-				Connection conn = null;
-				try
-				{
-					conn = sql.getConnection();
-					Statement st = conn.createStatement();
-					ResultSet rs = st.executeQuery("SELECT * FROM bliv_trails WHERE uuid='" + player.getUniqueId().toString() + "';");
-					if(rs.next())
-					{
-						ParticleEffect particleEff = null;
-						for(ParticleEffect pEff : ParticleEffect.values())
-						{
-							if(pEff.toString().equals(rs.getString("particle")))
-							{
-								if(pEff.equals(ParticleEffect.FOOTSTEP))
-								{
-									return;
-								}
-								particleEff = pEff;
-								util.logDebug("Equal to " + pEff.toString());
-								break;
-							}
-						}
-						//sqlite.query("CREATE TABLE table_name (uuid VARCHAR(50) PRIMARY_KEY, particle VARCHAR(50), type INT, length INT, height INT);");
-						trailMap.put(player.getUniqueId().toString(), new PlayerConfig(player.getUniqueId().toString(), particleEff,
-								rs.getInt("type"), rs.getInt("length"), rs.getInt("height"), rs.getInt("colour")));
-						util.logDebug("Loaded " + player.getName());
-						util.logDebug(player.getUniqueId().toString() + particleEff +
-								rs.getInt("type") + rs.getInt("length") + rs.getInt("height") + rs.getInt("colour"));
-					}
-					conn.close();
-				}
-				catch(SQLException e)
-				{
-					e.printStackTrace();
-					util.logError("SQLException for: " + player.getName());
-					try
-					{
-						conn.close();
-					} 
-					catch (SQLException e2)
-					{
-						e.printStackTrace();
-					}
-				}
+				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), null, 1, trailMap));
 			}
 			catch(NullPointerException e)
 			{
@@ -1350,52 +1305,19 @@ public class TrailListener implements Listener
 		}
 		if(pcfg != null)
 		{
+			if(pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
+			{
+				removePlayer(player.getUniqueId().toString());
+				return;
+			}
 			util.logDebug(player.getName() + "'s trail config is not null");
 			if(flatfile == null)
 			{
 				util.logDebug("Using MySQL to save " + player.getName() + "'s trail data");
 				try
 				{
-					Connection conn = null;
-					try
-					{
-						conn = sql.getConnection();
-						Statement st = conn.createStatement();
-						ResultSet rs = st.executeQuery("SELECT uuid FROM bliv_trails WHERE uuid='" + player.getUniqueId() + "';");
-						if(pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
-						{
-							removePlayer(player.getUniqueId().toString());
-							return;
-						}
-						if(rs.next())
-						{
-							st.execute("UPDATE bliv_trails SET particle='" + pcfg.getParticle().toString() + "', type='"
-									+ pcfg.getType() + "', length='" + pcfg.getLength() + "', height='" + pcfg.getHeight() + "', colour='" + pcfg.getColour() + "' WHERE uuid='" + pcfg.getUUID() + "';");
-						}
-						else
-						{
-							st.execute("INSERT INTO bliv_trails(uuid,particle,type,length,height,colour) VALUES('" + pcfg.getUUID() + "', '" + pcfg.getParticle().toString() + "','"
-									+ pcfg.getType() + "','" + pcfg.getLength() + "','" + pcfg.getHeight() + "', '" + pcfg.getColour() + "');");
-						}
-						util.logDebug("Saved " + player.getName() + "'s trail config to file");
-						util.logDebug("UPDATE bliv_trails SET particle='" + pcfg.getParticle().toString() + "', type='"
-						+ pcfg.getType() + "', length='" + pcfg.getLength() + "', height='" + pcfg.getHeight() + "', colour='" + pcfg.getColour() + "' WHERE uuid='" + pcfg.getUUID() + "';");
-						conn.close();
-					}
-					catch(SQLException e2)
-					{
-						try
-						{
-							conn.close();
-						}
-						catch(SQLException e3)
-						{
-							//Give up
-							e2.printStackTrace();
-							e3.printStackTrace();
-							util.logError("SQLException for: " + player.getName());
-						}
-					}
+					//Run MySQL off the main thread to avoid lockups
+					scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, 0, null));
 				}
 				catch(NullPointerException e)
 				{
@@ -1550,50 +1472,14 @@ public class TrailListener implements Listener
 		PlayerConfig pcfg = trailMap.get(uuid);
 		if(pcfg != null)
 		{
-			util.logDebug(Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s trail config is not null");
 			if(flatfile == null)
 			{
-				util.logDebug("Using MySQL to remove " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s trail data");
-				Connection conn = null;
-				try
-				{
-					conn = sql.getConnection();
-					Statement st = conn.createStatement();
-					trailMap.put(uuid.toString(), new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
-					boolean rs = st.execute("DELETE FROM bliv_trails WHERE uuid='" + uuid + "';");
-					conn.close();
-					if(rs == true) //If player has SQL Entry and HashMap Entry
-					{
-						//util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)), addVariable(msg.getString("messages.generic.force-remove-player"), Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
-						util.logDebug("Player " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + " was removed from the db");
-						return msg.getString("messages.generic.force-remove-receive");
-					}
-					else //If player only has HashMap entry
-					{
-						return msg.getString("messages.generic.force-remove-receive");
-					}
-				}
-				catch(SQLException e2)
-				{
-					try
-					{
-						conn.close();
-						return msg.getString("messages.error.unexpected");
-					}
-					catch(SQLException e3)
-					{
-						//Give up
-						e2.printStackTrace();
-						e3.printStackTrace();
-						return msg.getString("messages.error.unexpected");
-					}
-				}
+				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, uuid, pcfg, 1, trailMap));
 			}
 			else
 			{
 				try
 				{
-					util.logDebug("Using Flatfile to remove " + Bukkit.getPlayer(UUID.fromString(uuid)).getName() + "'s trail data");
 					flatfile.removeEntry(uuid);
 					flatfile.saveToFile();
 					//util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)), addVariable(msg.getString("messages.generic.force-remove-player"), Bukkit.getPlayer(UUID.fromString(uuid)).getName()));

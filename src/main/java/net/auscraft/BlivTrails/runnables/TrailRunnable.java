@@ -1,8 +1,11 @@
-package net.auscraft.BlivTrails;
+package net.auscraft.BlivTrails.runnables;
 
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.auscraft.BlivTrails.BlivTrails;
+import net.auscraft.BlivTrails.PlayerConfig;
+import net.auscraft.BlivTrails.TrailListener;
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.particleDefaultStorage;
 

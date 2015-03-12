@@ -128,39 +128,46 @@ public class BlivTrails extends JavaPlugin
 		ds.setPartitionCount(2);
 		ds.setMinConnectionsPerPartition(3);
 		ds.setMaxConnectionsPerPartition(7);
-		Connection conn = null;
-		try
+		Bukkit.getServer().getScheduler().runTaskAsynchronously(this, new Runnable()
 		{
-			conn = ds.getConnection();
-			Statement st = conn.createStatement();
-			st.executeQuery("SELECT 1 FROM bliv_trails LIMIT 1;");
-			//If no error, table is set up
-			conn.close();
-		}
-		catch(SQLException e) //Else, create the table
-		{
-			try 
+
+			@Override
+			public void run() 
 			{
-				util.logInfo("Setting up BlivTrails database...");
+				Connection conn = null;
 				try
 				{
+					conn = ds.getConnection();
 					Statement st = conn.createStatement();
-					st.execute("CREATE TABLE bliv_trails(uuid VARCHAR(36) PRIMARY KEY, particle VARCHAR(50), type INT(11), length INT(11), height INT(11), colour INT(11));");
+					st.executeQuery("SELECT 1 FROM bliv_trails LIMIT 1;");
+					//If no error, table is set up
 					conn.close();
 				}
-				catch(NullPointerException e2)
+				catch(SQLException e) //Else, create the table
 				{
-					util.logError("ERROR: mySQL Connection Issues. Do you have the correct db setup?");
-					this.getPluginLoader().disablePlugin(this);
+					try 
+					{
+						util.logInfo("Setting up BlivTrails database...");
+						try
+						{
+							Statement st = conn.createStatement();
+							st.execute("CREATE TABLE bliv_trails(uuid VARCHAR(36) PRIMARY KEY, particle VARCHAR(50), type INT(11), length INT(11), height INT(11), colour INT(11));");
+							conn.close();
+						}
+						catch(NullPointerException e2)
+						{
+							util.logError("ERROR: mySQL Connection Issues. Do you have the correct db setup?");
+							conn.close();
+						}
+					} 
+					catch (SQLException e2) 
+					{
+						e2.printStackTrace();
+					}
 				}
-				
-				//ALTER TABLE  `bliv_trails` ADD  `colour` INT NOT NULL DEFAULT  '0';
-			} 
-			catch (SQLException e2) 
-			{
-				e2.printStackTrace();
 			}
-		}
+			
+		});
 	}
 	
 	private void doTrailTimeouts()
