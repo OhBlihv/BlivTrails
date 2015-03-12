@@ -21,9 +21,9 @@ public class MySQLRunnable implements Runnable
 	private ConcurrentHashMap<String, PlayerConfig> trailMap = null;
 	
 	//Control flag to determine if the runnable is saving or loading
-	int process;
+	short process;
 	
-	public MySQLRunnable(BoneCPDataSource sql, String uuid, PlayerConfig pcfg, int process, ConcurrentHashMap<String, PlayerConfig> trailMap)
+	public MySQLRunnable(BoneCPDataSource sql, String uuid, PlayerConfig pcfg, short process, ConcurrentHashMap<String, PlayerConfig> trailMap)
 	{
 		this.sql = sql;
 		this.uuid = uuid;
@@ -43,8 +43,7 @@ public class MySQLRunnable implements Runnable
 		}
 	}
 	
-	@Override
-	public void run() 
+	public void run()
 	{
 		Connection conn = null;
 		try
@@ -96,16 +95,9 @@ public class MySQLRunnable implements Runnable
 				conn = sql.getConnection();
 				Statement st = conn.createStatement();
 				trailMap.put(uuid.toString(), new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
-				boolean rs = st.execute("DELETE FROM bliv_trails WHERE uuid='" + uuid + "';");
+				st.execute("DELETE FROM bliv_trails WHERE uuid='" + uuid + "';");
 				conn.close();
-				if(rs == true) //If player has SQL Entry and HashMap Entry
-				{
-					new CallablePrintout(UUID.fromString(uuid), "messages.generic.force-remove-receive");
-				}
-				else //If player only has HashMap entry
-				{
-					new CallablePrintout(UUID.fromString(uuid), "messages.generic.force-remove-receive");
-				}
+				new CallablePrintout(UUID.fromString(uuid), "messages.generic.force-remove-receive");
 			}
 			
 		}

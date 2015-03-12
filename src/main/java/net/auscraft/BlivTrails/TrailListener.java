@@ -1234,7 +1234,7 @@ public class TrailListener implements Listener
 		{
 			try
 			{
-				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), null, 1, trailMap));
+				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), null, (short) 1, trailMap));
 			}
 			catch(NullPointerException e)
 			{
@@ -1317,7 +1317,7 @@ public class TrailListener implements Listener
 				try
 				{
 					//Run MySQL off the main thread to avoid lockups
-					scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, 0, null));
+					scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, (short) 0, null));
 				}
 				catch(NullPointerException e)
 				{
@@ -1474,7 +1474,7 @@ public class TrailListener implements Listener
 		{
 			if(flatfile == null)
 			{
-				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, uuid, pcfg, 1, trailMap));
+				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, uuid, pcfg, (short) 1, trailMap));
 			}
 			else
 			{
@@ -1546,7 +1546,7 @@ public class TrailListener implements Listener
         return item;
 	}
 	
-	public boolean isVanished(Player player) throws ClassNotFoundException //TODO: Add Essentials Vanish
+	public boolean isVanished(Player player) throws ClassNotFoundException
 	{
 		boolean isVanished = false;
 		if(vanishHook == 1) //VanishNoPacket
