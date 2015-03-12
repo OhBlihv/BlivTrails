@@ -3,7 +3,6 @@ package net.auscraft.BlivTrails;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import net.auscraft.BlivTrails.config.ConfigAccessor;
@@ -15,24 +14,23 @@ import org.bukkit.command.CommandSender;
 public class Utilities 
 {
 	
-	private BlivTrails plugin;
-	private ConfigAccessor cfg;
-	private final String prefix = ChatColor.WHITE + "[" + ChatColor.DARK_AQUA + "BlivTrails" + ChatColor.WHITE + "] ";
+	private BlivTrails instance;
+	private final String prefix = "&f[&bBlivTrails&f] ";
 	private String playerPrefix = "";
-	private Logger log = Logger.getLogger("Minecraft");
-	private boolean debug;
+	private java.util.logging.Logger log = Bukkit.getLogger();
+	private boolean debug = true;
 	
-	public Utilities()
+	public Utilities(BlivTrails instance)
 	{
-		//Empty
-		debug = cfg.getBoolean("misc.debug");
+		this.instance = instance;
 	}
 	
 	//Used in Async methods where Bukkit is inaccessible.
+	//Or when the plugin instance is inaccessible
 	//Variables are assumed in this mode.
 	public Utilities(boolean isAsync)
 	{
-		debug = true;
+		//Empty
 	}
 	
 	//------------------------------------------------------------------------------------------------------
@@ -41,12 +39,12 @@ public class Utilities
 	
 	public void setConfig(ConfigAccessor cfg)
 	{
-		this.cfg = cfg;
-		playerPrefix = translateColours(plugin.getMessages().getString("messages.prefix"));
+		playerPrefix = translateColours(instance.getMessages().getString("messages.prefix"));
 		if(playerPrefix != "")
 		{
 			playerPrefix += " ";
 		}
+		debug = cfg.getBoolean("misc.debug");
 	}
 	
 	
@@ -59,6 +57,30 @@ public class Utilities
 		Pattern chatColorPattern = Pattern.compile("[&](.)");
 		String fixedString = chatColorPattern.matcher(toFix).replaceAll("");
 		return fixedString;
+	}
+	
+	public String translateConsoleColours(String toFix) //TODO: Add additional colours
+	{
+		toFix = Pattern.compile("(?i)(&|§)([a])").matcher(toFix).replaceAll("\u001B[32m;1m"); //Light Green
+		toFix = Pattern.compile("(?i)(&|§)([b])").matcher(toFix).replaceAll("\u001B[36m"); //Aqua
+		toFix = Pattern.compile("(?i)(&|§)([c])").matcher(toFix).replaceAll("\u001B[31m"); //Red
+		toFix = Pattern.compile("(?i)(&|§)([d])").matcher(toFix).replaceAll("\u001B[35m;1m"); //Pink
+		toFix = Pattern.compile("(?i)(&|§)([e])").matcher(toFix).replaceAll("\u001B[33m;1m"); //Yellow
+		toFix = Pattern.compile("(?i)(&|§)([f])").matcher(toFix).replaceAll("\u001B[0m"); //White
+		toFix = Pattern.compile("(?i)(&|§)([0])").matcher(toFix).replaceAll("\u001B[30m"); //Black
+		toFix = Pattern.compile("(?i)(&|§)([1])").matcher(toFix).replaceAll("\u001B[34m"); //Dark Blue
+		toFix = Pattern.compile("(?i)(&|§)([2])").matcher(toFix).replaceAll("\u001B[32m"); //Dark Green
+		toFix = Pattern.compile("(?i)(&|§)([3])").matcher(toFix).replaceAll("\u001B[34m;1m"); //Light Blue
+		toFix = Pattern.compile("(?i)(&|§)([4])").matcher(toFix).replaceAll("\u001B[31m"); //Dark Red
+		toFix = Pattern.compile("(?i)(&|§)([5])").matcher(toFix).replaceAll("\u001B[35m"); //Purple
+		toFix = Pattern.compile("(?i)(&|§)([6])").matcher(toFix).replaceAll("\u001B[33m"); //Gold
+		toFix = Pattern.compile("(?i)(&|§)([7])").matcher(toFix).replaceAll("\u001B[37m"); //Light Grey
+		toFix = Pattern.compile("(?i)(&|§)([8])").matcher(toFix).replaceAll("\u001B[30m;1m"); //Dark Grey
+		toFix = Pattern.compile("(?i)(&|§)([9])").matcher(toFix).replaceAll("\u001B[34m"); //Dark Aqua
+		toFix = Pattern.compile("(?i)(&|§)([r])").matcher(toFix).replaceAll("\u001B[0m");
+		toFix += "\u001B[0m"; //Stop colour from overflowing to the next line with a reset code
+		
+		return toFix;
 	}
 	
 	public String translateColours(String toFix)
@@ -136,35 +158,35 @@ public class Utilities
 		
 		public void logSuccess(String message)
 		{
-			log.log(Level.INFO, prefix + ChatColor.DARK_GREEN + "SUCCESS: " + ChatColor.GREEN + translateColours(message));
+			log.log(Level.INFO, translateConsoleColours(prefix + "&2SUCCESS: &a" + message));
 		}
 		
 		public void logPlain(String message)
 		{
-			log.log(Level.INFO, prefix + message);
+			log.log(Level.INFO, translateConsoleColours(prefix + message));
 		}
 		
 		public void logInfo(String message)
 		{
-			log.log(Level.INFO, prefix + ChatColor.DARK_AQUA + "" + "INFO: " + ChatColor.BLUE + translateColours(message));
+			log.log(Level.INFO, translateConsoleColours(prefix + "&9INFO: &b" + message));
 		}
 		
 		public void logError(String message)
 		{
-			log.log(Level.WARNING, prefix + ChatColor.DARK_RED + "ERROR: " + ChatColor.RED + translateColours(message));
+			log.log(Level.WARNING, translateConsoleColours(prefix + "&4ERROR: &c" + message));
 		}
 		
 		public void logDebug(String message)
 		{
 			if(debug)
 			{
-				log.log(Level.FINE, prefix + ChatColor.GREEN + "DEBUG: " + ChatColor.RED + translateColours(message));
+				log.log(Level.INFO, translateConsoleColours(prefix + "&2DEBUG: &a" + message));
 			}
 		}
 		
 		public void logSevere(String message)
 		{
-			log.log(Level.SEVERE, prefix + ChatColor.DARK_RED + "SEVERE: " + ChatColor.RED + translateColours(message));
+			log.log(Level.SEVERE, translateConsoleColours(prefix + "&4SEVERE: &c" + message));
 		}
 		
 		//------------------------------------------------------------------------------------------------------
@@ -173,7 +195,7 @@ public class Utilities
 		
 		public BlivTrails getInstance()
 		{
-			return plugin;
+			return instance;
 		}
 		
 		public String trailConfigName(String particleString)
