@@ -27,6 +27,7 @@ misc:
     trail-name-colour: true
     
     #GUI Item
+    enable: false
     #This item can be given to players on join,
     #and when right clicked (used), will open the gui
     gui-item:

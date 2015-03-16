@@ -33,15 +33,31 @@ public class ItemListener implements Listener
 	    if(event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK))
 	    {
 	    	Player player = event.getPlayer();
-	    	if(player.getItemInHand() == null || player.getItemInHand().getType().equals(Material.AIR))
-			{
-	            return;
-			}
-		    else if(player.getItemInHand().getType() == Material.getMaterial(cfg.getString("misc.gui-item.material")) && player.getItemInHand().getItemMeta().getDisplayName().contains(util.stripColours(cfg.getString("misc.gui-item.name"))))
-		    {
-		    	event.setCancelled(true);
-		        listener.mainMenu(player);
-		    }
+	    	try
+	    	{
+	    		if(player.getItemInHand() == null || player.getItemInHand().getType().equals(Material.AIR))
+				{
+		            return;
+				}
+	    		else if(cfg.getString("misc.gui-item.material").equals("NULL"))
+	    		{
+	    			util.logDebug("Your GUI Item invalid. Either disable this feature, or select a valid material.");
+	    			return;
+	    		}
+			    else if(player.getItemInHand().getType() == Material.getMaterial(cfg.getString("misc.gui-item.material")) && player.getItemInHand().getItemMeta().getDisplayName().contains(util.stripColours(cfg.getString("misc.gui-item.name"))))
+			    {
+			    	event.setCancelled(true);
+			        listener.mainMenu(player);
+			    }
+	    	}
+	    	catch(NullPointerException e)
+	    	{
+	    		if(cfg.getBoolean("misc.debug"))
+	    		{
+	    			e.printStackTrace();
+	    		}
+	    		util.logDebug("GUI Item is invalid. Check your config.");
+	    	}
 	    }
 	}
 	

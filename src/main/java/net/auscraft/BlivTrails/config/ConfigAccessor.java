@@ -71,6 +71,15 @@ public class ConfigAccessor
 				}
 			}
 		}
+		checkGUIItem();
+		
+		util.logInfo("Config Checking is enabled. If you encounter any freezes/stutters, turns this off once you've hit a stable config.");
+		return invalid;
+	}
+	
+	public void checkGUIItem()
+	{
+		boolean invalid = false;
 		if((this.getInt("misc.gui-item.position") >= 36) || (this.getInt("misc.gui-item.position") < 0))
 		{
 			util.logError("The GUI Item's location is outside the inventory bounds: " + this.getString("misc.gui-item.position"));
@@ -86,8 +95,10 @@ public class ConfigAccessor
 			invalid = true;
 		}
 		
-		util.logInfo("Config Checking is enabled. If you encounter any freezes/stutters, turns this off once you've hit a stable config.");
-		return invalid;
+		if(!invalid && getBoolean("misc.enabled"))
+		{
+			instance.doItemListener();
+		}
 	}
 	
 	public void addDefaults() //TODO:
@@ -179,7 +190,8 @@ public class ConfigAccessor
 
 	public String getString(String path)
 	{
-		String value = this.config.getString(path);
+		//String value = this.config.getString(path);
+		String value = this.config.getString(path, "NULL");
 		return value;
 	}
 

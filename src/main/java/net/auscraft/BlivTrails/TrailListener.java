@@ -29,6 +29,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.kitteh.vanish.VanishPlugin;
 
@@ -1318,6 +1319,10 @@ public class TrailListener implements Listener
 				{
 					//Run MySQL off the main thread to avoid lockups
 					scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, (short) 0, null));
+				}
+				catch(IllegalPluginAccessException e) //If the plugin is shutting down, tasks cannot be scheduled.
+				{
+					new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, (short) 0, null);
 				}
 				catch(NullPointerException e)
 				{

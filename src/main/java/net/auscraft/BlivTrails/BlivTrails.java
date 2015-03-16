@@ -47,7 +47,6 @@ public class BlivTrails extends JavaPlugin
 			flatfile = new FlatFile(this);
 		}
 		getServer().getPluginManager().registerEvents(new TrailListener(this), this);
-		getServer().getPluginManager().registerEvents(new ItemListener(this), this);
 		getCommand("trail").setExecutor(new TrailCommand(this));
 		getCommand("trailadmin").setExecutor(new TrailCommand(this));
 		doHooks();
@@ -71,6 +70,11 @@ public class BlivTrails extends JavaPlugin
 		{
 			//Not using SQL
 		}
+	}
+	
+	public void doItemListener()
+	{
+		getServer().getPluginManager().registerEvents(new ItemListener(this), this);
 	}
 	
 	public Utilities getUtil()
