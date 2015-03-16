@@ -155,40 +155,18 @@ public class TrailListener implements Listener
 			@Override
 			public void run()
 			{
-				try
+				loadTrail(player);
+				//Wait a few seconds for the async sql read to go through
+				scheduler.runTaskLater(instance, new Runnable()
 				{
-					loadTrail(player);
-					if(vanishEnabled)
+					
+					@Override
+					public void run() 
 					{
-						if(vanishHook == 1) //VanishNoPacket
-						{
-							if(isVanished(player))
-							{
-								if(trailMap.containsKey(player.getUniqueId().toString()))
-								{
-									trailMap.get(player.getUniqueId().toString()).setVanish(true);
-								}
-								else
-								{
-									util.logDebug("Player doesnt have a trail to hide");
-								}
-							}
-							else
-							{
-								util.logDebug("Player is not vanished");
-							}
-						}
-						else
-						{
-							//Essentials Vanish does not have vanish join
-							//Else, do nothing
-						}
+						
 					}
-				}
-				catch(ClassNotFoundException e)
-				{
-					util.logDebug("Vanish Hooking Failed. Did you unload a plugin?");
-				}
+					
+				}, 40L);
 			}
 		}, 100L);
 	}
@@ -234,7 +212,10 @@ public class TrailListener implements Listener
 					return;
 				}
 				int speed = cfg.getInt("trails.defaults.display-speed");
-				util.logDebug(util.trailConfigName(pcfg.getParticle().toString()) + "'s speed: " + cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.display-speed"));
+				if(speed == 0) //If config option is not set, will default to 0
+				{
+					speed = 1;
+				}
 				if(cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.display-speed") != 0)
 				{
 					speed =  cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.defaults.display-speed");
@@ -1246,7 +1227,7 @@ public class TrailListener implements Listener
 		{
 			try
 			{
-				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), null, (short) 1, trailMap));
+				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), null, (short) 1, trailMap, instance));
 			}
 			catch(NullPointerException e)
 			{
@@ -1310,11 +1291,6 @@ public class TrailListener implements Listener
 	public void saveTrail(OfflinePlayer player)
 	{
 		PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
-		if(pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
-		{
-			removePlayer(player.getUniqueId().toString());
-			return;
-		}
 		if(pcfg != null)
 		{
 			if(pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
@@ -1329,11 +1305,11 @@ public class TrailListener implements Listener
 				try
 				{
 					//Run MySQL off the main thread to avoid lockups
-					scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, (short) 0, null));
+					scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, (short) 0, null, null));
 				}
 				catch(IllegalPluginAccessException e) //If the plugin is shutting down, tasks cannot be scheduled.
 				{
-					new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, (short) 0, null);
+					new MySQLRunnable(sql, player.getUniqueId().toString(), pcfg, (short) 0, null, null);
 				}
 				catch(NullPointerException e)
 				{
@@ -1415,7 +1391,7 @@ public class TrailListener implements Listener
 		}
 		if(typeString.toLowerCase().equals("")) //Use Trail Defaults
 		{
-			particleDefaultStorage defaults = trailDefaults.getDefaults(trailDefaults.trailConfigName(particleEff.toString()));
+			particleDefaultStorage defaults = TrailDefaults.getDefaults(trailDefaults.trailConfigName(particleEff.toString()));
 			type = defaults.getInt("type");
 			length = defaults.getInt("length");
 			height = defaults.getInt("height");
@@ -1490,7 +1466,7 @@ public class TrailListener implements Listener
 		{
 			if(flatfile == null)
 			{
-				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, uuid, pcfg, (short) 1, trailMap));
+				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(sql, uuid, pcfg, (short) 1, trailMap, null));
 			}
 			else
 			{
@@ -1570,6 +1546,7 @@ public class TrailListener implements Listener
 			try
 			{
 				isVanished = ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player);
+				util.logDebug("Player is: " + ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player));
 			}
 			catch(NullPointerException | NoClassDefFoundError e)
 			{
@@ -1585,9 +1562,19 @@ public class TrailListener implements Listener
         return isVanished;
     }
 	
+	public boolean vanishEnabled()
+	{
+		return vanishEnabled;
+	}
+	
 	public void vanishEnabled(boolean enabled)
 	{
 		vanishEnabled = enabled;
+	}
+	
+	public int vanishHook()
+	{
+		return vanishHook;
 	}
 	
 	public void vanishHook(int i)
