@@ -141,6 +141,7 @@ trails:
             # type: "trace"             #Default Trail Type (trace, random, dynamic)
             # length: "short"           #Default Length (short, medium, long)
             # height: "feet"            #Default Height (feet, waist, halo)
+            # display-speed: 1          #Display speed in Ticks per Second (20 Ticks = 1 Second)
             # defaults:                 #Player Configurable options (OPTIONAL)
             #   random:                 #See above for option descriptions
             #       x-variation: 1.00

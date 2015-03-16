@@ -234,7 +234,8 @@ public class TrailListener implements Listener
 					return;
 				}
 				int speed = cfg.getInt("trails.defaults.display-speed");
-				if(cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.defaults.display-speed") != 0)
+				util.logDebug(util.trailConfigName(pcfg.getParticle().toString()) + "'s speed: " + cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.display-speed"));
+				if(cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.display-speed") != 0)
 				{
 					speed =  cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.defaults.display-speed");
 				}
