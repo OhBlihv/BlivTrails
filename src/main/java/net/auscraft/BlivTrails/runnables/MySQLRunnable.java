@@ -108,7 +108,7 @@ public class MySQLRunnable implements Runnable
 						if(vanishHook == 1) //VanishNoPacket
 						{
 							//if(isVanished(player))
-							if(player.hasPermission("vanish.silentjoin"))
+						    if(player.hasPermission("vanish.silentjoin"))
 							{
 								if(trailMap.containsKey(player.getUniqueId().toString()))
 								{

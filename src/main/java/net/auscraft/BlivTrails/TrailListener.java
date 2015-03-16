@@ -1538,7 +1538,7 @@ public class TrailListener implements Listener
         return item;
 	}
 	
-	public boolean isVanished(Player player) throws ClassNotFoundException
+	public boolean isVanished(Player player)
 	{
 		boolean isVanished = false;
 		if(vanishHook == 1) //VanishNoPacket
