@@ -112,6 +112,9 @@ trails:
         display-when-still: false
     #Global Trail Defaults
     defaults:
+        #Global | How fast to display the trail in ticks
+        #20 Ticks = 1 Second | Default is 1tick
+        display-speed: 1
         #Amplification of Types/Styles
         type:
             #Variation in positions (Centered on Players Waist)

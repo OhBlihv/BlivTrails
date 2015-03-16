@@ -61,21 +61,21 @@ public class Utilities
 	
 	public String translateConsoleColours(String toFix) //TODO: Add additional colours
 	{
-		toFix = Pattern.compile("(?i)(&|§)([a])").matcher(toFix).replaceAll("\u001B[32m;1m"); //Light Green
+		toFix = Pattern.compile("(?i)(&|§)([a])").matcher(toFix).replaceAll("\u001B[32m\u001B[1m"); //Light Green
 		toFix = Pattern.compile("(?i)(&|§)([b])").matcher(toFix).replaceAll("\u001B[36m"); //Aqua
 		toFix = Pattern.compile("(?i)(&|§)([c])").matcher(toFix).replaceAll("\u001B[31m"); //Red
-		toFix = Pattern.compile("(?i)(&|§)([d])").matcher(toFix).replaceAll("\u001B[35m;1m"); //Pink
-		toFix = Pattern.compile("(?i)(&|§)([e])").matcher(toFix).replaceAll("\u001B[33m;1m"); //Yellow
+		toFix = Pattern.compile("(?i)(&|§)([d])").matcher(toFix).replaceAll("\u001B[35m\u001B[1m"); //Pink
+		toFix = Pattern.compile("(?i)(&|§)([e])").matcher(toFix).replaceAll("\u001B[33m\u001B[1m"); //Yellow
 		toFix = Pattern.compile("(?i)(&|§)([f])").matcher(toFix).replaceAll("\u001B[0m"); //White
 		toFix = Pattern.compile("(?i)(&|§)([0])").matcher(toFix).replaceAll("\u001B[30m"); //Black
 		toFix = Pattern.compile("(?i)(&|§)([1])").matcher(toFix).replaceAll("\u001B[34m"); //Dark Blue
 		toFix = Pattern.compile("(?i)(&|§)([2])").matcher(toFix).replaceAll("\u001B[32m"); //Dark Green
-		toFix = Pattern.compile("(?i)(&|§)([3])").matcher(toFix).replaceAll("\u001B[34m;1m"); //Light Blue
+		toFix = Pattern.compile("(?i)(&|§)([3])").matcher(toFix).replaceAll("\u001B[34m\u001B[1m"); //Light Blue
 		toFix = Pattern.compile("(?i)(&|§)([4])").matcher(toFix).replaceAll("\u001B[31m"); //Dark Red
 		toFix = Pattern.compile("(?i)(&|§)([5])").matcher(toFix).replaceAll("\u001B[35m"); //Purple
 		toFix = Pattern.compile("(?i)(&|§)([6])").matcher(toFix).replaceAll("\u001B[33m"); //Gold
 		toFix = Pattern.compile("(?i)(&|§)([7])").matcher(toFix).replaceAll("\u001B[37m"); //Light Grey
-		toFix = Pattern.compile("(?i)(&|§)([8])").matcher(toFix).replaceAll("\u001B[30m;1m"); //Dark Grey
+		toFix = Pattern.compile("(?i)(&|§)([8])").matcher(toFix).replaceAll("\u001B[30m\u001B[1m"); //Dark Grey
 		toFix = Pattern.compile("(?i)(&|§)([9])").matcher(toFix).replaceAll("\u001B[34m"); //Dark Aqua
 		toFix = Pattern.compile("(?i)(&|§)([r])").matcher(toFix).replaceAll("\u001B[0m");
 		toFix += "\u001B[0m"; //Stop colour from overflowing to the next line with a reset code

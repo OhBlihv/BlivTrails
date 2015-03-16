@@ -82,9 +82,9 @@ public class TrailListener implements Listener
 		scheduler = Bukkit.getServer().getScheduler();
 		rand = new Random(System.currentTimeMillis());
 		
-		trailMap = new ConcurrentHashMap<String, PlayerConfig>();
-		taskMap = new ConcurrentHashMap<String, Integer>();
-		trailTime = new ConcurrentHashMap<String, Float>();
+		trailMap = new ConcurrentHashMap<String, PlayerConfig>(16, 0.9f, 2);
+		taskMap = new ConcurrentHashMap<String, Integer>(16, 0.9f, 1);
+		trailTime = new ConcurrentHashMap<String, Float>(16, 0.9f, 2);
 		trailLength = cfg.getFloat("trails.scheduler.trail-length");
 		
 		vanishEnabled = false;
@@ -149,41 +149,48 @@ public class TrailListener implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
 	{
-		loadTrail(event.getPlayer());
-		try
+		final Player player = event.getPlayer();
+		scheduler.runTaskLater(instance, new Runnable()
 		{
-			if(vanishEnabled)
+			@Override
+			public void run()
 			{
-				if(vanishHook == 1) //VanishNoPacket
+				try
 				{
-					if(isVanished(event.getPlayer()))
+					loadTrail(player);
+					if(vanishEnabled)
 					{
-						if(trailMap.containsKey(event.getPlayer().getUniqueId().toString()))
+						if(vanishHook == 1) //VanishNoPacket
 						{
-							trailMap.get(event.getPlayer().getUniqueId().toString()).setVanish(true);
+							if(isVanished(player))
+							{
+								if(trailMap.containsKey(player.getUniqueId().toString()))
+								{
+									trailMap.get(player.getUniqueId().toString()).setVanish(true);
+								}
+								else
+								{
+									util.logDebug("Player doesnt have a trail to hide");
+								}
+							}
+							else
+							{
+								util.logDebug("Player is not vanished");
+							}
 						}
 						else
 						{
-							util.logDebug("Player doesnt have a trail to hide");
+							//Essentials Vanish does not have vanish join
+							//Else, do nothing
 						}
 					}
-					else
-					{
-						util.logDebug("Player is not vanished");
-					}
 				}
-				else
+				catch(ClassNotFoundException e)
 				{
-					//Essentials Vanish does not have vanish join
-					//Else, do nothing
+					util.logDebug("Vanish Hooking Failed. Did you unload a plugin?");
 				}
 			}
-		}
-		catch(ClassNotFoundException e)
-		{
-			util.logDebug("Vanish Hooking Failed. Did you unload a plugin?");
-		}
-		
+		}, 100L);
 	}
 	
 	@EventHandler
@@ -226,13 +233,16 @@ public class TrailListener implements Listener
 				{
 					return;
 				}
+				int speed = cfg.getInt("trails.defaults.display-speed");
+				if(cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.defaults.display-speed") != 0)
+				{
+					speed =  cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.defaults.display-speed");
+				}
 				//public TrailRunnable(BlivTrails instance, Player player, PlayerConfig pcfg, TrailListener listener, Random rand, double[] option)
 				int pTask = scheduler.scheduleSyncRepeatingTask(instance, 
-						new TrailRunnable(instance, event.getPlayer(), pcfg, this, rand, option), 0L, 1L);
-				//util.logDebug("TaskID: " + pTask);
+						new TrailRunnable(instance, event.getPlayer(), pcfg, this, rand, option), 0L, speed);
 				taskMap.put(uuid, pTask);
 				trailTime.put(uuid, trailLength);
-				//util.logDebug("Added " + event.getPlayer().getName() + " to the taskMap");
 			}
 			else
 			{

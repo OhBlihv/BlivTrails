@@ -29,7 +29,14 @@ public class VanishListener implements Listener
 			listener.getPlayerConfig().get(event.getPlayer().getUniqueId().toString()).setVanish(event.isVanishing());
 			if(event.isVanishing())
 			{
-				Bukkit.getScheduler().cancelTask(listener.getActiveTrails().get(event.getPlayer().getUniqueId().toString()));
+				try
+				{
+					Bukkit.getScheduler().cancelTask(listener.getActiveTrails().get(event.getPlayer().getUniqueId().toString()));
+				}
+				catch(NullPointerException e)
+				{
+					//Player has no trail, or just joined.
+				}
 			}
 		}
 	}

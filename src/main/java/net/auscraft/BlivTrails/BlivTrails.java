@@ -3,6 +3,7 @@ package net.auscraft.BlivTrails;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Enumeration;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -189,8 +190,13 @@ public class BlivTrails extends JavaPlugin
 				int taskId = 0;
 				float resultingTime = 0;
 				
-				for(String uuid : trailTasks.keySet())
+				String uuid = "";
+				final Enumeration<String> itr = trailTasks.keys();
+				while(itr.hasMoreElements())
+				//for(String uuid : trailTasks.keySet())
 				{
+					uuid = itr.nextElement();
+					
 					taskId = trailTasks.get(uuid);
 					if(scheduler.isQueued(taskId) || scheduler.isCurrentlyRunning(taskId)) //If trail is active for given player
 					{
