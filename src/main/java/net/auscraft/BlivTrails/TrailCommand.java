@@ -2,6 +2,7 @@ package net.auscraft.BlivTrails;
 
 import java.util.regex.Pattern;
 
+import net.auscraft.BlivTrails.utils.Utilities;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

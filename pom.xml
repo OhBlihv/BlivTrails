@@ -1,107 +1,115 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>net.auscraft</groupId>
-  <artifactId>BlivTrails</artifactId>
-  <version>1.0.9.2</version>
-  <packaging>jar</packaging>
+    <groupId>net.auscraft</groupId>
+    <artifactId>BlivTrails</artifactId>
+    <version>1.0.9.2</version>
+    <packaging>jar</packaging>
 
-  <name>BlivTrails</name>
-  
-  <repositories>
-       <repository>
-     	    <id>md_5-snapshots</id>
-      		<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-       </repository>
-       <repository>
-    		<id>ess-repo</id>
-    		<url>http://repo.ess3.net/content/groups/essentials</url>
-  		</repository>
-  </repositories>
+    <name>BlivTrails</name>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+    <repositories>
+        <repository>
+            <id>bukkit-repo</id>
+            <url>http://repo.bukkit.org/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>ess-repo</id>
+            <url>http://repo.ess3.net/content/groups/essentials</url>
+        </repository>
+    </repositories>
 
-  <dependencies>
-    <dependency>
-      		<groupId>org.bukkit</groupId>
-      		<artifactId>bukkit</artifactId>
-      		<version>1.8-R0.1-SNAPSHOT</version>
-      		<scope>provided</scope>
-       </dependency>
-       <dependency>
-    		<groupId>net.ess3</groupId>
-   			<artifactId>Essentials</artifactId>
-    		<version>2.13-SNAPSHOT</version>
- 	    </dependency>
-       <dependency>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>bukkit</artifactId>
+            <version>1.7.10-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.ess3</groupId>
+            <artifactId>Essentials</artifactId>
+            <version>2.13-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.kitteh</groupId>
-    		<artifactId>vanish</artifactId>
-   			<version>3.19.1</version>
+            <artifactId>vanish</artifactId>
+            <version>3.19.1</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/VanishNoPacket-3.19.1.jar</systemPath>
         </dependency>
         <dependency>
-			<groupId>com.jolbox</groupId>
-			<artifactId>bonecp</artifactId>
-			<version>0.8.0-rc3</version>
-		</dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jdk14</artifactId>
-            <version>1.7.5</version>
+            <groupId>com.j256.ormlite</groupId>
+            <artifactId>ormlite-core</artifactId>
+            <version>4.48</version>
         </dependency>
-  </dependencies>
-  
-  <build>
-  	  <defaultGoal>clean package install</defaultGoal>
-      <finalName>${project.artifactId}-${project.version}</finalName>
-      <resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>plugin.yml</include>
-					<include>config.yml</include>
-					<include>messages.yml</include>
-					<include>trails.yml</include>
-				</includes>
-			</resource>
-		</resources>
-      <plugins>
-          <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-compiler-plugin</artifactId>
-              <configuration>
-                  <source>1.7</source>
-                  <target>1.7</target>
-              </configuration>
-          </plugin>
-          <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.2</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<minimizeJar>true</minimizeJar>
-							<artifactSet>
-								<includes>
-									<include>com.jolbox:bonecp</include>
-                                    <include>org.slf4j:slf4j-api</include>
-                                    <include>org.slf4j:slf4j-jdk14</include>
-								</includes>
-							</artifactSet>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-      </plugins>
-   </build>
+        <dependency>
+            <groupId>com.j256.ormlite</groupId>
+            <artifactId>ormlite-jdbc</artifactId>
+            <version>4.48</version>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.14.2</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>clean package install</defaultGoal>
+        <finalName>${project.artifactId}</finalName>
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/main/resources/</directory>
+                <includes>
+                    <include>*.yml</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.2</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <minimizeJar>true</minimizeJar>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.darkblade12.ParticleEffect</pattern>
+                                    <shadedPattern>net.auscraft.BlivTrails.particleeffect</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.j256.ormlite</pattern>
+                                    <shadedPattern>net.auscraft.BlivTrails.ormlite</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -1,10 +1,17 @@
-# This was done by me, so expect it to totally not work
-target/
-build.xml
-.classpath
-.gitattributes
-.project
+*.class
 .settings
-dependency-reduced-pom.xml
-CHANGELOG
-TODO
+.classpath
+bin
+.project
+.idea
+*.iml
+.externalToolBuilders
+build.xml
+.DS_Store
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+/target
