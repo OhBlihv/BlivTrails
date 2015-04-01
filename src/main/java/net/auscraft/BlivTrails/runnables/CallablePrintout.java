@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
-import net.auscraft.BlivTrails.Utilities;
+import net.auscraft.BlivTrails.utils.Utilities;
 
 public class CallablePrintout implements Callable<Object>
 {

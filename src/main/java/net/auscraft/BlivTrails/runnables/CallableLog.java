@@ -2,7 +2,7 @@ package net.auscraft.BlivTrails.runnables;
 
 import java.util.concurrent.Callable;
 
-import net.auscraft.BlivTrails.Utilities;
+import net.auscraft.BlivTrails.utils.Utilities;
 
 public class CallableLog implements Callable<Object>
 {

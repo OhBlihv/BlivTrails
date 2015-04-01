@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import net.auscraft.BlivTrails.BlivTrails;
-import net.auscraft.BlivTrails.Utilities;
+import net.auscraft.BlivTrails.utils.Utilities;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
