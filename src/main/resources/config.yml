@@ -51,6 +51,7 @@ menu:
         #back-button-pos: Number between 0 and size - 1
         #                 Use -1 to disable the back button
         back-button-pos: 9
+        back-button-material: BARRIER
         config:
         #Player Config Options:
         #enabled: If the option is available for players to change to
