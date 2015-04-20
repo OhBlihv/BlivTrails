@@ -124,7 +124,7 @@ public class TrailCommand implements CommandExecutor
 				}
 				else if (args[0].equalsIgnoreCase("reload"))
 				{
-					if (instance.getCfg().reloadMessages())
+					if (instance.getCfg().reloadConfig())
 					{
 						util.printError(sender, "You have config errors -- See Console for full printout");
 					}

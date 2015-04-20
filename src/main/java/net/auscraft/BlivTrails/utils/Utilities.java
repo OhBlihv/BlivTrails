@@ -58,8 +58,7 @@ public class Utilities
 		return fixedString;
 	}
 
-	public String translateConsoleColours(String toFix) // TODO: Add additional
-														// colours
+	public String translateConsoleColours(String toFix)
 	{
 		toFix = Pattern.compile("(?i)(&|§)([a])").matcher(toFix).replaceAll("\u001B[32m\u001B[1m"); // Light Green
 		toFix = Pattern.compile("(?i)(&|§)([b])").matcher(toFix).replaceAll("\u001B[36m"); // Aqua

@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import java.util.UUID;
 
-@DatabaseTable(tableName = "particle_trails", daoClass = ParticleStorage.class)
+@DatabaseTable(tableName = "bliv_trails", daoClass = ParticleStorage.class)
 public class ParticleData
 {
 

@@ -38,7 +38,7 @@ public class TrailRunnable implements Runnable
 		public void run()
 		{
 			particle.display(data, loc, 32);
-			// particle.display(color, center, range);
+			//particle.display(color, center, range);
 		}
 	}
 
@@ -365,17 +365,14 @@ public class TrailRunnable implements Runnable
 						if (particle.hasProperty(ParticleProperty.COLORABLE))
 						{
 							Bukkit.getScheduler().runTaskLater(instance,
-							// public DisplayColourableRunnable(ParticleEffect
-							// particle, ParticleColor data, Location loc)
 									new DisplayColourableRunnable(particle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
+							// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 						}
 						else
 						{
 							Bukkit.getScheduler().runTaskLater(instance, 
 									new DisplayRegularRunnable(particle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
-							// public DisplayRegularRunnable(ParticleEffect
-							// particle, float xOff, float yOff, float zOff,
-							// float speed, Location loc)
+							// public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
 									
 						}
 					}

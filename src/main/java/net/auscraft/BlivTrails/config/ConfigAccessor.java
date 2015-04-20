@@ -28,7 +28,7 @@ public class ConfigAccessor
 		this.instance = instance;
 		this.util = instance.getUtil();
 		saveDefaultConfig();
-		getMessages();
+		getConfig();
 	}
 
 	public boolean checkConfig()
@@ -116,16 +116,16 @@ public class ConfigAccessor
 		config.addDefault("misc.config-checking", true);
 	}
 
-	public FileConfiguration getMessages()
+	public FileConfiguration getConfig()
 	{
 		if (config == null)
 		{
-			reloadMessages();
+			reloadConfig();
 		}
 		return config;
 	}
 
-	public boolean reloadMessages()
+	public boolean reloadConfig()
 	{
 		if (configFile == null)
 		{

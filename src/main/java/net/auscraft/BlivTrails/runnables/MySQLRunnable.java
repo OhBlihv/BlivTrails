@@ -56,6 +56,8 @@ public class MySQLRunnable implements Runnable
 	public void run()
 	{
 		byte[] uuidBytes = UUIDUtils.toBytes(UUID.fromString(uuid));
+		
+		//Save
 		if (process == 0)
 		{
 			try
@@ -81,6 +83,7 @@ public class MySQLRunnable implements Runnable
 			}
 
 		}
+		//Load
 		else if (process == 1)
 		{
 			ParticleData particleData;
@@ -135,22 +138,26 @@ public class MySQLRunnable implements Runnable
 						}
 					}
 				}
-
 			}
-			else
+		}
+		//Remove
+		else
+		{
+			trailMap.put(uuid.toString(), new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
+			if(instance.getListener().getActiveTrails().contains(uuid))
 			{
-				trailMap.put(uuid.toString(), new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
-				try
-				{
-					instance.getParticleStorage().deleteById(uuidBytes);
-				}
-				catch (SQLException e)
-				{
-					e.printStackTrace();
-				}
-				new CallablePrintout(UUID.fromString(uuid), "messages.generic.force-remove-receive");
+				Bukkit.getServer().getScheduler().cancelTask(instance.getListener().getActiveTrails().remove(uuid));
 			}
-
+			
+			try
+			{
+				instance.getParticleStorage().deleteById(uuidBytes);
+			}
+			catch (SQLException e)
+			{
+				e.printStackTrace();
+			}
+			//new CallablePrintout(UUID.fromString(uuid), "messages.generic.force-remove-receive");
 		}
 	}
 }

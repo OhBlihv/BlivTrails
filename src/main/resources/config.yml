@@ -45,6 +45,19 @@ menu:
         #size: Must be a multiple of 9
         size: 54
         minimise-on-select: true
+    #These extras are customisable blocks for information, or however else you can use them
+    extras:
+        #guiItem1:                      #Unique name
+        #    title: "&eInformation"     #Display name for the item
+        #    material: PAPER            #Material from Bukkit Material List (https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html)
+        #    position: 50               #Position (Restrictions relative to the menu it is placed in)
+        #    menu: MAIN                 #Menu to display in. One of the following: MAIN, OPTIONS, TYPE, LENGTH, HEIGHT, COLOUR
+        #    damage: 0                  #Damage/Meta value for the item. Most dont require any and can be kept as 0
+        #    lore:                      #Lore to appear on the item
+        #    - "&6Line One"
+        #    - "&6Line Two"
+            
+        
     options:
         #size: Must be a multiple of 9
         size: 18

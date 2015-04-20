@@ -42,9 +42,12 @@ import java.util.regex.Pattern;
 public class TrailListener implements Listener
 {
 
-	public final ParticleEffect[] usedTrails = { ParticleEffect.VILLAGER_ANGRY, ParticleEffect.BARRIER, ParticleEffect.CLOUD, ParticleEffect.CRIT, ParticleEffect.CRIT_MAGIC, ParticleEffect.DRIP_LAVA, ParticleEffect.DRIP_WATER, ParticleEffect.ENCHANTMENT_TABLE, ParticleEffect.EXPLOSION_NORMAL,
-			ParticleEffect.FIREWORKS_SPARK, ParticleEffect.FLAME, ParticleEffect.HEART, ParticleEffect.LAVA, ParticleEffect.NOTE, ParticleEffect.PORTAL, ParticleEffect.REDSTONE, ParticleEffect.SLIME, ParticleEffect.SMOKE_LARGE, ParticleEffect.SNOW_SHOVEL, ParticleEffect.SNOWBALL,
-			ParticleEffect.SPELL, ParticleEffect.SPELL_INSTANT, ParticleEffect.SPELL_MOB, ParticleEffect.SPELL_WITCH, ParticleEffect.TOWN_AURA, ParticleEffect.VILLAGER_HAPPY, ParticleEffect.WATER_DROP, ParticleEffect.WATER_SPLASH };
+	public final ParticleEffect[] usedTrails = { ParticleEffect.VILLAGER_ANGRY, ParticleEffect.BARRIER, ParticleEffect.CLOUD, ParticleEffect.CRIT,
+			ParticleEffect.CRIT_MAGIC, ParticleEffect.DRIP_LAVA, ParticleEffect.DRIP_WATER, ParticleEffect.ENCHANTMENT_TABLE, ParticleEffect.EXPLOSION_NORMAL,
+			ParticleEffect.FIREWORKS_SPARK, ParticleEffect.FLAME, ParticleEffect.HEART, ParticleEffect.LAVA, ParticleEffect.NOTE, ParticleEffect.PORTAL,
+			ParticleEffect.REDSTONE, ParticleEffect.SLIME, ParticleEffect.SMOKE_LARGE, ParticleEffect.SNOW_SHOVEL, ParticleEffect.SNOWBALL,
+			ParticleEffect.SPELL, ParticleEffect.SPELL_INSTANT, ParticleEffect.SPELL_MOB, ParticleEffect.SPELL_WITCH, ParticleEffect.TOWN_AURA,
+			ParticleEffect.VILLAGER_HAPPY, ParticleEffect.WATER_DROP, ParticleEffect.WATER_SPLASH };
 
 	private ConcurrentHashMap<String, PlayerConfig> trailMap;
 	private ConcurrentHashMap<String, Integer> taskMap;
@@ -150,17 +153,8 @@ public class TrailListener implements Listener
 			{
 				loadTrail(player);
 				// Wait a few seconds for the async sql read to go through
-				scheduler.runTaskLater(instance, new Runnable()
-				{
-
-					@Override
-					public void run()
-					{
-
-					}
-
-				}, 40L);
 			}
+			
 		}, 100L);
 	}
 
@@ -205,8 +199,7 @@ public class TrailListener implements Listener
 					return;
 				}
 				int speed = cfg.getInt("trails.defaults.display-speed");
-				if (speed == 0) // If config option is not set, will default to
-								// 0
+				if (speed == 0) // If config option is not set, will default to 0
 				{
 					speed = 1;
 				}
@@ -214,17 +207,13 @@ public class TrailListener implements Listener
 				{
 					speed = cfg.getInt("trails." + util.trailConfigName(pcfg.getParticle().toString()) + ".options.defaults.display-speed");
 				}
-				// public TrailRunnable(BlivTrails instance, Player player,
-				// PlayerConfig pcfg, TrailListener listener, Random rand,
-				// double[] option)
+				// public TrailRunnable(BlivTrails instance, Player player, PlayerConfig pcfg, TrailListener listener, Random rand, double[] option)
 				int pTask = scheduler.scheduleSyncRepeatingTask(instance, new TrailRunnable(instance, event.getPlayer(), pcfg, this, rand, option), 0L, speed);
 				taskMap.put(uuid, pTask);
 				trailTime.put(uuid, trailLength);
 			}
 			else
 			{
-				// util.logDebug("Reset " + event.getPlayer().getName() +
-				// "'s time to " + trailLength);
 				trailTime.replace(uuid, trailLength);
 			}
 		}
@@ -274,7 +263,6 @@ public class TrailListener implements Listener
 					}
 					catch (NullPointerException e)
 					{
-						e.printStackTrace();
 						util.printPlain(((Player) event.getWhoClicked()), msg.getString("messages.error.no-trail"));
 					}
 				}
@@ -656,8 +644,6 @@ public class TrailListener implements Listener
 
 	public void mainMenu(Player player)
 	{
-		// try
-		// {
 		PlayerConfig pcfg = null;
 		if (trailMap.containsKey(player.getUniqueId().toString()))
 		{
@@ -690,6 +676,24 @@ public class TrailListener implements Listener
 				inv.setItem(cfg.getInt("trails.options-menu.position"),
 						menuItem(cfg.getString("trails.options-menu.material"), util.translateColours(cfg.getString("trails.options-menu.name")), util.translateColours(cfg.getStringList("trails.options-menu.lore")), player.hasPermission("blivtrails.options-menu"), false));
 			}
+			
+			try
+			{
+				for(String extra : cfg.getConfig().getConfigurationSection("menu.extras").getKeys(false))
+				{
+					if(cfg.getString("menu.extras." + extra + ".menu").equals("MAIN"))
+					{
+						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),
+								cfg.getInt("menu.extras." + extra + ".damage"), cfg.getString("menu.extras." + extra + ".title"), cfg.getStringList("menu.extras." + extra + ".lore")));
+					}
+				}
+			}
+			catch(NullPointerException e)
+			{
+				//No extras in config.
+				//Continue as usual
+			}
+			
 			player.openInventory(inv);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
@@ -727,6 +731,24 @@ public class TrailListener implements Listener
 				inv.setItem(cfg.getInt("menu.options.config.colour.position"), optionsColour(player, pcfg.getParticle()));
 			}
 			inv.setItem(cfg.getInt("menu.options.back-button.position"), backButton());
+			
+			try
+			{
+				for(String extra : cfg.getConfig().getConfigurationSection("menu.extras").getKeys(false))
+				{
+					if(cfg.getString("menu.extras." + extra + ".menu").equals("OPTIONS"))
+					{
+						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),
+								cfg.getInt("menu.extras." + extra + ".damage"), cfg.getString("menu.extras." + extra + ".title"), cfg.getStringList("menu.extras." + extra + ".lore")));
+					}
+				}
+			}
+			catch(NullPointerException e)
+			{
+				//No extras in config.
+				//Continue as usual
+			}
+			
 			player.openInventory(inv);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
@@ -762,6 +784,24 @@ public class TrailListener implements Listener
 				inv.setItem(14, informationItem(msg.getStringList("messages.information.type.dynamic")));
 			}
 			inv.setItem(cfg.getInt("menu.options.back-button.position"), backButton());
+			
+			try
+			{
+				for(String extra : cfg.getConfig().getConfigurationSection("menu.extras").getKeys(false))
+				{
+					if(cfg.getString("menu.extras." + extra + ".menu").equals("TYPE"))
+					{
+						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),
+								cfg.getInt("menu.extras." + extra + ".damage"), cfg.getString("menu.extras." + extra + ".title"), cfg.getStringList("menu.extras." + extra + ".lore")));
+					}
+				}
+			}
+			catch(NullPointerException e)
+			{
+				//No extras in config.
+				//Continue as usual
+			}
+			
 			player.openInventory(inv);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
@@ -792,6 +832,24 @@ public class TrailListener implements Listener
 			}
 			inv.setItem(13, informationItem(msg.getStringList("messages.information.length.info")));
 			inv.setItem(cfg.getInt("menu.options.back-button.position"), backButton());
+			
+			try
+			{
+				for(String extra : cfg.getConfig().getConfigurationSection("menu.extras").getKeys(false))
+				{
+					if(cfg.getString("menu.extras." + extra + ".menu").equals("LENGTH"))
+					{
+						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),
+								cfg.getInt("menu.extras." + extra + ".damage"), cfg.getString("menu.extras." + extra + ".title"), cfg.getStringList("menu.extras." + extra + ".lore")));
+					}
+				}
+			}
+			catch(NullPointerException e)
+			{
+				//No extras in config.
+				//Continue as usual
+			}
+			
 			player.openInventory(inv);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
@@ -821,6 +879,24 @@ public class TrailListener implements Listener
 			}
 			inv.setItem(13, informationItem(msg.getStringList("messages.information.height.info")));
 			inv.setItem(cfg.getInt("menu.options.back-button.position"), backButton());
+			
+			try
+			{
+				for(String extra : cfg.getConfig().getConfigurationSection("menu.extras").getKeys(false))
+				{
+					if(cfg.getString("menu.extras." + extra + ".menu").equals("HEIGHT"))
+					{
+						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),
+								cfg.getInt("menu.extras." + extra + ".damage"), cfg.getString("menu.extras." + extra + ".title"), cfg.getStringList("menu.extras." + extra + ".lore")));
+					}
+				}
+			}
+			catch(NullPointerException e)
+			{
+				//No extras in config.
+				//Continue as usual
+			}
+			
 			player.openInventory(inv);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
@@ -905,6 +981,24 @@ public class TrailListener implements Listener
 				inv.setItem(cfg.getInt("menu.options.config.colour.random-pos"), optionsColourItem(player, pcfg.getColour() == 16, 16, pcfg.getParticle()));
 			}
 			inv.setItem(cfg.getInt("menu.options.config.colour.back-button-pos"), backButton());
+			
+			try
+			{
+				for(String extra : cfg.getConfig().getConfigurationSection("menu.extras").getKeys(false))
+				{
+					if(cfg.getString("menu.extras." + extra + ".menu").equals("COLOUR"))
+					{
+						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),
+								cfg.getInt("menu.extras." + extra + ".damage"), cfg.getString("menu.extras." + extra + ".title"), cfg.getStringList("menu.extras." + extra + ".lore")));
+					}
+				}
+			}
+			catch(NullPointerException e)
+			{
+				//No extras in config.
+				//Continue as usual
+			}
+			
 			player.openInventory(inv);
 		}
 		catch (ArrayIndexOutOfBoundsException e)
@@ -1175,7 +1269,7 @@ public class TrailListener implements Listener
 		List<String> canUse = Arrays.asList(msg.getString("messages.options.doesnt-support-colours"));
 		if (particle.hasProperty(ParticleProperty.COLORABLE))
 		{
-			canUse = Arrays.asList(msg.getString("messages.options.supports-colours"));
+			canUse.add(msg.getString("messages.options.supports-colours"));
 		}
 		if(!player.hasPermission("blivtrails.options.colour"))
 		{
@@ -1306,6 +1400,25 @@ public class TrailListener implements Listener
 		item.setItemMeta(meta);
 		return item;
 	}
+	
+	//TODO:
+	protected ItemStack createItem(Material material, int damage, String displayName, List<String> lore)
+	{
+		ItemStack item = new ItemStack(material, 1, (short) damage);
+		ItemMeta meta = item.getItemMeta();
+		
+		meta.setDisplayName(util.translateColours(displayName));
+		if(lore != null)
+		{
+			if(lore.size() > 0)
+			{
+				meta.setLore(util.translateColours(lore));
+			}
+		}
+		item.setItemMeta(meta);
+		
+		return item;
+	}
 
 	/**
 	 * @param toReplace
@@ -1329,8 +1442,9 @@ public class TrailListener implements Listener
 		String particleString = particle.toString();
 		particleString = util.trailConfigName(particleString);
 		// Do Particle Defaults
-		String typeString = cfg.getString("trails." + particleString + ".options.type"), lengthString = cfg.getString("trails." + particleString + ".options.length"), heightString = cfg.getString("trails." + particleString + ".options.height"), colourString = cfg.getString("trails."
-				+ particleString + ".options.colour");
+		String typeString = cfg.getString("trails." + particleString + ".options.type"), lengthString = cfg.getString("trails." + particleString + ".options.length"),
+				heightString = cfg.getString("trails." + particleString + ".options.height"), 
+					colourString = (particle.hasProperty(ParticleProperty.COLORABLE) ? cfg.getString("trails." + particleString + ".options.colour") : "red");
 		int type = 1, length = 1, height = 0, colour = 0;
 
 		// Set it to the first, and change it if its different.
@@ -1754,7 +1868,7 @@ public class TrailListener implements Listener
 		{
 			if (flatfile == null)
 			{
-				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(uuid, pcfg, (short) 1, trailMap, null));
+				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(uuid, pcfg, (short) 2, trailMap, instance));
 			}
 			else
 			{
@@ -1762,9 +1876,6 @@ public class TrailListener implements Listener
 				{
 					flatfile.removeEntry(uuid);
 					flatfile.saveToFile();
-					// util.printPlain(Bukkit.getPlayer(UUID.fromString(uuid)),
-					// addVariable(msg.getString("messages.generic.force-remove-player"),
-					// Bukkit.getPlayer(UUID.fromString(uuid)).getName()));
 				}
 				catch (NullPointerException e)
 				{

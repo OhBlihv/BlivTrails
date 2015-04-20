@@ -82,7 +82,7 @@ public class BlivTrails extends JavaPlugin
 	@Override
 	public void onDisable()
 	{
-		getListener().doDisable();
+		this.getListener().doDisable();
 		try
 		{
 			ds.closeQuietly();
