@@ -505,7 +505,7 @@ public class TrailListener implements Listener {
 
 	
 	/*
-	 * Options Menus --------------------------------------------------------------------
+   * Options Menus --------------------------------------------------------------------
 	 */
 
   public void optionsMenu(Player player) throws NullPointerException {
@@ -532,7 +532,7 @@ public class TrailListener implements Listener {
       util.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
     }
   }
-	
+
 	/*
 	 * Sub Options Menus
 	 */
@@ -970,7 +970,7 @@ public class TrailListener implements Listener {
 	 */
 
   public ItemStack backButton() {
-    ItemStack item = new ItemStack(Material.STICK, 1);
+    ItemStack item = new ItemStack(Material.getMaterial(cfg.getString("menu.options.back-button-material")), 1);
     ItemMeta meta = item.getItemMeta();
     meta.setDisplayName(msg.getString("messages.options.titles.back"));
     item.setItemMeta(meta);
