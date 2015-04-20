@@ -1266,16 +1266,20 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 14);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.categories.colour"));
-		List<String> canUse = Arrays.asList(msg.getString("messages.options.doesnt-support-colours"));
+		ArrayList<String> lore = new ArrayList<String>();
 		if (particle.hasProperty(ParticleProperty.COLORABLE))
 		{
-			canUse.add(msg.getString("messages.options.supports-colours"));
+			lore.add(msg.getString("messages.options.supports-colours"));
+		}
+		else
+		{
+			lore.add(msg.getString("messages.options.doesnt-support-colours"));
 		}
 		if(!player.hasPermission("blivtrails.options.colour"))
 		{
-			canUse.add(util.translateColours("messages.indicators.dont-have-permission"));
+			lore.add(util.translateColours("messages.indicators.dont-have-permission"));
 		}
-		meta.setLore(canUse);
+		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
