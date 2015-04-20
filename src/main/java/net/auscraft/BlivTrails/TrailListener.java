@@ -60,7 +60,7 @@ public class TrailListener implements Listener
 	private double option[];
 	private float trailLength;
 
-	private TrailDefaults trailDefaults;
+	public TrailDefaults trailDefaults;
 	private boolean vanishEnabled;
 	private BukkitScheduler scheduler;
 	private BlivTrails instance;
@@ -1738,7 +1738,7 @@ public class TrailListener implements Listener
 		}
 		if (typeString.toLowerCase().equals("")) // Use Trail Defaults
 		{
-			particleDefaultStorage defaults = TrailDefaults.getDefaults(trailDefaults.trailConfigName(particleEff.toString()));
+			particleDefaultStorage defaults = trailDefaults.getDefaults(trailDefaults.trailConfigName(particleEff.toString()));
 			type = defaults.getInt("type");
 			length = defaults.getInt("length");
 			height = defaults.getInt("height");
@@ -1747,10 +1747,8 @@ public class TrailListener implements Listener
 		else
 		// Use defined inputs
 		{
-			if (typeString != null) // type
+			switch (typeString.toLowerCase())
 			{
-				switch (typeString.toLowerCase())
-				{
 				case "trace":
 					type = 1;
 					break;
@@ -1762,7 +1760,6 @@ public class TrailListener implements Listener
 					break;
 				default:
 					return "&cInvalid Type | (trace, random, dynamic)";
-				}
 			}
 			if (lengthString != null)
 			{

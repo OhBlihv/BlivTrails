@@ -75,7 +75,7 @@ public class TrailDefaults
 		}
 	}
 
-	private static ConcurrentHashMap<String, particleDefaultStorage> particleDefaults;
+	private ConcurrentHashMap<String, particleDefaultStorage> particleDefaults;
 
 	public TrailDefaults(ConfigAccessor cfg)
 	{
@@ -100,7 +100,7 @@ public class TrailDefaults
 		}
 	}
 
-	public static particleDefaultStorage getDefaults(String particle)
+	public particleDefaultStorage getDefaults(String particle)
 	{
 		return particleDefaults.get(particle);
 	}

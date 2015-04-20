@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailListener;
-import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.particleDefaultStorage;
 
 import org.bukkit.Bukkit;
@@ -104,7 +103,7 @@ public class TrailRunnable implements Runnable
 		this.pcfg = pcfg;
 		this.player = player;
 		this.uuid = player.getUniqueId().toString();
-		particleDefaultStorage pDef = TrailDefaults.getDefaults(trailConfigName(pcfg.getParticle().toString()));
+		particleDefaultStorage pDef = listener.trailDefaults.getDefaults(trailConfigName(pcfg.getParticle().toString()));
 
 		// Height Global/Trail-Specific Overrides
 		// If there isnt trail-given override, use the global value

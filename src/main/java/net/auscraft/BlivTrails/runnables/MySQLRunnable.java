@@ -5,7 +5,6 @@ import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.storage.ParticleData;
 import net.auscraft.BlivTrails.utils.UUIDUtils;
-import net.auscraft.BlivTrails.utils.Utilities;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -23,14 +22,12 @@ public class MySQLRunnable implements Runnable
 	private boolean vanishEnabled;
 	private int vanishHook;
 	private Player player;
-	private Utilities util;
 
 	// Control flag to determine if the runnable is saving or loading
 	short process;
 
 	public MySQLRunnable(String uuid, PlayerConfig pcfg, short process, ConcurrentHashMap<String, PlayerConfig> trailMap, BlivTrails instance)
 	{
-		this.util = new Utilities(true);
 		this.uuid = uuid;
 		this.process = process;
 		this.instance = instance;
@@ -144,7 +141,7 @@ public class MySQLRunnable implements Runnable
 		else
 		{
 			trailMap.put(uuid.toString(), new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
-			if(instance.getListener().getActiveTrails().contains(uuid))
+			if(instance.getListener().getActiveTrails().containsKey(uuid))
 			{
 				Bukkit.getServer().getScheduler().cancelTask(instance.getListener().getActiveTrails().remove(uuid));
 			}
