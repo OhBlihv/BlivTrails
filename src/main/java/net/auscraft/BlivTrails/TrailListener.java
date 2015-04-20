@@ -1051,16 +1051,19 @@ public class TrailListener implements Listener
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.type.random"));
 		ArrayList<String> lore = new ArrayList<String>();
+		
+		if(!player.hasPermission("blivtrails.options.type.random"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			if(!player.hasPermission("blivtrails.options.type.random"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
 			
 			item.setDurability((short) 10);
 		}
+		
 		if (particle.hasProperty(ParticleProperty.COLORABLE))
 		{
 			lore.add(msg.getString("messages.options.doesnt-support-randomisation"));
@@ -1080,24 +1083,27 @@ public class TrailListener implements Listener
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.type.dynamic"));
 		ArrayList<String> lore = new ArrayList<String>();
+		if(!player.hasPermission("blivtrails.options.type.dynamic"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			if(!player.hasPermission("blivtrails.options.type.dynamic"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
 			
 			item.setDurability((short) 10);
 		}
+		
 		if (particle.hasProperty(ParticleProperty.DIRECTIONAL))
-		{
-			lore.add(msg.getString("messages.options.doesnt-support-dynamic"));
-		}
-		else
 		{
 			lore.add(msg.getString("messages.options.supports-dynamic"));
 		}
+		else
+		{
+			lore.add(msg.getString("messages.options.doesnt-support-dynamic"));
+		}
+		
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
@@ -1125,17 +1131,20 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.length.short"));
+		
+		ArrayList<String> lore = new ArrayList<String>();
+		if(!player.hasPermission("blivtrails.options.length.short"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			ArrayList<String> lore = new ArrayList<String>();
-			if(!player.hasPermission("blivtrails.options.length.short"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
-			meta.setLore(lore);
 			item.setDurability((short) 10);
 		}
+		
+		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -1145,17 +1154,20 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.length.medium"));
+		
+		ArrayList<String> lore = new ArrayList<String>();
+		if(!player.hasPermission("blivtrails.options.length.medium"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			ArrayList<String> lore = new ArrayList<String>();
-			if(!player.hasPermission("blivtrails.options.length.medium"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
-			meta.setLore(lore);
 			item.setDurability((short) 10);
 		}
+		
+		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -1165,17 +1177,20 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.length.long"));
+
+		ArrayList<String> lore = new ArrayList<String>();
+		if(!player.hasPermission("blivtrails.options.length.long"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			ArrayList<String> lore = new ArrayList<String>();
-			if(!player.hasPermission("blivtrails.options.length.long"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
-			meta.setLore(lore);
 			item.setDurability((short) 10);
 		}
+		
+		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -1202,17 +1217,20 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.height.feet"));
+		
+		ArrayList<String> lore = new ArrayList<String>();
+		if(!player.hasPermission("blivtrails.options.height.feet"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			ArrayList<String> lore = new ArrayList<String>();
-			if(!player.hasPermission("blivtrails.options.height.feet"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
-			meta.setLore(lore);
 			item.setDurability((short) 10);
 		}
+		
+		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -1222,17 +1240,20 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.height.waist"));
+		
+		ArrayList<String> lore = new ArrayList<String>();
+		if(!player.hasPermission("blivtrails.options.height.waist"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			ArrayList<String> lore = new ArrayList<String>();
-			if(!player.hasPermission("blivtrails.options.height.waist"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
-			meta.setLore(lore);
 			item.setDurability((short) 10);
 		}
+		
+		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -1242,13 +1263,15 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.height.halo"));
+		
+		ArrayList<String> lore = new ArrayList<String>();
+		if(!player.hasPermission("blivtrails.options.height.halo"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			ArrayList<String> lore = new ArrayList<String>();
-			if(!player.hasPermission("blivtrails.options.height.halo"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
 			meta.setLore(lore);
 			item.setDurability((short) 10);
@@ -1350,12 +1373,14 @@ public class TrailListener implements Listener
 		meta.setDisplayName(colour);
 		
 		ArrayList<String> lore = new ArrayList<String>();
+		
+		if(!player.hasPermission("blivtrails.options.colour." + ChatColor.stripColor(colour.toLowerCase().replaceAll("[ ]", ""))))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			if(!player.hasPermission("blivtrails.options.colour." + ChatColor.stripColor(colour.toLowerCase().replaceAll("[ ]", ""))))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
 		}
 		if (particle == ParticleEffect.NOTE) // Disable some colours which dont exist for notes
