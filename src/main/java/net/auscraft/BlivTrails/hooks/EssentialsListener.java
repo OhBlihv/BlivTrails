@@ -12,7 +12,7 @@ public class EssentialsListener implements Listener
 {
 
 	private TrailListener listener;
-	
+
 	public EssentialsListener(BlivTrails instance)
 	{
 		listener = instance.getListener();
@@ -20,18 +20,18 @@ public class EssentialsListener implements Listener
 		listener.vanishHook(2);
 		instance.getUtil().logInfo("Essentials loaded | (Limited Support) Hooking...");
 	}
-	
+
 	@EventHandler
 	public void vanishCommand(PlayerCommandPreprocessEvent event)
 	{
 		String cmd = event.getMessage();
-		//if(cmd.contains("^(evanish|vanish|ev|essentials:vanish)$"))
-		if(cmd.equals("/v")  || cmd.equals("/evanish") || cmd.equals("/vanish") || cmd.equals("/ev") || cmd.equals("/essentials:vanish"))
+		// if(cmd.contains("^(evanish|vanish|ev|essentials:vanish)$"))
+		if (cmd.equals("/v") || cmd.equals("/evanish") || cmd.equals("/vanish") || cmd.equals("/ev") || cmd.equals("/essentials:vanish"))
 		{
-			if(listener.getPlayerConfig().containsKey(event.getPlayer().getUniqueId().toString()))
+			if (listener.getPlayerConfig().containsKey(event.getPlayer().getUniqueId().toString()))
 			{
 				PlayerConfig pcfg = listener.getPlayerConfig().get(event.getPlayer().getUniqueId().toString());
-				if(pcfg.getVanish())
+				if (pcfg.getVanish())
 				{
 					pcfg.setVanish(false);
 				}
@@ -42,5 +42,5 @@ public class EssentialsListener implements Listener
 			}
 		}
 	}
-	
+
 }

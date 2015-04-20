@@ -12,7 +12,7 @@ public class VanishListener implements Listener
 {
 
 	private TrailListener listener;
-	
+
 	public VanishListener(BlivTrails instance)
 	{
 		listener = instance.getListener();
@@ -20,25 +20,25 @@ public class VanishListener implements Listener
 		listener.vanishHook(1);
 		instance.getUtil().logInfo("VanishNoPacket loaded | Hooking...");
 	}
-	
+
 	@EventHandler
 	public void onVanish(VanishStatusChangeEvent event)
 	{
-		if(listener.getPlayerConfig().containsKey(event.getPlayer().getUniqueId().toString()))
+		if (listener.getPlayerConfig().containsKey(event.getPlayer().getUniqueId().toString()))
 		{
 			listener.getPlayerConfig().get(event.getPlayer().getUniqueId().toString()).setVanish(event.isVanishing());
-			if(event.isVanishing())
+			if (event.isVanishing())
 			{
 				try
 				{
 					Bukkit.getScheduler().cancelTask(listener.getActiveTrails().get(event.getPlayer().getUniqueId().toString()));
 				}
-				catch(NullPointerException e)
+				catch (NullPointerException e)
 				{
-					//Player has no trail, or just joined.
+					// Player has no trail, or just joined.
 				}
 			}
 		}
 	}
-	
+
 }

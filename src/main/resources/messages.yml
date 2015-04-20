@@ -19,14 +19,35 @@ messages:
         have-permission: "&aHave Permission"
         dont-have-permission: "&cNo Permission"
         trail-selected: "&aSelected!"
+    no-permission:
+        trail: "&cYou don't have permission to use that trail!"
+        options:
+            base: "&cYou don't have permission to use the options menu!"
+            type:
+                base: "&cYou don't have permission to access the type menu!"
+                trace: "&c You don't have permission to use the trace type!"
+                random: "&c You don't have permission to use the random type!"
+                dynamic: "&c You don't have permission to use the dynamic type!"
+            length:
+                base: "&c You don't have permission access the length menu!"
+                short: "&c You don't have permission have a short trail!"
+                medium: "&c You don't have permission have a medium length trail!"
+                long: "&c You don't have permission have a long trail!"
+            height:
+                base: "&c You don't have permission to access the height menu!"
+                feet: "&c You don't have permission to place the trail at your feet!"
+                waist: "&c You don't have permission to place the trail at your waist!"
+                halo: "&c You don't have permission to use the trail as a halo!"
+            colour:
+                base: "&c You don't have permission access the colour menu!"
+                colour: "&c You don't have permission to change to that colour!"
+                random: "&c You don't have permission to your colour to random!"
     error:
         unexpected: "&cAn unexpected error has occurred"
         trail-error: "&cYour trail has been causing issues, and was forcibly removed."
         no-exist: "&cError! &fThe item you selected is not attached to any trail."
         no-trail-remove: "&cYou don't have a trail to remove!"
         no-trail: "&cSet a Trail First!"
-        no-permission-options: "&cYou don't have permission to use the options menu!"
-        no-permission-trail: "&cYou don't have permission to use that trail!"
         player-no-trail: "&cPlayer doesn't have an active trail, or isn't online."
         misplaced-gui-option: "&cMisplaced GUI Option! Check that every location is under the gui size, or disabled"
         player-misplaced-gui-option: "&cThere is a problem with the trails config. Send this to a server operator"

@@ -14,19 +14,19 @@ public class CallablePrintout implements Callable<Object>
 	private Utilities util = new Utilities(true);
 	private CommandSender sender;
 	private String message;
-	
-	//Required to already have the uuid.
-	//A pre-translated string is recommended
+
+	// Required to already have the uuid.
+	// A pre-translated string is recommended
 	public CallablePrintout(UUID uuid, String message)
 	{
 		this.sender = (CommandSender) Bukkit.getPlayer(uuid);
 		this.message = message;
 	}
-	
-	public Object call() throws Exception 
+
+	public Object call() throws Exception
 	{
 		String cfgmsg = util.getInstance().getMessages().getString(message);
-		if(cfgmsg != null)
+		if (cfgmsg != null)
 		{
 			cfgmsg = message;
 		}

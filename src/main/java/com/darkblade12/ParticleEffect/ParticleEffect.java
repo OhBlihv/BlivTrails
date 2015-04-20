@@ -510,8 +510,10 @@ public enum ParticleEffect {
 	 * @return Whether the distance exceeds 256 or not
 	 */
 	private static boolean isLongDistance(Location location, List<Player> players) {
+		String world = location.getWorld().getName();
 		for (Player player : players) {
-			if (player.getLocation().distanceSquared(location) < 65536) {
+			Location playerLocation = player.getLocation();
+			if (!world.equals(playerLocation.getWorld().getName()) || playerLocation.distanceSquared(location) < 65536) {
 				continue;
 			}
 			return true;
@@ -1184,7 +1186,7 @@ public enum ParticleEffect {
 		 * Construct a new note color
 		 * 
 		 * @param note Note id which determines color
-		 * @throws IllegalArgumentException If the note value is lower than 0 or higher than 255
+		 * @throws IllegalArgumentException If the note value is lower than 0 or higher than 24
 		 */
 		public NoteColor(int note) throws IllegalArgumentException {
 			if (note < 0) {
@@ -1409,6 +1411,9 @@ public enum ParticleEffect {
 		 * @return The version number
 		 */
 		public static int getVersion() {
+			if (!initialized) {
+				initialize();
+			}
 			return version;
 		}
 
@@ -1503,6 +1508,7 @@ public enum ParticleEffect {
 		 * @throws IllegalArgumentException If the range is lower than 1
 		 * @see #sendTo(Location center, Player player)
 		 */
+		@SuppressWarnings("deprecation")
 		public void sendTo(Location center, double range) throws IllegalArgumentException {
 			if (range < 1) {
 				throw new IllegalArgumentException("The range is lower than 1");

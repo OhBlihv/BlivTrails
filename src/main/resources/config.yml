@@ -48,10 +48,11 @@ menu:
     options:
         #size: Must be a multiple of 9
         size: 18
-        #back-button-pos: Number between 0 and size - 1
-        #                 Use -1 to disable the back button
-        back-button-pos: 9
-        back-button-material: BARRIER
+        #back-button.position: Number between 0 and size - 1
+        #                   Use -1 to disable the back button
+        back-button:
+            position: 9
+            material: BARRIER
         config:
         #Player Config Options:
         #enabled: If the option is available for players to change to
@@ -114,7 +115,7 @@ trails:
     #Global Trail Defaults
     defaults:
         #Global | How fast to display the trail in ticks
-        #20 Ticks = 1 Second | Default is 1tick
+        #20 Ticks = 1 Second | Default is 1 tick
         display-speed: 1
         #Amplification of Types/Styles
         type:
@@ -142,6 +143,7 @@ trails:
             # type: "trace"             #Default Trail Type (trace, random, dynamic)
             # length: "short"           #Default Length (short, medium, long)
             # height: "feet"            #Default Height (feet, waist, halo)
+            # colour: "lime"            #Default colour (applicable to colourable trails only)
             # display-speed: 1          #Display speed in Ticks per Second (20 Ticks = 1 Second)
             # defaults:                 #Player Configurable options (OPTIONAL)
             #   random:                 #See above for option descriptions
@@ -327,6 +329,7 @@ trails:
             type: "trace"
             length: "short"
             height: "feet"
+            colour: "lime"
         material: JUKEBOX
         name: "&aNote"
         lore: {}
@@ -347,6 +350,7 @@ trails:
             type: "trace"
             length: "short"
             height: "feet"
+            colour: "red"
         material: REDSTONE
         name: "&cRedstone"
         lore: {}
@@ -397,6 +401,7 @@ trails:
             type: "trace"
             length: "short"
             height: "feet"
+            colour: purple
         material: POTION
         name: "&5Spell"
         lore: {}
@@ -417,12 +422,13 @@ trails:
             type: "trace"
             length: "short"
             height: "feet"
+            colour: red
         material: BLAZE_ROD
         name: "&eMob Spell"
         lore: {}
     spell-witch:
         display: true
-        position: 23
+        position: 24
         options:
             type: "trace"
             length: "short"
@@ -432,7 +438,7 @@ trails:
         lore: {}
     town-aura:
         display: true
-        position: 24
+        position: 25
         options:
             type: "trace"
             length: "short"
@@ -442,7 +448,7 @@ trails:
         lore: {}
     water-drop:
         display: true
-        position: 25
+        position: 26
         options:
             type: "trace"
             length: "short"
@@ -452,7 +458,7 @@ trails:
         lore: {}
     water-splash:
         display: true
-        position: 26
+        position: 27
         options:
             type: "trace"
             length: "short"
