@@ -4,7 +4,7 @@
   <groupId>net.auscraft</groupId>
   <artifactId>BlivTrails</artifactId>
   <name>BlivTrails</name>
-  <version>1.0.9.3</version>
+  <version>1.1.0</version>
   <build>
     <defaultGoal>clean package install</defaultGoal>
     <resources>

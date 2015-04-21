@@ -241,6 +241,15 @@ public class TrailListener implements Listener
 				if (trailMap.containsKey(player.getUniqueId().toString()))
 				{
 					trailMap.put(player.getUniqueId().toString(), new PlayerConfig(player.getUniqueId().toString(), ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
+					try
+					{
+						Bukkit.getServer().getScheduler().cancelTask(taskMap.remove(player.getUniqueId().toString()));
+					}
+					catch(NullPointerException e)
+					{
+						
+					}
+					removePlayer(player.getUniqueId().toString());
 					util.printPlain(player, msg.getString("messages.generic.trail-removed"));
 				}
 				else
@@ -263,6 +272,7 @@ public class TrailListener implements Listener
 					}
 					catch (NullPointerException e)
 					{
+						e.printStackTrace();
 						util.printPlain(((Player) event.getWhoClicked()), msg.getString("messages.error.no-trail"));
 					}
 				}
@@ -405,11 +415,11 @@ public class TrailListener implements Listener
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.type.random")))
 			{
-				if (pcfg.getParticle().hasProperty(ParticleProperty.COLORABLE)) // If the particle is colourable, it doesnt support directional/randomisation
+				/*if (pcfg.getParticle().hasProperty(ParticleProperty.COLORABLE)) // If the particle is colourable, it doesnt support directional/randomisation
 				{
 					util.printError(player, msg.getString("messages.error.option-trail-no-support"));
 					return;
-				}
+				}*/
 				
 				if(player.hasPermission("blivtrails.options.type.random"))
 				{
@@ -1030,17 +1040,19 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.type.trace"));
+		
+		ArrayList<String> lore = new ArrayList<String>();
+		if(!player.hasPermission("blivtrails.options.type.trace"))
+		{
+			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+		}
+		
 		if (isEnabled)
 		{
-			ArrayList<String> lore = new ArrayList<String>();
-			if(!player.hasPermission("blivtrails.options.type.trace"))
-			{
-				lore.add(msg.getString("messages.indicators.dont-have-permission"));
-			}
 			lore.add(msg.getString("messages.generic.enabled-lore"));
-			meta.setLore(lore);
 			item.setDurability((short) 10);
 		}
+		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
 	}
@@ -1064,14 +1076,15 @@ public class TrailListener implements Listener
 			item.setDurability((short) 10);
 		}
 		
-		if (particle.hasProperty(ParticleProperty.COLORABLE))
+		lore.add(msg.getString("messages.options.supports-randomisation"));
+		/*if (particle.hasProperty(ParticleProperty.COLORABLE))
 		{
 			lore.add(msg.getString("messages.options.doesnt-support-randomisation"));
 		}
 		else
 		{
-			lore.add(msg.getString("messages.options.supports-randomisation"));
-		}
+			
+		}*/
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
@@ -1430,7 +1443,6 @@ public class TrailListener implements Listener
 		return item;
 	}
 	
-	//TODO:
 	protected ItemStack createItem(Material material, int damage, String displayName, List<String> lore)
 	{
 		ItemStack item = new ItemStack(material, 1, (short) damage);
@@ -1600,6 +1612,8 @@ public class TrailListener implements Listener
 		}
 		taskMap.remove(uuid.toString());
 		trailTime.remove(uuid.toString());
+		util.logDebug("Successfully added trail!");
+		util.logDebug(trailMap.get(uuid.toString()).getParticle().getName());
 	}
 
 	public void loadTrail(Player player)
@@ -1684,9 +1698,7 @@ public class TrailListener implements Listener
 					// Run MySQL off the main thread to avoid lockups
 					scheduler.runTaskAsynchronously(instance, new MySQLRunnable(player.getUniqueId().toString(), pcfg, (short) 0, null, instance));
 				}
-				catch (IllegalPluginAccessException e) // If the plugin is
-														// shutting down, tasks
-														// cannot be scheduled.
+				catch (IllegalPluginAccessException e) // If the plugin is shutting down, tasks cannot be scheduled.
 				{
 					new MySQLRunnable(player.getUniqueId().toString(), pcfg, (short) 0, null, instance);
 				}
@@ -1736,10 +1748,6 @@ public class TrailListener implements Listener
 	 */
 	public String addTrail(String uuid, String particleString, String typeString, String lengthString, String heightString, String colourString)
 	{
-		/*
-		 * Args format: args[0] = uuid args[0] = particle args[1] = type args[2]
-		 * = length args[3] = height args[4] = colour
-		 */
 		ParticleEffect particleEff = ParticleEffect.FOOTSTEP;
 		String particleStringLoop = "";
 		for (ParticleEffect pEff : usedTrails)

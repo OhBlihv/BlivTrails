@@ -123,7 +123,6 @@ public class MySQLRunnable implements Runnable
 							trailMap.get(player.getUniqueId().toString()).setVanish(true);
 							try
 							{
-								Bukkit.getServer().getScheduler().cancelTask(instance.getListener().getActiveTrails().get(player.getUniqueId().toString()));
 								instance.getListener().getActiveTrails().remove(player.getUniqueId().toString());
 								// util.logDebug("Player has had their trail hidden");
 							}
