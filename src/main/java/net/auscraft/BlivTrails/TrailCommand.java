@@ -82,7 +82,7 @@ public class TrailCommand implements CommandExecutor
 					}
 					catch (NullPointerException e)
 					{
-						util.printError(sender, "Player is not currently online. Cannot remove.");
+						Utilities.printError(sender, "Player is not currently online. Cannot remove.");
 					}
 					return true;
 				}
@@ -98,17 +98,17 @@ public class TrailCommand implements CommandExecutor
 
 							if (args.length == 3)
 							{
-								util.printPlain(sender, instance.getListener().addTrail(player.getUniqueId().toString(), particle, "", "", "", ""));
+								Utilities.printPlain(sender, instance.getListener().addTrail(player.getUniqueId().toString(), particle, "", "", "", ""));
 							}
 							else if (args.length >= 4)
 							{
 								try
 								{
-									util.printPlain(sender, util.translateColours(instance.getListener().addTrail(player.getUniqueId().toString(), particle, args[3], args[4], args[5], args[6])));
+									Utilities.printPlain(sender, Utilities.translateColours(instance.getListener().addTrail(player.getUniqueId().toString(), particle, args[3], args[4], args[5], args[6])));
 								}
 								catch(ArrayIndexOutOfBoundsException e)
 								{
-									util.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
+									Utilities.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
 									return true;
 								}
 							}
@@ -117,7 +117,7 @@ public class TrailCommand implements CommandExecutor
 					}
 					else
 					{
-						util.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
+						Utilities.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
 						return true;
 					}
 
@@ -126,13 +126,13 @@ public class TrailCommand implements CommandExecutor
 				{
 					if (instance.getCfg().reloadConfig())
 					{
-						util.printError(sender, "You have config errors -- See Console for full printout");
+						Utilities.printError(sender, "You have config errors -- See Console for full printout");
 					}
 					instance.getMessages().reloadMessages();
 					instance.getListener().loadDefaultOptions();
 					util.setConfig(instance.getCfg());
-					util.logSuccess("Config and Messages Reloaded!");
-					util.printSuccess(sender, "Config and Messages Reloaded!");
+					Utilities.logSuccess("Config and Messages Reloaded!");
+					Utilities.printSuccess(sender, "Config and Messages Reloaded!");
 					return true;
 				}
 				else

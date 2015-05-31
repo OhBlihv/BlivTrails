@@ -2,6 +2,7 @@ package net.auscraft.BlivTrails.hooks;
 
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.TrailListener;
+import net.auscraft.BlivTrails.utils.Utilities;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -18,7 +19,7 @@ public class VanishListener implements Listener
 		listener = instance.getListener();
 		listener.vanishEnabled(true);
 		listener.vanishHook(1);
-		instance.getUtil().logInfo("VanishNoPacket loaded | Hooking...");
+		Utilities.logInfo("VanishNoPacket loaded | Hooking...");
 	}
 
 	@EventHandler

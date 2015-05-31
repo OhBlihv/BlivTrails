@@ -69,7 +69,7 @@ public class ItemListener implements Listener
 		{
 			ItemStack item = new ItemStack(Material.getMaterial(cfg.getString("misc.gui-item.material")));
 			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(util.translateColours(cfg.getString("misc.gui-item.name")));
+			meta.setDisplayName(Utilities.translateColours(cfg.getString("misc.gui-item.name")));
 			meta.setLore(util.translateColours(cfg.getStringList("misc.gui-item.lore")));
 			item.setItemMeta(meta);
 

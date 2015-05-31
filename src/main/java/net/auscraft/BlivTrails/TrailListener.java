@@ -250,11 +250,11 @@ public class TrailListener implements Listener
 						
 					}
 					removePlayer(player.getUniqueId().toString());
-					util.printPlain(player, msg.getString("messages.generic.trail-removed"));
+					Utilities.printPlain(player, msg.getString("messages.generic.trail-removed"));
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.error.no-trail-remove"));
+					Utilities.printPlain(player, msg.getString("messages.error.no-trail-remove"));
 				}
 				if (cfg.getBoolean("menu.main.minimise-on-select"))
 				{
@@ -273,12 +273,12 @@ public class TrailListener implements Listener
 					catch (NullPointerException e)
 					{
 						e.printStackTrace();
-						util.printPlain(((Player) event.getWhoClicked()), msg.getString("messages.error.no-trail"));
+						Utilities.printPlain(((Player) event.getWhoClicked()), msg.getString("messages.error.no-trail"));
 					}
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.options.base"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.options.base"));
 				}
 			}
 			else
@@ -299,7 +299,7 @@ public class TrailListener implements Listener
 						}
 						else
 						{
-							util.printPlain(player, msg.getString("messages.no-permission.trail"));
+							Utilities.printPlain(player, msg.getString("messages.no-permission.trail"));
 						}
 					}
 				}
@@ -327,7 +327,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.type.base"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.type.base"));
 				}
 				
 			}
@@ -339,7 +339,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.length.base"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.length.base"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.categories.height")))
@@ -350,7 +350,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.height.base"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.height.base"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.categories.colour")))
@@ -363,12 +363,12 @@ public class TrailListener implements Listener
 					}
 					else
 					{
-						util.printPlain(player, msg.getString("messages.no-permission.length.base"));
+						Utilities.printPlain(player, msg.getString("messages.no-permission.length.base"));
 					}
 				}
 				else
 				{
-					util.printError(player, msg.getString("messages.error.option-trail-no-support"));
+					Utilities.printError(player, msg.getString("messages.error.option-trail-no-support"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.back")))
@@ -381,7 +381,7 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				util.logError(msg.getString("messages.error.no-exist"));
+				Utilities.logError(msg.getString("messages.error.no-exist"));
 			}
 		}
 		/*
@@ -410,7 +410,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.type.trace"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.type.trace"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.type.random")))
@@ -428,14 +428,14 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.type.random"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.type.random"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.type.dynamic")))
 			{
 				if (pcfg.getParticle().hasProperty(ParticleProperty.COLORABLE)) 
 				{
-					util.printError(player, msg.getString("messages.error.option-trail-no-support"));
+					Utilities.printError(player, msg.getString("messages.error.option-trail-no-support"));
 					return;
 				}
 				
@@ -446,7 +446,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.type.dynamic"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.type.dynamic"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.back")))
@@ -459,7 +459,7 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				util.printPlain(player, msg.getString("messages.error.no-exist"));
+				Utilities.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
 		else if (util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.length"))))
@@ -485,7 +485,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.length.short"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.length.short"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.length.medium")))
@@ -497,7 +497,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.length.medium"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.length.medium"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.length.long")))
@@ -509,7 +509,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.length.long"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.length.long"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.back")))
@@ -522,7 +522,7 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				util.printPlain(player, msg.getString("messages.error.no-exist"));
+				Utilities.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
 		else if (util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.height"))))
@@ -548,7 +548,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.height.feet"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.height.feet"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.height.waist")))
@@ -560,7 +560,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.height.waist"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.height.waist"));
 				}
 			}
 			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.height.halo")))
@@ -572,7 +572,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.height.halo"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.height.halo"));
 				}
 			}
 			else if (event.getCurrentItem().getType().equals(Material.BOOK))
@@ -585,7 +585,7 @@ public class TrailListener implements Listener
 			}
 			else
 			{
-				util.printPlain(player, msg.getString("messages.error.no-exist"));
+				Utilities.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
 		else if (util.stripColours(event.getInventory().getTitle()).contains(util.stripColours(msg.getString("messages.titles.colours"))))
@@ -617,8 +617,10 @@ public class TrailListener implements Listener
 						case 7:
 						case 8:
 						case 15:
-							util.printError(player, msg.getString("messages.error.option-trail-no-support"));
+							Utilities.printError(player, msg.getString("messages.error.option-trail-no-support"));
 							return;
+						default:
+							break;
 					}
 				}
 				if(player.hasPermission("blivtrails.options.colour." + util.intToColour(event.getCurrentItem().getDurability())))
@@ -628,7 +630,7 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.colour.colour"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.colour.colour"));
 				}
 				
 				
@@ -642,12 +644,12 @@ public class TrailListener implements Listener
 				}
 				else
 				{
-					util.printPlain(player, msg.getString("messages.no-permission.colour.random"));
+					Utilities.printPlain(player, msg.getString("messages.no-permission.colour.random"));
 				}
 			}
 			else
 			{
-				util.printPlain(player, msg.getString("messages.error.no-exist"));
+				Utilities.printPlain(player, msg.getString("messages.error.no-exist"));
 			}
 		}
 	}
@@ -670,21 +672,21 @@ public class TrailListener implements Listener
 			if (cfg.getBoolean("trails.remove-trail.display"))
 			{
 				inv.setItem(cfg.getInt("trails.remove-trail.position"),
-						menuItem(cfg.getString("trails.remove-trail.material"), util.translateColours(cfg.getString("trails.remove-trail.name")), util.translateColours(cfg.getStringList("trails.remove-trail.lore")), player.hasPermission("blivtrails.remove-trail"), false));
+						menuItem(cfg.getString("trails.remove-trail.material"), Utilities.translateColours(cfg.getString("trails.remove-trail.name")), util.translateColours(cfg.getStringList("trails.remove-trail.lore")), player.hasPermission("blivtrails.remove-trail"), false));
 			}
 			String particleString;
 			for (ParticleEffect particleEff : usedTrails)
 			{
 				particleString = util.trailConfigName(particleEff.toString());
 				inv.setItem(cfg.getInt("trails." + particleString + ".position"),
-						menuItem(cfg.getString("trails." + particleString + ".material"), util.translateColours(cfg.getString("trails." + particleString + ".name")),
+						menuItem(cfg.getString("trails." + particleString + ".material"), Utilities.translateColours(cfg.getString("trails." + particleString + ".name")),
 								util.translateColours(cfg.getStringList("trails." + particleString + ".lore")),
 								player.hasPermission("blivtrails." + particleString), pcfg.getParticle() == particleEff));
 			}
 			if (cfg.getBoolean("trails.options-menu.display"))
 			{
 				inv.setItem(cfg.getInt("trails.options-menu.position"),
-						menuItem(cfg.getString("trails.options-menu.material"), util.translateColours(cfg.getString("trails.options-menu.name")), util.translateColours(cfg.getStringList("trails.options-menu.lore")), player.hasPermission("blivtrails.options-menu"), false));
+						menuItem(cfg.getString("trails.options-menu.material"), Utilities.translateColours(cfg.getString("trails.options-menu.name")), util.translateColours(cfg.getStringList("trails.options-menu.lore")), player.hasPermission("blivtrails.options-menu"), false));
 			}
 			
 			try
@@ -708,8 +710,8 @@ public class TrailListener implements Listener
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			util.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			util.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			Utilities.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
+			Utilities.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
 		}
 	}
 
@@ -763,8 +765,8 @@ public class TrailListener implements Listener
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			util.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			util.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			Utilities.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
+			Utilities.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
 		}
 	}
 
@@ -785,7 +787,7 @@ public class TrailListener implements Listener
 			}
 			if (cfg.getBoolean("menu.options.config.type.random"))
 			{
-				inv.setItem(4, optionsTypeRandom(player, pcfg.getType() == 2, pcfg.getParticle()));
+				inv.setItem(4, optionsTypeRandom(player, pcfg.getType() == 2));
 				inv.setItem(13, informationItem(msg.getStringList("messages.information.type.random")));
 			}
 			if (cfg.getBoolean("menu.options.config.type.dynamic"))
@@ -816,8 +818,8 @@ public class TrailListener implements Listener
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			util.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			util.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			Utilities.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
+			Utilities.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
 		}
 
 	}
@@ -864,8 +866,8 @@ public class TrailListener implements Listener
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			util.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			util.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			Utilities.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
+			Utilities.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
 		}
 	}
 
@@ -911,8 +913,8 @@ public class TrailListener implements Listener
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			util.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			util.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			Utilities.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
+			Utilities.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
 		}
 	}
 
@@ -1013,8 +1015,8 @@ public class TrailListener implements Listener
 		}
 		catch (ArrayIndexOutOfBoundsException e)
 		{
-			util.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			util.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			Utilities.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
+			Utilities.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
 		}
 	}
 
@@ -1057,7 +1059,7 @@ public class TrailListener implements Listener
 		return item;
 	}
 
-	public ItemStack optionsTypeRandom(Player player, boolean isEnabled, ParticleEffect particle)
+	public ItemStack optionsTypeRandom(Player player, boolean isEnabled)
 	{
 		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
 		ItemMeta meta = item.getItemMeta();
@@ -1077,14 +1079,6 @@ public class TrailListener implements Listener
 		}
 		
 		lore.add(msg.getString("messages.options.supports-randomisation"));
-		/*if (particle.hasProperty(ParticleProperty.COLORABLE))
-		{
-			lore.add(msg.getString("messages.options.doesnt-support-randomisation"));
-		}
-		else
-		{
-			
-		}*/
 		meta.setLore(lore);
 		item.setItemMeta(meta);
 		return item;
@@ -1133,7 +1127,7 @@ public class TrailListener implements Listener
 		meta.setDisplayName(msg.getString("messages.options.titles.categories.length"));
 		if(!player.hasPermission("blivtrails.options.length"))
 		{
-			meta.setLore(Arrays.asList(util.translateColours("messages.indicators.dont-have-permission")));
+			meta.setLore(Arrays.asList(Utilities.translateColours("messages.indicators.dont-have-permission")));
 		}
 		item.setItemMeta(meta);
 		return item;
@@ -1219,7 +1213,7 @@ public class TrailListener implements Listener
 		meta.setDisplayName(msg.getString("messages.options.titles.categories.height"));
 		if(!player.hasPermission("blivtrails.options.height"))
 		{
-			meta.setLore(Arrays.asList(util.translateColours("messages.indicators.dont-have-permission")));
+			meta.setLore(Arrays.asList(Utilities.translateColours("messages.indicators.dont-have-permission")));
 		}
 		item.setItemMeta(meta);
 		return item;
@@ -1313,7 +1307,7 @@ public class TrailListener implements Listener
 		}
 		if(!player.hasPermission("blivtrails.options.colour"))
 		{
-			lore.add(util.translateColours("messages.indicators.dont-have-permission"));
+			lore.add(Utilities.translateColours("messages.indicators.dont-have-permission"));
 		}
 		meta.setLore(lore);
 		item.setItemMeta(meta);
@@ -1408,6 +1402,8 @@ public class TrailListener implements Listener
 				case 15:
 					isDisabled = msg.getString("messages.options.doesnt-apply-to-note");
 					break;
+				default:
+					break;
 			}
 			if (isDisabled != null)
 			{
@@ -1448,7 +1444,7 @@ public class TrailListener implements Listener
 		ItemStack item = new ItemStack(material, 1, (short) damage);
 		ItemMeta meta = item.getItemMeta();
 		
-		meta.setDisplayName(util.translateColours(displayName));
+		meta.setDisplayName(Utilities.translateColours(displayName));
 		if(lore != null)
 		{
 			if(lore.size() > 0)
@@ -1493,36 +1489,42 @@ public class TrailListener implements Listener
 		{
 			switch (typeString)
 			{
-			case "random":
-				type = 2;
-				break;
-			case "dynamic":
-				type = 3;
-				break;
+				case "random":
+					type = 2;
+					break;
+				case "dynamic":
+					type = 3;
+					break;
+				default:
+					break;
 			}
 		}
 		if (lengthString != null)
 		{
 			switch (lengthString)
 			{
-			case "medium":
-				length = 2;
-				break;
-			case "long":
-				length = 3;
-				break;
+				case "medium":
+					length = 2;
+					break;
+				case "long":
+					length = 3;
+					break;
+				default:
+					break;
 			}
 		}
 		if (heightString != null)
 		{
 			switch (heightString)
 			{
-			case "waist":
-				height = 1;
-				break;
-			case "halo":
-				height = 2;
-				break;
+				case "waist":
+					height = 1;
+					break;
+				case "halo":
+					height = 2;
+					break;
+				default:
+					break;
 			}
 		}
 		if (colourString != null)
@@ -1579,19 +1581,10 @@ public class TrailListener implements Listener
 				case "random":
 					colour = 16;
 					break;
+				default:
+					break;
 			}
 		}
-
-		/*
-		 * //Player has had a trail before //TODO: Implement player options that
-		 * traverse trails if(trailMap.containsKey(uuid)) { PlayerConfig pcfg =
-		 * trailMap.get(uuid); pcfg.setParticle(particle); if(type != 0) {
-		 * pcfg.setType(type); } if(length != 0) { pcfg.setLength(length); }
-		 * pcfg.setHeight(height); util.printPlain(Bukkit.getPlayer(uuid),
-		 * addVariable(msg.getString("messages.generic.trail-applied"),
-		 * cfg.getString("trails" + util.trailConfigName(particle.toString()) +
-		 * ".name"))); }
-		 */
 
 		// Trail for the first time
 		String trailName = cfg.getString("trails." + util.trailConfigName(particle.toString()) + ".name");
@@ -1599,7 +1592,7 @@ public class TrailListener implements Listener
 		{
 			trailName = util.stripColours(trailName);
 		}
-		util.printPlain(Bukkit.getPlayer(uuid), addVariable(msg.getString("messages.generic.trail-applied"), trailName));
+		Utilities.printPlain(Bukkit.getPlayer(uuid), addVariable(msg.getString("messages.generic.trail-applied"), trailName));
 		trailMap.put(uuid.toString(), new PlayerConfig(uuid.toString(), particle, type, length, height, colour));
 		try
 		{
@@ -1607,8 +1600,7 @@ public class TrailListener implements Listener
 		}
 		catch (NullPointerException e)
 		{
-			// util.logDebug("Task invalid");
-			// Task already cancelled/not active
+			
 		}
 		taskMap.remove(uuid.toString());
 		trailTime.remove(uuid.toString());
@@ -1633,8 +1625,7 @@ public class TrailListener implements Listener
 		else
 		{
 			/*
-			 * dataSplit[0] == Particle String dataSplit[1] == Type dataSplit[2]
-			 * == Length dataSplit[3] == Height dataSplit[4] == Colour
+			 * dataSplit[0] == Particle String dataSplit[1] == Type dataSplit[2] == Length dataSplit[3] == Height dataSplit[4] == Colour 
 			 */
 			String data = flatfile.loadEntry(player.getUniqueId().toString());
 
@@ -1679,6 +1670,8 @@ public class TrailListener implements Listener
 		}
 	}
 
+	//I hate myself for doing this, but there is nothing wrong with creating a new MySQLRunnable there
+	@SuppressWarnings("unused")
 	public void saveTrail(OfflinePlayer player)
 	{
 		PlayerConfig pcfg = trailMap.get(player.getUniqueId().toString());
@@ -1765,9 +1758,10 @@ public class TrailListener implements Listener
 		}
 
 		int type = 1, length = 1, height = 0, colour = 0;
-		if (particleEff.equals(ParticleEffect.BARRIER))
+		if (particleEff == ParticleEffect.BARRIER)
 		{
 			// Barriers dont support anything. Give up. Leave everything default
+			return "&aTrail Successfully Applied";
 		}
 		if (typeString.toLowerCase().equals("")) // Use Trail Defaults
 		{

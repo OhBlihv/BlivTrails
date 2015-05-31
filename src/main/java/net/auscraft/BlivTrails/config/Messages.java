@@ -8,30 +8,37 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import net.auscraft.BlivTrails.BlivTrails;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
 
 public class Messages
 {
+	private static Messages instance;
+	
 	private File messagesFile = null;
 	private FileConfiguration messages = null;
-	private BlivTrails instance;
 
-	public Messages(BlivTrails instance)
+	public Messages()
 	{
-		this.instance = instance;
 		saveDefaultConfig();
 		getMessages();
 		messages.options().copyDefaults(true);
 		doDefaults();
 	}
+	
+	public static Messages getInstance()
+	{
+		if(instance == null)
+		{
+			instance = new Messages();
+		}
+		return instance;
+	}
 
-	public void doDefaults() // Add in config options which were added in
-								// versions newer than 1.0
+	public void doDefaults() // Add in config options which were added in versions newer than 1.0
 	{
 		messages.addDefault("messages.titles.main-menu", "Trail GUI");
 		messages.addDefault("messages.titles.main-options", "Trail Options");
@@ -52,6 +59,7 @@ public class Messages
 
 	public void reloadMessages()
 	{
+		Plugin instance = Bukkit.getPluginManager().getPlugin("BlivTrails");
 		if (messagesFile == null)
 		{
 			messagesFile = new File(instance.getDataFolder(), "messages.yml");
@@ -77,6 +85,7 @@ public class Messages
 
 	public void saveDefaultConfig()
 	{
+		Plugin instance = Bukkit.getPluginManager().getPlugin("BlivTrails");
 		if (messagesFile == null)
 		{
 			messagesFile = new File(instance.getDataFolder(), "messages.yml");

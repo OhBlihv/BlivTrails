@@ -45,11 +45,11 @@ public class BlivTrails extends JavaPlugin
 	{
 		util = new Utilities(this);
 		setupCFG();
-		messages = new Messages(this);
+		messages = Messages.getInstance();
 
 		if (cfg.getBoolean("database.mysql"))
 		{
-			util.logInfo("Using mySQL as the storage option");
+			Utilities.logInfo("Using mySQL as the storage option");
 			disableDatabaseLogging();
 			try
 			{
@@ -64,7 +64,7 @@ public class BlivTrails extends JavaPlugin
 		}
 		else
 		{
-			util.logInfo("Using FlatFile as the storage option");
+			Utilities.logInfo("Using FlatFile as the storage option");
 			flatfile = new FlatFile(this);
 		}
 		getServer().getPluginManager().registerEvents(new TrailListener(this), this);
@@ -109,10 +109,7 @@ public class BlivTrails extends JavaPlugin
 		{
 			return ds;
 		}
-		else
-		{
-			return flatfile;
-		}
+		return flatfile;
 	}
 
 	private void doHooks()
@@ -129,7 +126,7 @@ public class BlivTrails extends JavaPlugin
 			}
 			else
 			{
-				util.logInfo("No Vanish Plugin Hooked.");
+				Utilities.logInfo("No Vanish Plugin Hooked.");
 			}
 		}
 		catch (NullPointerException e)

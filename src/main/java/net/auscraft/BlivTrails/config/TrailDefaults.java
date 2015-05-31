@@ -40,14 +40,16 @@ public class TrailDefaults
 		{
 			switch (option)
 			{
-			case "type":
-				return optionsInt[0];
-			case "length":
-				return optionsInt[1];
-			case "height":
-				return optionsInt[2];
-			case "colour":
-				return optionsInt[3];
+				case "type":
+					return optionsInt[0];
+				case "length":
+					return optionsInt[1];
+				case "height":
+					return optionsInt[2];
+				case "colour":
+					return optionsInt[3];
+				default:
+					break;
 			}
 			return 0;
 		}
@@ -56,20 +58,22 @@ public class TrailDefaults
 		{
 			switch (option)
 			{
-			case "xvariation":
-				return optionsDouble[0];
-			case "yvariation":
-				return optionsDouble[1];
-			case "zvariation":
-				return optionsDouble[2];
-			case "sprayvariation":
-				return optionsDouble[3];
-			case "feetlocation":
-				return optionsDouble[4];
-			case "waistlocation":
-				return optionsDouble[5];
-			case "halolocation":
-				return optionsDouble[6];
+				case "xvariation":
+					return optionsDouble[0];
+				case "yvariation":
+					return optionsDouble[1];
+				case "zvariation":
+					return optionsDouble[2];
+				case "sprayvariation":
+					return optionsDouble[3];
+				case "feetlocation":
+					return optionsDouble[4];
+				case "waistlocation":
+					return optionsDouble[5];
+				case "halolocation":
+					return optionsDouble[6];
+				default:
+					break;
 			}
 			return 0.0;
 		}
@@ -118,6 +122,8 @@ public class TrailDefaults
 				case "dynamic":
 					type = 3;
 					break;
+				default:
+					break;
 			}
 			return type;
 		}
@@ -140,6 +146,8 @@ public class TrailDefaults
 				case "long":
 					length = 3;
 					break;
+				default:
+					break;
 			}
 			return length;
 		}
@@ -161,6 +169,8 @@ public class TrailDefaults
 					break;
 				case "halo":
 					height = 2;
+					break;
+				default:
 					break;
 			}
 			return height;
@@ -228,6 +238,8 @@ public class TrailDefaults
 					break;
 				case "random":
 					colour = 16;
+					break;
+				default:
 					break;
 			}
 		}

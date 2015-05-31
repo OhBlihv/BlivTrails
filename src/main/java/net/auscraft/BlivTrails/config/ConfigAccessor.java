@@ -36,12 +36,12 @@ public class ConfigAccessor
 		boolean invalid = false;
 		if ((this.getInt("menu.main.size") % 9) != 0)
 		{
-			util.logError("Your Main Menu GUI is not a multiple of 9, and cannot be displayed. (Size: " + this.getInt("menu.main.size") + ")");
+			Utilities.logError("Your Main Menu GUI is not a multiple of 9, and cannot be displayed. (Size: " + this.getInt("menu.main.size") + ")");
 			invalid = true;
 		}
 		if ((this.getInt("menu.options.size") % 9) != 0)
 		{
-			util.logError("Your Options Menu GUI is not a multiple of 9, and cannot be displayed. (Size: " + this.getInt("menu.options.size") + ")");
+			Utilities.logError("Your Options Menu GUI is not a multiple of 9, and cannot be displayed. (Size: " + this.getInt("menu.options.size") + ")");
 			invalid = true;
 		}
 		String particleString = "";
@@ -59,7 +59,7 @@ public class ConfigAccessor
 			{
 				if ((this.getInt("trails." + particleString + ".position") >= this.getInt("menu.main.size")) || (this.getInt("trails." + particleString + ".position") < 0))
 				{
-					util.logError("Trail " + particleString + "'s location is outside the menu bounds: " + this.getInt("trails." + particleString + ".position"));
+					Utilities.logError("Trail " + particleString + "'s location is outside the menu bounds: " + this.getInt("trails." + particleString + ".position"));
 					invalid = true;
 				}
 				try
@@ -68,14 +68,14 @@ public class ConfigAccessor
 				}
 				catch (NullPointerException e)
 				{
-					util.logError("Trail " + particleString + " has an invalid material: " + this.getString("trails." + particleString + ".material"));
+					Utilities.logError("Trail " + particleString + " has an invalid material: " + this.getString("trails." + particleString + ".material"));
 					invalid = true;
 				}
 			}
 		}
 		checkGUIItem();
 
-		util.logInfo("Config Checking is enabled. If you encounter any freezes/stutters, turns this off once you've hit a stable config.");
+		Utilities.logInfo("Config Checking is enabled. If you encounter any freezes/stutters, turns this off once you've hit a stable config.");
 		return invalid;
 	}
 
@@ -84,7 +84,7 @@ public class ConfigAccessor
 		boolean invalid = false;
 		if ((this.getInt("misc.gui-item.position") >= 36) || (this.getInt("misc.gui-item.position") < 0))
 		{
-			util.logError("The GUI Item's location is outside the inventory bounds: " + this.getString("misc.gui-item.position"));
+			Utilities.logError("The GUI Item's location is outside the inventory bounds: " + this.getString("misc.gui-item.position"));
 			invalid = true;
 		}
 		try
@@ -93,7 +93,7 @@ public class ConfigAccessor
 		}
 		catch (NullPointerException e)
 		{
-			util.logError("GUI Item has an invalid material: " + this.getString("misc.gui-item.material"));
+			Utilities.logError("GUI Item has an invalid material: " + this.getString("misc.gui-item.material"));
 			invalid = true;
 		}
 
@@ -103,15 +103,8 @@ public class ConfigAccessor
 		}
 	}
 
-	public void addDefaults() // TODO:
+	public void addDefaults()
 	{
-		/*
-		 * String particleString = ""; for(ParticleEffect pEff :
-		 * ParticleEffect.values()) //Check every particle effect used in the
-		 * config { particleString = util.trailConfigName(pEff.toString());
-		 * if(!particleString.equals("NULL")) { config.addDefault("", value); }
-		 * }
-		 */
 		config.addDefault("misc.debug", false);
 		config.addDefault("misc.config-checking", true);
 	}
@@ -151,9 +144,9 @@ public class ConfigAccessor
 		boolean invalid = false;
 		if (this.getBoolean("misc.config-checking"))
 		{
-			util.logInfo("Checking Config...");
+			Utilities.logInfo("Checking Config...");
 			invalid = checkConfig();
-			util.logInfo("Config Checked!");
+			Utilities.logInfo("Config Checked!");
 		}
 		return invalid;
 	}
@@ -193,7 +186,7 @@ public class ConfigAccessor
 		String value = this.config.getString(path, "String Missing!");
 		if(value.equals("String Missing!"))
 		{
-			util.logError("Path of missing String: '" + path + "'");
+			Utilities.logError("Path of missing String: '" + path + "'");
 		}
 		return value;
 	}

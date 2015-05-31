@@ -15,22 +15,14 @@ public class Utilities
 {
 
 	private BlivTrails instance;
-	private final String prefix = "&f[&bBlivTrails&f] ";
-	private String playerPrefix = "";
-	private java.util.logging.Logger log = Bukkit.getLogger();
+	private static final String prefix = "&f[&bBlivTrails&f] ";
+	private static String playerPrefix = "";
+	private static final java.util.logging.Logger log = Bukkit.getLogger();
 	private boolean debug = true;
 
 	public Utilities(BlivTrails instance)
 	{
 		this.instance = instance;
-	}
-
-	// Used in Async methods where Bukkit is inaccessible.
-	// Or when the plugin instance is inaccessible
-	// Variables are assumed in this mode.
-	public Utilities(boolean isAsync)
-	{
-		// Empty
 	}
 
 	// ------------------------------------------------------------------------------------------------------
@@ -58,7 +50,7 @@ public class Utilities
 		return fixedString;
 	}
 
-	public String translateConsoleColours(String toFix)
+	public static String translateConsoleColours(String toFix)
 	{
 		toFix = Pattern.compile("(?i)(&|§)([a])").matcher(toFix).replaceAll("\u001B[32m\u001B[1m"); // Light Green
 		toFix = Pattern.compile("(?i)(&|§)([b])").matcher(toFix).replaceAll("\u001B[36m"); // Aqua
@@ -82,7 +74,7 @@ public class Utilities
 		return toFix;
 	}
 
-	public String translateColours(String toFix)
+	public static String translateColours(String toFix)
 	{
 		// Convert every single colour code and formatting code, excluding
 		// 'magic' (&k), capitals and lowercase are converted.
@@ -122,22 +114,22 @@ public class Utilities
 	// Printing
 	// ------------------------------------------------------------------------------------------------------
 
-	public void printSuccess(CommandSender sender, String message)
+	public static void printSuccess(CommandSender sender, String message)
 	{
 		sender.sendMessage(playerPrefix + ChatColor.DARK_GREEN + "" + ChatColor.BOLD + "" + ChatColor.ITALIC + "SUCCESS: " + ChatColor.GREEN + translateColours(message));
 	}
 
-	public void printPlain(CommandSender sender, String message)
+	public static void printPlain(CommandSender sender, String message)
 	{
 		sender.sendMessage(playerPrefix + translateColours(message));
 	}
 
-	public void printInfo(CommandSender sender, String message)
+	public static void printInfo(CommandSender sender, String message)
 	{
 		sender.sendMessage(playerPrefix + ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "" + ChatColor.ITALIC + "INFO: " + ChatColor.BLUE + translateColours(message));
 	}
 
-	public void printError(CommandSender sender, String message)
+	public static void printError(CommandSender sender, String message)
 	{
 		sender.sendMessage(playerPrefix + ChatColor.DARK_RED + "" + ChatColor.BOLD + "" + ChatColor.ITALIC + "ERROR: " + ChatColor.RED + translateColours(message));
 	}
@@ -155,22 +147,22 @@ public class Utilities
 	// Logging
 	// ------------------------------------------------------------------------------------------------------
 
-	public void logSuccess(String message)
+	public static void logSuccess(String message)
 	{
 		log.log(Level.INFO, translateConsoleColours(prefix + "&2SUCCESS: &a" + message));
 	}
 
-	public void logPlain(String message)
+	public static void logPlain(String message)
 	{
 		log.log(Level.INFO, translateConsoleColours(prefix + message));
 	}
 
-	public void logInfo(String message)
+	public static void logInfo(String message)
 	{
 		log.log(Level.INFO, translateConsoleColours(prefix + "&9INFO: &b" + message));
 	}
 
-	public void logError(String message)
+	public static void logError(String message)
 	{
 		log.log(Level.WARNING, translateConsoleColours(prefix + "&4ERROR: &c" + message));
 	}
@@ -183,7 +175,7 @@ public class Utilities
 		}
 	}
 
-	public void logSevere(String message)
+	public static void logSevere(String message)
 	{
 		log.log(Level.SEVERE, translateConsoleColours(prefix + "&4SEVERE: &c" + message));
 	}
