@@ -123,142 +123,91 @@ public class TrailDefaults
 
 	public int typeStringtoInt(String typeString)
 	{
-		int type = 1;
-		try
+		if(typeString == null) return 1;
+		
+		switch (typeString)
 		{
-			switch (typeString)
-			{
-				case "random":
-					type = 2;
-					break;
-				case "dynamic":
-					type = 3;
-					break;
-				default:
-					break;
-			}
-			return type;
-		}
-		catch (NullPointerException e)
-		{
-			return 1;
+			case "random":
+				return 2;
+			case "dynamic":
+				return 3;
+			default:
+				return 1;
 		}
 	}
 
 	public int lengthStringtoInt(String lengthString)
 	{
-		int length = 1;
-		try
+		if(lengthString == null) return 1;
+		
+		switch (lengthString)
 		{
-			switch (lengthString)
-			{
-				case "medium":
-					length = 2;
-					break;
-				case "long":
-					length = 3;
-					break;
-				default:
-					break;
-			}
-			return length;
-		}
-		catch (NullPointerException e)
-		{
-			return 1;
+			case "medium":
+				return 2;
+			case "long":
+				return 3;
+			default:
+				return 1;
 		}
 	}
 
 	public int heightStringtoInt(String heightString)
 	{
-		int height = 0;
-		try
+		if(heightString == null) return 0;
+		
+		switch (heightString)
 		{
-			switch (heightString)
-			{
-				case "waist":
-					height = 1;
-					break;
-				case "halo":
-					height = 2;
-					break;
-				default:
-					break;
-			}
-			return height;
+			case "waist":
+				return 1;
+			case "halo":
+				return 2;
+			default:
+				return 0;
 		}
-		catch (NullPointerException e)
-		{
-			return 0;
-		}
-
 	}
 
 	public int colourStringtoInt(String colourString)
 	{
-		int colour = 0;
-		try
+		if(colourString == null) return 0;
+		
+		switch (colourString)
 		{
-			switch (colourString)
-			{
-				case "red":
-					colour = 1;
-					break;
-				case "dark green":
-					colour = 2;
-					break;
-				case "brown":
-					colour = 3;
-					break;
-				case "dark blue":
-					colour = 4;
-					break;
-				case "purple":
-					colour = 5;
-					break;
-				case "cyan":
-					colour = 6;
-					break;
-				case "light grey":
-				case "light gray":
-					colour = 7;
-					break;
-				case "grey":
-				case "gray":
-					colour = 8;
-					break;
-				case "pink":
-					colour = 9;
-					break;
-				case "lime":
-					colour = 10;
-					break;
-				case "yellow":
-					colour = 11;
-					break;
-				case "light blue":
-					colour = 12;
-					break;
-				case "magenta":
-					colour = 13;
-					break;
-				case "orange":
-					colour = 14;
-					break;
-				case "black":
-					colour = 15;
-					break;
-				case "random":
-					colour = 16;
-					break;
-				default:
-					break;
-			}
+			case "red":
+				return 1;
+			case "dark green":
+				return 2;
+			case "brown":
+				return 3;
+			case "dark blue":
+				return 4;
+			case "purple":
+				return 5;
+			case "cyan":
+				return 6;
+			case "light grey":
+			case "light gray":
+				return 7;
+			case "grey":
+			case "gray":
+				return 8;
+			case "pink":
+				return 9;
+			case "lime":
+				return 10;
+			case "yellow":
+				return 11;
+			case "light blue":
+				return 12;
+			case "magenta":
+				return 13;
+			case "orange":
+				return 14;
+			case "black":
+				return 15;
+			case "random":
+				return 16;
+			default:
+				return 0;
 		}
-		catch (NullPointerException e)
-		{
-			// Null
-		}
-		return colour;
 	}
 }

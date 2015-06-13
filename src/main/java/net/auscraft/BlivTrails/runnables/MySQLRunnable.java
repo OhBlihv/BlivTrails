@@ -24,6 +24,9 @@ public class MySQLRunnable implements Runnable
 	private Player player;
 
 	// Control flag to determine if the runnable is saving or loading
+	//Save == 0
+	//Load == 1
+	//Remove == 2
 	short process;
 
 	public MySQLRunnable(String uuid, PlayerConfig pcfg, short process, ConcurrentHashMap<String, PlayerConfig> trailMap, BlivTrails instance)
@@ -124,7 +127,6 @@ public class MySQLRunnable implements Runnable
 							try
 							{
 								instance.getListener().getActiveTrails().remove(player.getUniqueId().toString());
-								// util.logDebug("Player has had their trail hidden");
 							}
 							catch (NullPointerException e)
 							{
@@ -153,7 +155,6 @@ public class MySQLRunnable implements Runnable
 			{
 				e.printStackTrace();
 			}
-			//new CallablePrintout(UUID.fromString(uuid), "messages.generic.force-remove-receive");
 		}
 	}
 }

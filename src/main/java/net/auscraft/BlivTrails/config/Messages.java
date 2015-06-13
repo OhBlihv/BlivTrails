@@ -9,7 +9,7 @@ public class Messages extends FlatFile
 {
 	private static Messages instance;
 
-	public Messages()
+	private Messages()
 	{
 		fileName = "messages.yml";
 		save.options().copyDefaults(true);

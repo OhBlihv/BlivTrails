@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 public class Utilities
 {
 
-	private static BlivTrails instance;
 	private static final String prefix = "&f[&bBlivTrails&f] ";
 	private static String playerPrefix = "";
 	private static final java.util.logging.Logger log = Bukkit.getLogger();
@@ -26,7 +25,7 @@ public class Utilities
 
 	public static void setConfig(ConfigAccessor cfg)
 	{
-		playerPrefix = translateColours(instance.getMessages().getString("messages.prefix"));
+		playerPrefix = translateColours(BlivTrails.getInstance().getMessages().getString("messages.prefix"));
 		if (!(playerPrefix.length() == 0))
 		{
 			playerPrefix += " ";
