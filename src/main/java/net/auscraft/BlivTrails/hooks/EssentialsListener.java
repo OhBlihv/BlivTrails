@@ -32,13 +32,13 @@ public class EssentialsListener implements Listener
 			if (listener.getPlayerConfig().containsKey(event.getPlayer().getUniqueId().toString()))
 			{
 				PlayerConfig pcfg = listener.getPlayerConfig().get(event.getPlayer().getUniqueId().toString());
-				if (pcfg.getVanish())
+				if (pcfg.isVanished())
 				{
-					pcfg.setVanish(false);
+					pcfg.setVanished(false);
 				}
 				else
 				{
-					pcfg.setVanish(true);
+					pcfg.setVanished(true);
 				}
 			}
 		}

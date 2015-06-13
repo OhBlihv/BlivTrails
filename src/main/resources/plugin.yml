@@ -4,7 +4,7 @@ author: OhBlihv
 website: http://www.spigotmc.org/resources/blivtrails.4544/
 main: net.auscraft.BlivTrails.BlivTrails
 description: Fancy trails for Fancy people
-softdepend: [VanishNoPacket]
+softdepend: [VanishNoPacket, Essentials]
 commands:
   trail:
     description: Open the Trails menu
@@ -53,7 +53,7 @@ permissions:
       blivtrails.water-splash: true
   blivtrails.remove-trail:
     description: Gives access to removing your own trail
-  blivtrails.options-menu:
+  blivtrails.options:
     description: Gives access to the trail options menu
   blivtrails.angry-villager:
     description: Gives access to the trail

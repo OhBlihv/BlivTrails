@@ -5,6 +5,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleProperty;
 
+import net.auscraft.BlivTrails.utils.Utilities;
+
 public class TrailDefaults
 {
 	// Will hold the trail defaults
@@ -49,9 +51,8 @@ public class TrailDefaults
 				case "colour":
 					return optionsInt[3];
 				default:
-					break;
+					return 0;
 			}
-			return 0;
 		}
 
 		public double getDouble(String option)
@@ -73,24 +74,35 @@ public class TrailDefaults
 				case "halolocation":
 					return optionsDouble[6];
 				default:
-					break;
+					return 0.0;
 			}
-			return 0.0;
 		}
 	}
 
+	private static TrailDefaults instance = null;
+	
 	private ConcurrentHashMap<String, particleDefaultStorage> particleDefaults;
-
-	public TrailDefaults(ConfigAccessor cfg)
+	
+	public static TrailDefaults getInstance()
 	{
-		String particleString = "NULL";
+		if(instance == null)
+		{
+			instance = new TrailDefaults();
+		}
+		return instance;
+	}
+	
+	private TrailDefaults()
+	{
+		ConfigAccessor cfg = ConfigAccessor.getInstance();
+		String particleString = "";
 		particleDefaults = new ConcurrentHashMap<String, particleDefaultStorage>();
 		for (ParticleEffect particle : ParticleEffect.values())
 		{
 			particleString = particle.toString();
-			if (!trailConfigName(particleString).equals("NULL"))
+			if (Utilities.trailConfigName(particleString).length() != 0)
 			{
-				particleString = trailConfigName(particleString);
+				particleString = Utilities.trailConfigName(particleString);
 				
 				particleDefaults.put(particleString,
 						new particleDefaultStorage(typeStringtoInt(cfg.getString("trails." + particleString + ".options.type")),
@@ -248,100 +260,5 @@ public class TrailDefaults
 			// Null
 		}
 		return colour;
-	}
-
-	public String trailConfigName(String particleString)
-	{
-		switch (particleString)
-		{
-			case "BARRIER":
-				particleString = "barrier";
-				break;
-			case "CLOUD":
-				particleString = "cloud";
-				break;
-			case "CRIT":
-				particleString = "criticals";
-				break;
-			case "CRIT_MAGIC":
-				particleString = "criticals-magic";
-				break;
-			case "DRIP_LAVA":
-				particleString = "drip-lava";
-				break;
-			case "DRIP_WATER":
-				particleString = "drip-water";
-				break;
-			case "ENCHANTMENT_TABLE":
-				particleString = "enchant";
-				break;
-			case "EXPLOSION_NORMAL":
-				particleString = "explosion-smoke";
-				break;
-			case "FIREWORKS_SPARK":
-				particleString = "firework";
-				break;
-			case "FLAME":
-				particleString = "flame";
-				break;
-			case "HEART":
-				particleString = "hearts";
-				break;
-			case "LAVA":
-				particleString = "lava";
-				break;
-			case "NOTE":
-				particleString = "note";
-				break;
-			case "PORTAL":
-				particleString = "portal";
-				break;
-			case "REDSTONE":
-				particleString = "redstone";
-				break;
-			case "SLIME":
-				particleString = "slime";
-				break;
-			case "SMOKE_LARGE":
-				particleString = "smoke";
-				break;
-			case "SNOW_SHOVEL":
-				particleString = "snow-shovel";
-				break;
-			case "SNOWBALL":
-				particleString = "snow-ball";
-				break;
-			case "SPELL":
-				particleString = "spell";
-				break;
-			case "SPELL_INSTANT":
-				particleString = "spell-instant";
-				break;
-			case "SPELL_MOB":
-				particleString = "spell-mob";
-				break;
-			case "SPELL_WITCH":
-				particleString = "spell-witch";
-				break;
-			case "VILLAGER_ANGRY":
-				particleString = "angry-villager";
-				break;
-			case "VILLAGER_HAPPY":
-				particleString = "happy-villager";
-				break;
-			case "TOWN_AURA":
-				particleString = "town-aura";
-				break;
-			case "WATER_DROP":
-				particleString = "water-drop";
-				break;
-			case "WATER_SPLASH":
-				particleString = "water-splash";
-				break;
-			default:
-				particleString = "NULL";
-				break;
-		}
-		return particleString;
 	}
 }

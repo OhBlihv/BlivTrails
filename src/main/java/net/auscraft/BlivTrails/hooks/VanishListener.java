@@ -27,7 +27,7 @@ public class VanishListener implements Listener
 	{
 		if (listener.getPlayerConfig().containsKey(event.getPlayer().getUniqueId().toString()))
 		{
-			listener.getPlayerConfig().get(event.getPlayer().getUniqueId().toString()).setVanish(event.isVanishing());
+			listener.getPlayerConfig().get(event.getPlayer().getUniqueId().toString()).setVanished(event.isVanishing());
 			if (event.isVanishing())
 			{
 				try

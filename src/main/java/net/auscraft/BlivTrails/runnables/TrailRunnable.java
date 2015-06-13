@@ -5,7 +5,9 @@ import java.util.Random;
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailListener;
+import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.particleDefaultStorage;
+import net.auscraft.BlivTrails.utils.Utilities;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -68,11 +70,11 @@ public class TrailRunnable implements Runnable
 		}
 	}
 
-	private BlivTrails instance;
+	private BlivTrails plugin;
+	private TrailListener listener;
 	private String uuid;
 	private Player player;
 	private Random rand;
-	private TrailListener listener;
 	double[] heightCfg = new double[3], variationCfg = new double[3];
 	double sprayCfg;
 	
@@ -86,8 +88,6 @@ public class TrailRunnable implements Runnable
 
 	/**
 	 * 
-	 * @param instance
-	 *            BlivTrails instance
 	 * @param player
 	 *            Player object of the player receiving the trail
 	 * @param pcfg
@@ -100,15 +100,15 @@ public class TrailRunnable implements Runnable
 	 * @param option
 	 *            Global Option Array
 	 */
-	public TrailRunnable(BlivTrails instance, Player player, PlayerConfig pcfg, TrailListener listener, Random rand, double[] option)
+	public TrailRunnable(TrailListener listener, Player player, PlayerConfig pcfg, Random rand, double[] option)
 	{
-		this.instance = instance;
+		this.plugin = BlivTrails.getInstance();
 		this.listener = listener;
 		this.rand = rand;
 		this.player = player;
 		this.uuid = player.getUniqueId().toString();
 		particle = pcfg.getParticle();
-		particleDefaultStorage pDef = listener.trailDefaults.getDefaults(trailConfigName(pcfg.getParticle().toString()));
+		particleDefaultStorage pDef = TrailDefaults.getInstance().getDefaults(Utilities.trailConfigName(pcfg.getParticle().toString()));
 
 		// Height Global/Trail-Specific Overrides
 		// If there isnt trail-given override, use the global value
@@ -391,20 +391,20 @@ public class TrailRunnable implements Runnable
 						{
 							if(type == 2)
 							{
-								Bukkit.getScheduler().runTaskLater(instance,
+								Bukkit.getScheduler().runTaskLater(plugin,
 										new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 							else
 							{
-								Bukkit.getScheduler().runTaskLater(instance,
+								Bukkit.getScheduler().runTaskLater(plugin,
 										new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 						}
 						else
 						{
-							Bukkit.getScheduler().runTaskLater(instance, 
+							Bukkit.getScheduler().runTaskLater(plugin, 
 									new DisplayRegularRunnable(finalParticle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 							// public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
 									
@@ -432,100 +432,5 @@ public class TrailRunnable implements Runnable
 			Bukkit.getServer().getScheduler().cancelTask(listener.getActiveTrails().get(uuid)); // Cancel Self
 		}
 	}
-
-	public String trailConfigName(String particleString)
-	{
-		switch (particleString)
-		{
-			case "BARRIER":
-				particleString = "barrier";
-				break;
-			case "CLOUD":
-				particleString = "cloud";
-				break;
-			case "CRIT":
-				particleString = "criticals";
-				break;
-			case "CRIT_MAGIC":
-				particleString = "criticals-magic";
-				break;
-			case "DRIP_LAVA":
-				particleString = "drip-lava";
-				break;
-			case "DRIP_WATER":
-				particleString = "drip-water";
-				break;
-			case "ENCHANTMENT_TABLE":
-				particleString = "enchant";
-				break;
-			case "EXPLOSION_NORMAL":
-				particleString = "explosion-smoke";
-				break;
-			case "FIREWORKS_SPARK":
-				particleString = "firework";
-				break;
-			case "FLAME":
-				particleString = "flame";
-				break;
-			case "HEART":
-				particleString = "hearts";
-				break;
-			case "LAVA":
-				particleString = "lava";
-				break;
-			case "NOTE":
-				particleString = "note";
-				break;
-			case "PORTAL":
-				particleString = "portal";
-				break;
-			case "REDSTONE":
-				particleString = "redstone";
-				break;
-			case "SLIME":
-				particleString = "slime";
-				break;
-			case "SMOKE_LARGE":
-				particleString = "smoke";
-				break;
-			case "SNOW_SHOVEL":
-				particleString = "snow-shovel";
-				break;
-			case "SNOWBALL":
-				particleString = "snow-ball";
-				break;
-			case "SPELL":
-				particleString = "spell";
-				break;
-			case "SPELL_INSTANT":
-				particleString = "spell-instant";
-				break;
-			case "SPELL_MOB":
-				particleString = "spell-mob";
-				break;
-			case "SPELL_WITCH":
-				particleString = "spell-witch";
-				break;
-			case "VILLAGER_ANGRY":
-				particleString = "angry-villager";
-				break;
-			case "VILLAGER_HAPPY":
-				particleString = "happy-villager";
-				break;
-			case "TOWN_AURA":
-				particleString = "town-aura";
-				break;
-			case "WATER_DROP":
-				particleString = "water-drop";
-				break;
-			case "WATER_SPLASH":
-				particleString = "water-splash";
-				break;
-			default:
-				particleString = "NULL";
-				break;
-		}
-		return particleString;
-	}
-
+	
 }

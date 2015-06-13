@@ -34,22 +34,31 @@ public class BlivTrails extends JavaPlugin
 	private FlatFile flatfile = null;
 	@Getter
 	private Messages messages;
-	private Utilities util;
 	@Getter
 	private Random rand;
 	@Getter
 	private ParticleStorage particleStorage;
+	
+	private static BlivTrails instance = null;
+	
+	public static BlivTrails getInstance()
+	{
+		if(instance == null)
+		{
+			instance = (BlivTrails) Bukkit.getPluginManager().getPlugin("BlivTrails");
+		}
+		return instance;
+	}
 
 	@Override
 	public void onEnable()
 	{
-		util = new Utilities(this);
-		setupCFG();
+		cfg = ConfigAccessor.getInstance();
 		messages = Messages.getInstance();
 
 		if (cfg.getBoolean("database.mysql"))
 		{
-			Utilities.logInfo("Using mySQL as the storage option");
+			Utilities.logInfo("Using MySQL as the storage option");
 			disableDatabaseLogging();
 			try
 			{
@@ -65,7 +74,7 @@ public class BlivTrails extends JavaPlugin
 		else
 		{
 			Utilities.logInfo("Using FlatFile as the storage option");
-			flatfile = new FlatFile(this);
+			flatfile = FlatFile.getInstance();
 		}
 		getServer().getPluginManager().registerEvents(new TrailListener(this), this);
 		getCommand("trail").setExecutor(new TrailCommand(this));
@@ -96,11 +105,6 @@ public class BlivTrails extends JavaPlugin
 	public void doItemListener()
 	{
 		getServer().getPluginManager().registerEvents(new ItemListener(this), this);
-	}
-
-	public Utilities getUtil()
-	{
-		return util;
 	}
 
 	public Object getSave()
@@ -220,13 +224,6 @@ public class BlivTrails extends JavaPlugin
 			}
 		}, 0L, checkTime * 20);
 
-	}
-
-	public void setupCFG()
-	{
-		this.saveDefaultConfig();
-		this.getConfig().options().copyDefaults(true);
-		cfg = new ConfigAccessor(this);
 	}
 
 }

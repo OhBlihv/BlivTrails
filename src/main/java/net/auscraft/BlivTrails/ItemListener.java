@@ -19,13 +19,11 @@ public class ItemListener implements Listener
 
 	private ConfigAccessor cfg;
 	private TrailListener listener;
-	private Utilities util;
 
 	public ItemListener(BlivTrails instance)
 	{
 		cfg = instance.getCfg();
 		listener = instance.getListener();
-		util = instance.getUtil();
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
@@ -40,12 +38,12 @@ public class ItemListener implements Listener
 				{
 					return;
 				}
-				else if (cfg.getString("misc.gui-item.material").equals("NULL"))
+				else if (cfg.getString("misc.gui-item.material").length() == 0)
 				{
-					util.logDebug("Your GUI Item invalid. Either disable this feature, or select a valid material.");
+					Utilities.logDebug("Your GUI Item is invalid. Either disable this feature, or select a valid material.");
 					return;
 				}
-				else if (player.getItemInHand().getType() == Material.getMaterial(cfg.getString("misc.gui-item.material")) && player.getItemInHand().getItemMeta().getDisplayName().contains(util.stripColours(cfg.getString("misc.gui-item.name"))))
+				else if (player.getItemInHand().getType().equals(Material.getMaterial(cfg.getString("misc.gui-item.material"))) && player.getItemInHand().getItemMeta().getDisplayName().contains(Utilities.stripColours(cfg.getString("misc.gui-item.name"))))
 				{
 					event.setCancelled(true);
 					listener.mainMenu(player);
@@ -57,7 +55,7 @@ public class ItemListener implements Listener
 				{
 					e.printStackTrace();
 				}
-				util.logDebug("GUI Item is invalid. Check your config.");
+				Utilities.logDebug("GUI Item is invalid. Check your config.");
 			}
 		}
 	}
@@ -70,7 +68,7 @@ public class ItemListener implements Listener
 			ItemStack item = new ItemStack(Material.getMaterial(cfg.getString("misc.gui-item.material")));
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(Utilities.translateColours(cfg.getString("misc.gui-item.name")));
-			meta.setLore(util.translateColours(cfg.getStringList("misc.gui-item.lore")));
+			meta.setLore(Utilities.translateColours(cfg.getStringList("misc.gui-item.lore")));
 			item.setItemMeta(meta);
 
 			if (!event.getPlayer().getInventory().contains(item)) // Can only have one

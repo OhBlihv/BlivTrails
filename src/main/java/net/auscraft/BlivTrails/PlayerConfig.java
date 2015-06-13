@@ -1,5 +1,8 @@
 package net.auscraft.BlivTrails;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import com.darkblade12.ParticleEffect.ParticleEffect;
 
 public class PlayerConfig
@@ -10,15 +13,28 @@ public class PlayerConfig
 	 * trail (1,2,3 particles wide)
 	 */
 
+	@Getter
 	private String uuid;
+	@Getter
+	@Setter
 	private ParticleEffect particle;
+	@Getter
+	@Setter
 	private int type;
+	@Getter
+	@Setter
 	private int length;
+	@Getter
+	@Setter
 	private int height;
+	@Getter
+	@Setter
 	private int colour;
 
 	// Now, its less of trail config, and just storing values
-	private boolean isVanished = false;
+	@Getter
+	@Setter
+	private boolean vanished = false;
 
 	public PlayerConfig(String uuid, ParticleEffect particle, int type, int length, int height, int colour)
 	{
@@ -38,69 +54,4 @@ public class PlayerConfig
 		this.colour = colour;
 	}
 
-	public void setParticle(ParticleEffect particle)
-	{
-		this.particle = particle;
-	}
-
-	public void setType(int type)
-	{
-		this.type = type;
-	}
-
-	public void setLength(int length)
-	{
-		this.length = length;
-	}
-
-	public void setHeight(int height)
-	{
-		this.height = height;
-	}
-
-	public void setColour(int colour)
-	{
-		this.colour = colour;
-	}
-
-	public String getUUID()
-	{
-		return uuid;
-	}
-
-	public ParticleEffect getParticle()
-	{
-		return particle;
-	}
-
-	public int getType()
-	{
-		return type;
-	}
-
-	public int getLength()
-	{
-		return length;
-	}
-
-	public int getHeight()
-	{
-		return height;
-	}
-
-	public int getColour()
-	{
-		return colour;
-	}
-
-	// Holders
-	public void setVanish(boolean isVanished)
-	{
-		this.isVanished = isVanished;
-	}
-
-	public boolean getVanish()
-	{
-		return isVanished;
-	}
 }

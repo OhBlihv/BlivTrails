@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.util.logging.Level;
+import java.util.List;
+import java.util.Set;
 
 import net.auscraft.BlivTrails.BlivTrails;
+import net.auscraft.BlivTrails.utils.Utilities;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,84 +17,97 @@ import org.bukkit.configuration.file.YamlConfiguration;
 public class FlatFile
 {
 
-	private File saveFile = null;
-	private FileConfiguration save = null;
-	private BlivTrails instance;
+	protected File saveFile = null;
+	protected FileConfiguration save = null;
 
-	public FlatFile(BlivTrails instance)
+	protected static FlatFile instance = null;
+	protected static BlivTrails plugin = null;
+	
+	protected static String fileName = "trails.yml";
+	
+	public static FlatFile getInstance()
 	{
-		this.instance = instance;
+		if(instance == null)
+		{
+			instance = new FlatFile();
+		}
+		return instance;
+	}
+	
+	protected FlatFile()
+	{
 		saveDefaultConfig();
 		getSave();
+		plugin = BlivTrails.getInstance();
 	}
 
-	public FileConfiguration getSave()
+	public FileConfiguration getSave() 
 	{
-		if (save == null)
-		{
-			reloadMessages();
-		}
-		return save;
+	    if (save == null)
+	    {
+	        reloadFile();
+	    }
+	    return save;
 	}
-
-	public void reloadMessages()
+	
+	public void reloadFile() 
 	{
-		if (saveFile == null)
+	    if (saveFile == null) 
+	    {
+	    	saveFile = new File(plugin.getDataFolder(), fileName);
+	    }
+	    save = YamlConfiguration.loadConfiguration(saveFile);
+	 
+	    // Look for defaults in the jar
+	    Reader defConfigStream = null;
+		try 
 		{
-			saveFile = new File(instance.getDataFolder(), "trails.yml");
-		}
-		save = YamlConfiguration.loadConfiguration(saveFile);
-
-		// Look for defaults in the jar
-		Reader defConfigStream = null;
-		try
-		{
-			defConfigStream = new InputStreamReader(instance.getResource("trails.yml"), "UTF8");
-		}
-		catch (UnsupportedEncodingException e)
+			defConfigStream = new InputStreamReader(plugin.getResource(fileName), "UTF8");
+		} 
+		catch (UnsupportedEncodingException e) 
 		{
 			e.printStackTrace();
 		}
-		if (defConfigStream != null)
-		{
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-			save.setDefaults(defConfig);
-		}
+	    if (defConfigStream != null)
+	    {
+	        YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+	        save.setDefaults(defConfig);
+	    }
 	}
-
-	public void saveDefaultConfig()
+	
+	public void saveDefaultConfig() 
 	{
-		if (saveFile == null)
-		{
-			saveFile = new File(instance.getDataFolder(), "trails.yml");
-		}
-		if (!saveFile.exists())
-		{
-			instance.saveResource("trails.yml", false);
-		}
+	    if (saveFile == null)
+	    {
+	        saveFile = new File(plugin.getDataFolder(), fileName);
+	    }
+	    if (!saveFile.exists())
+	    {            
+	    	plugin.saveResource(fileName, false);
+	    }
 	}
-
-	public void saveToFile()
+	
+	public void saveToFile() 
 	{
-		if (save == null || saveFile == null)
-		{
-			return;
-		}
-		try
-		{
-			getSave().save(saveFile);
-		}
-		catch (IOException ex)
-		{
-			instance.getLogger().log(Level.SEVERE, "Could not save config to " + saveFile, ex);
-		}
+	    if (save == null || saveFile == null) 
+	    {
+	        return;
+	    }
+	    try
+	    {
+	        getSave().save(saveFile);
+	    }
+	    catch (IOException ex) 
+	    {
+	    	Utilities.logError("Could not save config to " + saveFile);
+	    }
 	}
-
+	
 	public void removeEntry(String path)
 	{
 		this.getSave().set(path, null);
 	}
-
+	
 	public void saveEntry(String path, String entry)
 	{
 		this.getSave().set(path, entry);
@@ -101,8 +116,53 @@ public class FlatFile
 
 	public String loadEntry(String path)
 	{
-		String value = this.save.getString(path);
-		return value;
+		return this.save.getString(path);
+	}
+	
+	public Set<String> getChildren(String path)
+	{
+		return this.save.getConfigurationSection(path).getKeys(true);
+	}
+	
+	public String getString(String path)
+	{
+		return this.save.getString(path, "");
+	}
+	
+	public List<String> getStringList(String path)
+	{
+		return this.save.getStringList(path);
+	}
+	
+	public int getInt(String path)
+	{
+		return this.save.getInt(path);
+	}
+	
+	public boolean getBoolean(String path)
+	{
+		return this.save.getBoolean(path);
+	}
+	
+	public long getLong(String path)
+	{
+		return this.save.getLong(path);
+	}
+	
+	public void saveValue(String path, Object value)
+	{
+		this.save.set(path, value);
+		saveToFile();
+	}
+
+	public double getDouble(String path)
+	{
+		return this.save.getDouble(path);
+	}
+	
+	public float getFloat(String path)
+	{
+		return (float) this.save.getDouble(path);
 	}
 
 }

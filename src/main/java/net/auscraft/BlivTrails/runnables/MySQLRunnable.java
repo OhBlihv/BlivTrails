@@ -120,7 +120,7 @@ public class MySQLRunnable implements Runnable
 					{
 						if (trailMap.containsKey(player.getUniqueId().toString()))
 						{
-							trailMap.get(player.getUniqueId().toString()).setVanish(true);
+							trailMap.get(player.getUniqueId().toString()).setVanished(true);
 							try
 							{
 								instance.getListener().getActiveTrails().remove(player.getUniqueId().toString());

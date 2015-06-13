@@ -4,58 +4,90 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
-import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.utils.Utilities;
 
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
 
-public class ConfigAccessor
+public class ConfigAccessor extends FlatFile
 {
 
-	private File configFile = null;
-	private FileConfiguration config = null;
-	private BlivTrails instance;
-	private Utilities util;
-
-	public ConfigAccessor(BlivTrails instance)
+	protected static ConfigAccessor instance;
+	
+	public static ConfigAccessor getInstance()
 	{
-		this.instance = instance;
-		this.util = instance.getUtil();
+		if(instance == null)
+		{
+			instance = new ConfigAccessor();
+		}
+		return instance;
+	}
+	
+	private ConfigAccessor()
+	{
+		fileName = "config.yml";
 		saveDefaultConfig();
-		getConfig();
+		getSave();
+	}
+	
+	public boolean reloadConfig()
+	{
+		if (saveFile == null)
+		{
+			saveFile = new File(plugin.getDataFolder(), fileName);
+		}
+		save = YamlConfiguration.loadConfiguration(saveFile);
+
+		// Look for defaults in the jar
+		Reader defConfigStream = null;
+		try
+		{
+			defConfigStream = new InputStreamReader(plugin.getResource(fileName), "UTF8");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+		if (defConfigStream != null)
+		{
+			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+			save.setDefaults(defConfig);
+		}
+		boolean invalid = false;
+		if (this.getBoolean("misc.config-checking"))
+		{
+			Utilities.logInfo("Checking Config...");
+			invalid = checkConfig();
+			Utilities.logInfo("Config Checked!");
+		}
+		return invalid;
 	}
 
 	public boolean checkConfig()
 	{
 		boolean invalid = false;
-		if ((this.getInt("menu.main.size") % 9) != 0)
+		if ((getInt("menu.main.size") % 9) != 0)
 		{
 			Utilities.logError("Your Main Menu GUI is not a multiple of 9, and cannot be displayed. (Size: " + this.getInt("menu.main.size") + ")");
 			invalid = true;
 		}
-		if ((this.getInt("menu.options.size") % 9) != 0)
+		if ((getInt("menu.options.size") % 9) != 0)
 		{
 			Utilities.logError("Your Options Menu GUI is not a multiple of 9, and cannot be displayed. (Size: " + this.getInt("menu.options.size") + ")");
 			invalid = true;
 		}
 		String particleString = "";
-		for (ParticleEffect pEff : ParticleEffect.values()) // Check every
-															// particle effect
-															// used in the
-															// config
+		for (ParticleEffect pEff : ParticleEffect.values()) // Check every particle effect used in the config
 		{
 			/*
 			 * Currently checks: Position (If outside the acceptable range)
 			 * Material Exists
 			 */
-			particleString = util.trailConfigName(pEff.toString());
-			if (!particleString.equals("NULL"))
+			particleString = Utilities.trailConfigName(pEff.toString());
+			if (particleString.length() != 0)
 			{
 				if ((this.getInt("trails." + particleString + ".position") >= this.getInt("menu.main.size")) || (this.getInt("trails." + particleString + ".position") < 0))
 				{
@@ -99,108 +131,7 @@ public class ConfigAccessor
 
 		if (!invalid && getBoolean("misc.enabled"))
 		{
-			instance.doItemListener();
+			plugin.doItemListener();
 		}
 	}
-
-	public void addDefaults()
-	{
-		config.addDefault("misc.debug", false);
-		config.addDefault("misc.config-checking", true);
-	}
-
-	public FileConfiguration getConfig()
-	{
-		if (config == null)
-		{
-			reloadConfig();
-		}
-		return config;
-	}
-
-	public boolean reloadConfig()
-	{
-		if (configFile == null)
-		{
-			configFile = new File(instance.getDataFolder(), "config.yml");
-		}
-		config = YamlConfiguration.loadConfiguration(configFile);
-
-		// Look for defaults in the jar
-		Reader defConfigStream = null;
-		try
-		{
-			defConfigStream = new InputStreamReader(instance.getResource("config.yml"), "UTF8");
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			e.printStackTrace();
-		}
-		if (defConfigStream != null)
-		{
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-			config.setDefaults(defConfig);
-		}
-		boolean invalid = false;
-		if (this.getBoolean("misc.config-checking"))
-		{
-			Utilities.logInfo("Checking Config...");
-			invalid = checkConfig();
-			Utilities.logInfo("Config Checked!");
-		}
-		return invalid;
-	}
-
-	public void saveDefaultConfig()
-	{
-		if (configFile == null)
-		{
-			configFile = new File(instance.getDataFolder(), "config.yml");
-		}
-		if (!configFile.exists())
-		{
-			instance.saveResource("messages.yml", false);
-		}
-	}
-
-	public int getInt(String path)
-	{
-		int value = this.config.getInt(path);
-		return value;
-	}
-
-	public double getDouble(String path)
-	{
-		double value = this.config.getDouble(path);
-		return value;
-	}
-
-	public float getFloat(String path)
-	{
-		double value = this.config.getDouble(path);
-		return (float) value;
-	}
-
-	public String getString(String path)
-	{
-		String value = this.config.getString(path, "String Missing!");
-		if(value.equals("String Missing!"))
-		{
-			Utilities.logError("Path of missing String: '" + path + "'");
-		}
-		return value;
-	}
-
-	public boolean getBoolean(String path)
-	{
-		boolean value = this.config.getBoolean(path);
-		return value;
-	}
-
-	public List<String> getStringList(String path)
-	{
-		List<String> values = this.config.getStringList(path);
-		return values;
-	}
-
 }

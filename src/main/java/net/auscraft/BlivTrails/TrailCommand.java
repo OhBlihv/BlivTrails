@@ -18,19 +18,17 @@ public class TrailCommand implements CommandExecutor
 {
 
 	private BlivTrails instance;
-	private Utilities util;
 	private ConfigAccessor cfg;
 
 	public TrailCommand(BlivTrails instance)
 	{
 		this.instance = instance;
-		this.util = instance.getUtil();
 		this.cfg = instance.getCfg();
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String args[])
 	{
-		if (cmd.getName().equalsIgnoreCase("trail") || cmd.getName().equalsIgnoreCase("trails"))
+		if (cmd.getName().equalsIgnoreCase("trail"))
 		{
 			instance.getListener().mainMenu((Player) sender);
 			return true;
@@ -44,13 +42,12 @@ public class TrailCommand implements CommandExecutor
 			}
 			else if (args.length >= 1)
 			{
-				if (args[0].equalsIgnoreCase("particles")) // /trailadmin
-															// particles|types|lengths|heights|colours
+				if (args[0].equalsIgnoreCase("particles")) // /trailadmin particles|types|lengths|heights|colours
 				{
 					String output = " ";
-					for (ParticleEffect particleEff : instance.getListener().usedTrails)
+					for (ParticleEffect particleEff : TrailListener.usedTrails)
 					{
-						output += util.stripColours(cfg.getString("trails." + util.trailConfigName(particleEff.toString()) + ".name")).replaceAll("[ ]", "_") + ", ";
+						output += Utilities.stripColours(cfg.getString("trails." + Utilities.trailConfigName(particleEff.toString()) + ".name")).replaceAll("[ ]", "_") + ", ";
 					}
 					sender.sendMessage(ChatColor.GREEN + "Available Particles:\n" + ChatColor.WHITE + output);
 				}
@@ -124,13 +121,13 @@ public class TrailCommand implements CommandExecutor
 				}
 				else if (args[0].equalsIgnoreCase("reload"))
 				{
-					if (instance.getCfg().reloadConfig())
+					if (ConfigAccessor.getInstance().reloadConfig())
 					{
 						Utilities.printError(sender, "You have config errors -- See Console for full printout");
 					}
-					instance.getMessages().reloadMessages();
+					instance.getMessages().reloadFile();
 					instance.getListener().loadDefaultOptions();
-					util.setConfig(instance.getCfg());
+					Utilities.setConfig(instance.getCfg());
 					Utilities.logSuccess("Config and Messages Reloaded!");
 					Utilities.printSuccess(sender, "Config and Messages Reloaded!");
 					return true;

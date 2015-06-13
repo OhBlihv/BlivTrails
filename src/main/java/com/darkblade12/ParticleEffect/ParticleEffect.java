@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -349,7 +350,7 @@ public enum ParticleEffect {
 	 * <li>The speed value has no influence on this particle effect
 	 * </ul>
 	 */
-	BLOCK_CRACK("blockcrack", 37, -1, ParticleProperty.DIRECTIONAL, ParticleProperty.REQUIRES_DATA),
+	BLOCK_CRACK("blockcrack", 37, -1, ParticleProperty.REQUIRES_DATA),
 	/**
 	 * A particle effect which is displayed when falling:
 	 * <ul>
@@ -1114,6 +1115,15 @@ public enum ParticleEffect {
 		}
 
 		/**
+		 * Construct a new ordinary color
+		 * 
+		 * @param color Bukkit color
+		 */
+		public OrdinaryColor(Color color) {
+			this(color.getRed(), color.getGreen(), color.getBlue());
+		}
+
+		/**
 		 * Returns the red value of the RGB format
 		 * 
 		 * @return The red value
@@ -1310,7 +1320,7 @@ public enum ParticleEffect {
 		private static Method sendPacket;
 		private static boolean initialized;
 		private final ParticleEffect effect;
-		private final float offsetX;
+		private float offsetX;
 		private final float offsetY;
 		private final float offsetZ;
 		private final float speed;
@@ -1376,6 +1386,9 @@ public enum ParticleEffect {
 		 */
 		public ParticlePacket(ParticleEffect effect, ParticleColor color, boolean longDistance) {
 			this(effect, color.getValueX(), color.getValueY(), color.getValueZ(), 1, 0, longDistance, null);
+			if (effect == ParticleEffect.REDSTONE && color instanceof OrdinaryColor && ((OrdinaryColor) color).getRed() == 0) {
+				offsetX = 1 / 255F;
+			}
 		}
 
 		/**
@@ -1449,7 +1462,8 @@ public enum ParticleEffect {
 					ReflectionUtils.setValue(packet, true, "a", enumParticle.getEnumConstants()[effect.getId()]);
 					ReflectionUtils.setValue(packet, true, "j", longDistance);
 					if (data != null) {
-						ReflectionUtils.setValue(packet, true, "k", data.getPacketData());
+						int[] packetData = data.getPacketData();
+						ReflectionUtils.setValue(packet, true, "k", effect == ParticleEffect.ITEM_CRACK ? packetData : new int[] { packetData[0] | (packetData[1] << 12) });
 					}
 				}
 				ReflectionUtils.setValue(packet, true, "b", (float) center.getX());
@@ -1508,7 +1522,6 @@ public enum ParticleEffect {
 		 * @throws IllegalArgumentException If the range is lower than 1
 		 * @see #sendTo(Location center, Player player)
 		 */
-		@SuppressWarnings("deprecation")
 		public void sendTo(Location center, double range) throws IllegalArgumentException {
 			if (range < 1) {
 				throw new IllegalArgumentException("The range is lower than 1");

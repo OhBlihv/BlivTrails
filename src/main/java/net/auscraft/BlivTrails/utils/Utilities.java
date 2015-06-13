@@ -14,25 +14,20 @@ import java.util.regex.Pattern;
 public class Utilities
 {
 
-	private BlivTrails instance;
+	private static BlivTrails instance;
 	private static final String prefix = "&f[&bBlivTrails&f] ";
 	private static String playerPrefix = "";
 	private static final java.util.logging.Logger log = Bukkit.getLogger();
-	private boolean debug = true;
-
-	public Utilities(BlivTrails instance)
-	{
-		this.instance = instance;
-	}
+	private static boolean debug = true;
 
 	// ------------------------------------------------------------------------------------------------------
 	// Extra Setup
 	// ------------------------------------------------------------------------------------------------------
 
-	public void setConfig(ConfigAccessor cfg)
+	public static void setConfig(ConfigAccessor cfg)
 	{
 		playerPrefix = translateColours(instance.getMessages().getString("messages.prefix"));
-		if (!playerPrefix.equals(""))
+		if (!(playerPrefix.length() == 0))
 		{
 			playerPrefix += " ";
 		}
@@ -43,7 +38,7 @@ public class Utilities
 	// String Translation
 	// ------------------------------------------------------------------------------------------------------
 
-	public String stripColours(String toFix)
+	public static String stripColours(String toFix)
 	{
 		Pattern chatColorPattern = Pattern.compile("[&](.)");
 		String fixedString = chatColorPattern.matcher(toFix).replaceAll("");
@@ -83,7 +78,7 @@ public class Utilities
 		return fixedString;
 	}
 
-	public List<String> translateColours(List<?> lines)
+	public static List<String> translateColours(List<?> lines)
 	{
 		try
 		{
@@ -96,10 +91,10 @@ public class Utilities
 			{
 				return null;
 			}
+			
 			for (int i = 0; i < lines.size(); i++)
 			{
-				Pattern chatColourPattern = Pattern.compile("(?i)&([0-9A-Fa-fk-oK-OrR])");
-				lineString[i] = chatColourPattern.matcher(lineString[i]).replaceAll("\u00A7$1");
+				lineString[i] = Pattern.compile("(?i)&([0-9A-Fa-fk-oK-OrR])").matcher(lineString[i]).replaceAll("\u00A7$1");
 			}
 			return Arrays.asList(lineString);
 		}
@@ -167,7 +162,7 @@ public class Utilities
 		log.log(Level.WARNING, translateConsoleColours(prefix + "&4ERROR: &c" + message));
 	}
 
-	public void logDebug(String message)
+	public static void logDebug(String message)
 	{
 		if (debug)
 		{
@@ -184,144 +179,62 @@ public class Utilities
 	// Miscellaneous
 	// ------------------------------------------------------------------------------------------------------
 
-	public BlivTrails getInstance()
-	{
-		return instance;
-	}
-
-	public String trailConfigName(String particleString)
+	public static String trailConfigName(String particleString)
 	{
 		switch (particleString)
 		{
-		case "BARRIER":
-			particleString = "barrier";
-			break;
-		case "CLOUD":
-			particleString = "cloud";
-			break;
-		case "CRIT":
-			particleString = "criticals";
-			break;
-		case "CRIT_MAGIC":
-			particleString = "criticals-magic";
-			break;
-		case "DRIP_LAVA":
-			particleString = "drip-lava";
-			break;
-		case "DRIP_WATER":
-			particleString = "drip-water";
-			break;
-		case "ENCHANTMENT_TABLE":
-			particleString = "enchant";
-			break;
-		case "EXPLOSION_NORMAL":
-			particleString = "explosion-smoke";
-			break;
-		case "FIREWORKS_SPARK":
-			particleString = "firework";
-			break;
-		case "FLAME":
-			particleString = "flame";
-			break;
-		case "HEART":
-			particleString = "hearts";
-			break;
-		case "LAVA":
-			particleString = "lava";
-			break;
-		case "NOTE":
-			particleString = "note";
-			break;
-		case "PORTAL":
-			particleString = "portal";
-			break;
-		case "REDSTONE":
-			particleString = "redstone";
-			break;
-		case "SLIME":
-			particleString = "slime";
-			break;
-		case "SMOKE_LARGE":
-			particleString = "smoke";
-			break;
-		case "SNOW_SHOVEL":
-			particleString = "snow-shovel";
-			break;
-		case "SNOWBALL":
-			particleString = "snow-ball";
-			break;
-		case "SPELL":
-			particleString = "spell";
-			break;
-		case "SPELL_INSTANT":
-			particleString = "spell-instant";
-			break;
-		case "SPELL_MOB":
-			particleString = "spell-mob";
-			break;
-		case "SPELL_WITCH":
-			particleString = "spell-witch";
-			break;
-		case "VILLAGER_ANGRY":
-			particleString = "angry-villager";
-			break;
-		case "VILLAGER_HAPPY":
-			particleString = "happy-villager";
-			break;
-		case "TOWN_AURA":
-			particleString = "town-aura";
-			break;
-		case "WATER_DROP":
-			particleString = "water-drop";
-			break;
-		case "WATER_SPLASH":
-			particleString = "water-splash";
-			break;
-		default:
-			particleString = "NULL";
-			break;
+			case "BARRIER": return "barrier";
+			case "CLOUD": return "cloud";
+			case "CRIT": return "criticals";
+			case "CRIT_MAGIC": return "criticals-magic";
+			case "DRIP_LAVA": return "drip-lava";
+			case "DRIP_WATER": return "drip-water";
+			case "ENCHANTMENT_TABLE": return "enchant";
+			case "EXPLOSION_NORMAL": return "explosion-smoke";
+			case "FIREWORKS_SPARK": return "firework";
+			case "FLAME": return "flame";
+			case "HEART": return "hearts";
+			case "LAVA": return "lava";
+			case "NOTE": return "note";
+			case "PORTAL": return "portal";
+			case "REDSTONE": return "redstone";
+			case "SLIME": return "slime";
+			case "SMOKE_LARGE": return "smoke";
+			case "SNOW_SHOVEL": return "snow-shovel";
+			case "SNOWBALL": return "snow-ball";
+			case "SPELL": return "spell";
+			case "SPELL_INSTANT": return "spell-instant";
+			case "SPELL_MOB": return "spell-mob";
+			case "SPELL_WITCH": return "spell-witch";
+			case "VILLAGER_ANGRY": return "angry-villager";
+			case "VILLAGER_HAPPY": return "happy-villager";
+			case "TOWN_AURA": return "town-aura";
+			case "WATER_DROP": return "water-drop";
+			case "WATER_SPLASH": return "water-splash";
+			default: return "";
 		}
-		return particleString;
 	}
 	
-	public String intToColour(int colour)
+	public static String intToColour(int colour)
 	{
 		switch (colour)
 		{
-			case 1:
-				return "red";
-			case 2:
-				return "darkgreen";
-			case 3:
-				return "brown";
-			case 4:
-				return "darkblue";
-			case 5:
-				return "purple";
-			case 6:
-				return "cyan";
-			case 7:
-				return "lightgrey";
-			case 8:
-				return "grey";
-			case 9:
-				return "pink";
-			case 10:
-				return "lime";
-			case 11:
-				return "yellow";
-			case 12:
-				return "lightblue";
-			case 13:
-				return "magenta";
-			case 14:
-				return "orange";
-			case 15:
-				return "black";
-			case 16:
-				return "random";
-			default:
-				return "black";
+			case 1: return "red";
+			case 2: return "darkgreen";
+			case 3: return "brown";
+			case 4: return "darkblue";
+			case 5: return "purple";
+			case 6: return "cyan";
+			case 7: return "lightgrey";
+			case 8: return "grey";
+			case 9: return "pink";
+			case 10: return "lime";
+			case 11: return "yellow";
+			case 12: return "lightblue";
+			case 13: return "magenta";
+			case 14: return "orange";
+			case 16: return "random";
+			default: return "black";
 		}
 	}
 }
