@@ -53,8 +53,8 @@ public class BlivTrails extends JavaPlugin
 	@Override
 	public void onEnable()
 	{
-		cfg = ConfigAccessor.getInstance();
 		messages = Messages.getInstance();
+		cfg = ConfigAccessor.getInstance();
 
 		if (cfg.getBoolean("database.mysql"))
 		{

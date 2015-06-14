@@ -66,11 +66,12 @@ public class MySQLRunnable implements Runnable
 
 				if (particleData == null)
 				{
-					instance.getParticleStorage().create(new ParticleData(uuidBytes, pcfg.getParticle().toString(), pcfg.getLength(), pcfg.getHeight(), pcfg.getColour()));
+					instance.getParticleStorage().create(new ParticleData(uuidBytes, pcfg.getParticle().toString(), pcfg.getType(), pcfg.getLength(), pcfg.getHeight(), pcfg.getColour()));
 				}
 				else
 				{
 					particleData.setParticle(pcfg.getParticle().toString());
+					particleData.setType(pcfg.getType());
 					particleData.setLength(pcfg.getLength());
 					particleData.setHeight(pcfg.getHeight());
 					particleData.setColour(pcfg.getColour());

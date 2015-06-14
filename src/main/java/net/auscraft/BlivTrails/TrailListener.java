@@ -1708,9 +1708,12 @@ public class TrailListener implements Listener
 			else
 			{
 				/*
-				 * dataSplit[0] == UUID dataSplit[1] == Particle String
-				 * dataSplit[2] == Type dataSplit[3] == Length dataSplit[4] ==
-				 * Height dataSplit[5] == Colour
+				 * dataSplit[0] == UUID 
+				 * dataSplit[1] == Particle String
+				 * dataSplit[2] == Type 
+				 * dataSplit[3] == Length 
+				 * dataSplit[4] == Height
+				 * dataSplit[5] == Colour
 				 */
 				try
 				{

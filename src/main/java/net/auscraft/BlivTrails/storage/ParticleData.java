@@ -55,10 +55,11 @@ public class ParticleData
 		uuid = player.getUniqueId();
 	}
 
-	public ParticleData(byte[] uuidBytes, String particle, int length, int height, int colour)
+	public ParticleData(byte[] uuidBytes, String particle, int type, int length, int height, int colour)
 	{
 		this.id = uuidBytes;
 		this.particle = particle;
+		this.type = type;
 		this.length = length;
 		this.height = height;
 		this.colour = colour;

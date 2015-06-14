@@ -8,10 +8,11 @@ import org.bukkit.ChatColor;
 public class Messages extends FlatFile
 {
 	private static Messages instance;
-
+	
 	private Messages()
 	{
-		fileName = "messages.yml";
+		super();
+		
 		save.options().copyDefaults(true);
 		doDefaults();
 	}
@@ -20,6 +21,7 @@ public class Messages extends FlatFile
 	{
 		if(instance == null)
 		{
+			fileName = "messages.yml";
 			instance = new Messages();
 		}
 		return instance;

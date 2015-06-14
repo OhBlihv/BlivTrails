@@ -21,6 +21,7 @@ public class ConfigAccessor extends FlatFile
 	{
 		if(instance == null)
 		{
+			fileName = "config.yml";
 			instance = new ConfigAccessor();
 		}
 		return instance;
@@ -28,9 +29,7 @@ public class ConfigAccessor extends FlatFile
 	
 	private ConfigAccessor()
 	{
-		fileName = "config.yml";
-		saveDefaultConfig();
-		getSave();
+		super();
 	}
 	
 	public boolean reloadConfig()
