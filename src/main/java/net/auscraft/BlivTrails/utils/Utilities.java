@@ -2,6 +2,7 @@ package net.auscraft.BlivTrails.utils;
 
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.config.ConfigAccessor;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;

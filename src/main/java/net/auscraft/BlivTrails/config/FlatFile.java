@@ -36,9 +36,9 @@ public class FlatFile
 	
 	protected FlatFile()
 	{
+		plugin = BlivTrails.getInstance();
 		saveDefaultConfig();
 		getSave();
-		plugin = BlivTrails.getInstance();
 	}
 
 	public FileConfiguration getSave() 
