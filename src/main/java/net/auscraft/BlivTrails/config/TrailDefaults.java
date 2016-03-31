@@ -1,87 +1,50 @@
 package net.auscraft.BlivTrails.config;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import net.auscraft.BlivTrails.TrailManager;
+import net.auscraft.BlivTrails.util.BUtil;
 
-import net.auscraft.BlivTrails.utils.Utilities;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class TrailDefaults
 {
 	// Will hold the trail defaults
-	public class particleDefaultStorage
+	@AllArgsConstructor
+	public static class ParticleDefaultStorage
 	{
 		/*
 		 * Defaults: type length height random.x-variation random.y-variation
 		 * random.z-variation dynamic.spray-variation height.feet-location
 		 * height.waist-location height.halo-location
 		 */
-		private int optionsInt[];
-		private double optionsDouble[];
+		@Getter
+		private String displayName;
 
-		public particleDefaultStorage(int type, int length, int height, int colour, double xvariation, double yvariation, double zvariation, double sprayvariation, double feetlocation, double waistlocation, double halolocation)
-		{
-			optionsInt = new int[4];
-			optionsInt[0] = type;
-			optionsInt[1] = length;
-			optionsInt[2] = height;
-			optionsInt[3] = colour;
+		@Getter
+		private int type,
+					length,
+					height,
+					colour,
+					displaySpeed;
 
-			optionsDouble = new double[7];
-			optionsDouble[0] = xvariation;
-			optionsDouble[1] = yvariation;
-			optionsDouble[2] = zvariation;
-			optionsDouble[3] = sprayvariation;
-			optionsDouble[4] = feetlocation;
-			optionsDouble[5] = waistlocation;
-			optionsDouble[6] = halolocation;
-		}
+		@Getter
+		private double  xVariation,
+						yVariation,
+						zVariation,
+						sprayVariation,
+						feetLocation,
+						waistLocation,
+						haloLocation;
 
-		public int getInt(String option)
-		{
-			switch (option)
-			{
-				case "type":
-					return optionsInt[0];
-				case "length":
-					return optionsInt[1];
-				case "height":
-					return optionsInt[2];
-				case "colour":
-					return optionsInt[3];
-				default:
-					return 0;
-			}
-		}
-
-		public double getDouble(String option)
-		{
-			switch (option)
-			{
-				case "xvariation":
-					return optionsDouble[0];
-				case "yvariation":
-					return optionsDouble[1];
-				case "zvariation":
-					return optionsDouble[2];
-				case "sprayvariation":
-					return optionsDouble[3];
-				case "feetlocation":
-					return optionsDouble[4];
-				case "waistlocation":
-					return optionsDouble[5];
-				case "halolocation":
-					return optionsDouble[6];
-				default:
-					return 0.0;
-			}
-		}
 	}
 
 	private static TrailDefaults instance = null;
-	
-	private ConcurrentHashMap<String, particleDefaultStorage> particleDefaults;
+
+	@Getter
+	private static ConcurrentHashMap<ParticleEffect, ParticleDefaultStorage> particleDefaults = new ConcurrentHashMap<>();
 	
 	public static TrailDefaults getInstance()
 	{
@@ -91,32 +54,39 @@ public class TrailDefaults
 		}
 		return instance;
 	}
+
+	@Getter
+	private static int defaultSpeed = 1;
 	
 	private TrailDefaults()
 	{
-		ConfigAccessor cfg = ConfigAccessor.getInstance();
-		String particleString = "";
-		particleDefaults = new ConcurrentHashMap<String, particleDefaultStorage>();
-		for (ParticleEffect particle : ParticleEffect.values())
+		FlatFile cfg = FlatFile.getInstance();
+
+		defaultSpeed = cfg.getInt("trails.defaults.display-speed");
+
+		String particleString;
+		for (ParticleEffect particle : TrailManager.usedTrails)
 		{
-			particleString = particle.toString();
-			if (Utilities.trailConfigName(particleString).length() != 0)
+			particleString = BUtil.trailConfigName(particle.toString());
+			if (!particleString.isEmpty())
 			{
-				particleString = Utilities.trailConfigName(particleString);
+				particleString = BUtil.trailConfigName(particleString);
 				
-				particleDefaults.put(particleString,
-						new particleDefaultStorage(typeStringtoInt(cfg.getString("trails." + particleString + ".options.type")),
-								lengthStringtoInt(cfg.getString("trails." + particleString + ".options.length")), heightStringtoInt(cfg.getString("trails." + particleString + ".options.height")),
-								particle.hasProperty(ParticleProperty.COLORABLE) ? colourStringtoInt(cfg.getString("trails." + particleString + ".options.colour")) : 15,
-								cfg.getDouble("trails." + particleString + ".options.defaults.random.x-variation"),
-								cfg.getDouble("trails." + particleString + ".options.defaults.random.y-variation"), cfg.getDouble("trails." + particleString + ".options.defaults.random.z-variation"),
-								cfg.getDouble("trails." + particleString + ".options.defaults.dynamic.spray-variation"), cfg.getDouble("trails." + particleString + ".options.defaults.height.feet-location"),
-								cfg.getDouble("trails." + particleString + ".options.defaults.height.waist-location"), cfg.getDouble("trails." + particleString + ".options.defaults.height.halo-location")));
+				particleDefaults.put(particle,
+				                     new ParticleDefaultStorage(BUtil.translateColours(cfg.getString("trails." + particleString + ".name")),
+						                                        typeStringtoInt(cfg.getString("trails." + particleString + ".options.type")),
+				                                                lengthStringtoInt(cfg.getString("trails." + particleString + ".options.length")), heightStringtoInt(cfg.getString("trails." + particleString + ".options.height")),
+				                                                particle.hasProperty(ParticleProperty.COLORABLE) ? colourStringtoInt(cfg.getString("trails." + particleString + ".options.colour")) : 15,
+				                                                cfg.getInt("trails." + particleString + ".options.display-speed"),
+				                                                cfg.getDouble("trails." + particleString + ".options.defaults.random.x-variation"),
+				                                                cfg.getDouble("trails." + particleString + ".options.defaults.random.y-variation"), cfg.getDouble("trails." + particleString + ".options.defaults.random.z-variation"),
+				                                                cfg.getDouble("trails." + particleString + ".options.defaults.dynamic.spray-variation"), cfg.getDouble("trails." + particleString + ".options.defaults.height.feet-location"),
+				                                                cfg.getDouble("trails." + particleString + ".options.defaults.height.waist-location"), cfg.getDouble("trails." + particleString + ".options.defaults.height.halo-location")));
 			}
 		}
 	}
 
-	public particleDefaultStorage getDefaults(String particle)
+	public static ParticleDefaultStorage getDefaults(ParticleEffect particle)
 	{
 		return particleDefaults.get(particle);
 	}

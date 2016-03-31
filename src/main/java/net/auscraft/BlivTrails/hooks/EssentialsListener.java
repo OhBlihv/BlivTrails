@@ -1,10 +1,8 @@
 package net.auscraft.BlivTrails.hooks;
 
-import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.PlayerConfig;
-import net.auscraft.BlivTrails.TrailListener;
-import net.auscraft.BlivTrails.utils.Utilities;
-
+import net.auscraft.BlivTrails.TrailManager;
+import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -12,14 +10,11 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 public class EssentialsListener implements Listener
 {
 
-	private TrailListener listener;
-
-	public EssentialsListener(BlivTrails instance)
+	public EssentialsListener()
 	{
-		listener = instance.getListener();
-		listener.vanishEnabled(true);
-		listener.vanishHook(2);
-		Utilities.logInfo("Essentials loaded | (Limited Support) Hooking...");
+		TrailManager.setVanishEnabled(true);
+		TrailManager.setVanishHook(2);
+		BUtil.logInfo("Essentials loaded | (Limited Support) Hooking...");
 	}
 
 	@EventHandler
@@ -29,17 +24,10 @@ public class EssentialsListener implements Listener
 		// if(cmd.contains("^(evanish|vanish|ev|essentials:vanish)$"))
 		if (cmd.equals("/v") || cmd.equals("/evanish") || cmd.equals("/vanish") || cmd.equals("/ev") || cmd.equals("/essentials:vanish"))
 		{
-			if (listener.getPlayerConfig().containsKey(event.getPlayer().getUniqueId().toString()))
+			if (TrailManager.getTrailMap().containsKey(event.getPlayer().getUniqueId()))
 			{
-				PlayerConfig pcfg = listener.getPlayerConfig().get(event.getPlayer().getUniqueId().toString());
-				if (pcfg.isVanished())
-				{
-					pcfg.setVanished(false);
-				}
-				else
-				{
-					pcfg.setVanished(true);
-				}
+				PlayerConfig pcfg = TrailManager.getTrailMap().get(event.getPlayer().getUniqueId());
+				pcfg.setVanished(!pcfg.isVanished());
 			}
 		}
 	}

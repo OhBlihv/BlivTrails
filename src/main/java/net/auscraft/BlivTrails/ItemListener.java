@@ -1,8 +1,8 @@
 package net.auscraft.BlivTrails;
 
-import net.auscraft.BlivTrails.config.ConfigAccessor;
-
-import net.auscraft.BlivTrails.utils.Utilities;
+import net.auscraft.BlivTrails.config.FlatFile;
+import net.auscraft.BlivTrails.listeners.GUIListener;
+import net.auscraft.BlivTrails.util.GUIUtil;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,45 +17,51 @@ import org.bukkit.inventory.meta.ItemMeta;
 public class ItemListener implements Listener
 {
 
-	private ConfigAccessor cfg;
-	private TrailListener listener;
+	private TrailManager listener;
 
-	public ItemListener(BlivTrails instance)
+	private ItemStack guiItem = null;
+	private int guiItemSlot = 0;
+
+	private Material guiItemMaterial;
+	private String guiItemDisplayname;
+
+	public ItemListener()
 	{
-		cfg = instance.getCfg();
-		listener = instance.getListener();
+		FlatFile cfg = FlatFile.getInstance();
+
+		if(cfg.getConfigurationSection("misc.gui-item") != null)
+		{
+			GUIUtil.ItemContainer tempContainer = GUIUtil.ItemContainer.buildItemContainer(cfg.getConfigurationSection("misc.gui-item"), true);
+			if(tempContainer != null)
+			{
+				guiItem = tempContainer.toItemStack(null);
+
+				ItemMeta itemMeta = guiItem.getItemMeta();
+
+				guiItemMaterial = guiItem.getType();
+				guiItemDisplayname = itemMeta.getDisplayName();
+
+				guiItemSlot = cfg.getInt("misc.gui-item.position");
+			}
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onPlayerUse(PlayerInteractEvent event)
 	{
-		if (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK))
+		if ((event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) && guiItem != null)
 		{
 			Player player = event.getPlayer();
-			try
+
+			if (player.getItemInHand() == null || player.getItemInHand().getType().equals(Material.AIR))
 			{
-				if (player.getItemInHand() == null || player.getItemInHand().getType().equals(Material.AIR))
-				{
-					return;
-				}
-				else if (cfg.getString("misc.gui-item.material").length() == 0)
-				{
-					Utilities.logDebug("Your GUI Item is invalid. Either disable this feature, or select a valid material.");
-					return;
-				}
-				else if (player.getItemInHand().getType().equals(Material.getMaterial(cfg.getString("misc.gui-item.material"))) && player.getItemInHand().getItemMeta().getDisplayName().contains(Utilities.stripColours(cfg.getString("misc.gui-item.name"))))
-				{
-					event.setCancelled(true);
-					listener.mainMenu(player);
-				}
+				return;
 			}
-			catch (NullPointerException e)
+
+			if (player.getItemInHand().getType() == guiItemMaterial && player.getItemInHand().getItemMeta().getDisplayName().equals(guiItemDisplayname))
 			{
-				if (cfg.getBoolean("misc.debug"))
-				{
-					e.printStackTrace();
-				}
-				Utilities.logDebug("GUI Item is invalid. Check your config.");
+				event.setCancelled(true);
+				GUIListener.mainMenu(player);
 			}
 		}
 	}
@@ -63,25 +69,16 @@ public class ItemListener implements Listener
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
 	{
-		if (cfg.getBoolean("misc.gui-give-on-join"))
+		if (guiItem != null && !event.getPlayer().getInventory().contains(guiItem))
 		{
-			ItemStack item = new ItemStack(Material.getMaterial(cfg.getString("misc.gui-item.material")));
-			ItemMeta meta = item.getItemMeta();
-			meta.setDisplayName(Utilities.translateColours(cfg.getString("misc.gui-item.name")));
-			meta.setLore(Utilities.translateColours(cfg.getStringList("misc.gui-item.lore")));
-			item.setItemMeta(meta);
-
-			if (!event.getPlayer().getInventory().contains(item)) // Can only have one
+			//If there is already an item in its place
+			if (event.getPlayer().getInventory().getItem(guiItemSlot) != null)
 			{
-				//If there is already an item in its place
-				if (event.getPlayer().getInventory().getItem(cfg.getInt("misc.gui-item.position")) != null) 
-				{
-					event.getPlayer().getInventory().addItem(item);
-				}
-				else
-				{
-					event.getPlayer().getInventory().setItem(cfg.getInt("misc.gui-item.position"), item);
-				}
+				event.getPlayer().getInventory().addItem(guiItem);
+			}
+			else
+			{
+				event.getPlayer().getInventory().setItem(guiItemSlot, guiItem);
 			}
 		}
 	}

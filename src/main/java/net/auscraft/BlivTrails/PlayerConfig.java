@@ -5,6 +5,8 @@ import lombok.Setter;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
 
+import java.util.UUID;
+
 public class PlayerConfig
 {
 	/*
@@ -14,29 +16,34 @@ public class PlayerConfig
 	 */
 
 	@Getter
-	private String uuid;
+	private UUID uuid;
+
 	@Getter
 	@Setter
 	private ParticleEffect particle;
+
 	@Getter
 	@Setter
 	private int type;
+
 	@Getter
 	@Setter
 	private int length;
+
 	@Getter
 	@Setter
 	private int height;
+
 	@Getter
 	@Setter
 	private int colour;
 
-	// Now, its less of trail config, and just storing values
+	// Now, it's less of trail config, and just storing values
 	@Getter
 	@Setter
 	private boolean vanished = false;
 
-	public PlayerConfig(String uuid, ParticleEffect particle, int type, int length, int height, int colour)
+	public PlayerConfig(UUID uuid, ParticleEffect particle, int type, int length, int height, int colour)
 	{
 		this.uuid = uuid;
 		if (particle != null)

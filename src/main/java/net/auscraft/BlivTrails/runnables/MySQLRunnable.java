@@ -3,8 +3,9 @@ package net.auscraft.BlivTrails.runnables;
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.PlayerConfig;
+import net.auscraft.BlivTrails.TrailManager;
 import net.auscraft.BlivTrails.storage.ParticleData;
-import net.auscraft.BlivTrails.utils.UUIDUtils;
+import net.auscraft.BlivTrails.util.UUIDUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -15,10 +16,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class MySQLRunnable implements Runnable
 {
 
-	private String uuid;
+	private UUID uuid;
 	private PlayerConfig pcfg;
 	private BlivTrails instance;
-	private ConcurrentHashMap<String, PlayerConfig> trailMap = null;
+	private ConcurrentHashMap<UUID, PlayerConfig> trailMap = null;
 	private boolean vanishEnabled;
 	private int vanishHook;
 	private Player player;
@@ -29,7 +30,7 @@ public class MySQLRunnable implements Runnable
 	//Remove == 2
 	short process;
 
-	public MySQLRunnable(String uuid, PlayerConfig pcfg, short process, ConcurrentHashMap<String, PlayerConfig> trailMap, BlivTrails instance)
+	public MySQLRunnable(UUID uuid, PlayerConfig pcfg, short process, ConcurrentHashMap<UUID, PlayerConfig> trailMap, BlivTrails instance)
 	{
 		this.uuid = uuid;
 		this.process = process;
@@ -42,9 +43,9 @@ public class MySQLRunnable implements Runnable
 		{
 			this.trailMap = trailMap;
 
-			vanishEnabled = instance.getListener().vanishEnabled();
-			vanishHook = instance.getListener().vanishHook();
-			player = Bukkit.getPlayer(UUID.fromString(uuid));
+			vanishEnabled = TrailManager.isVanishEnabled();
+			vanishHook = TrailManager.getVanishHook();
+			player = Bukkit.getPlayer(uuid);
 		}
 		else
 		{
@@ -55,7 +56,7 @@ public class MySQLRunnable implements Runnable
 
 	public void run()
 	{
-		byte[] uuidBytes = UUIDUtils.toBytes(UUID.fromString(uuid));
+		byte[] uuidBytes = UUIDUtils.toBytes(uuid);
 		
 		//Save
 		if (process == 0)
@@ -122,16 +123,16 @@ public class MySQLRunnable implements Runnable
 					// if(isVanished(player))
 					if (player.hasPermission("vanish.silentjoin"))
 					{
-						if (trailMap.containsKey(player.getUniqueId().toString()))
+						if (trailMap.containsKey(player.getUniqueId()))
 						{
-							trailMap.get(player.getUniqueId().toString()).setVanished(true);
+							trailMap.get(player.getUniqueId()).setVanished(true);
 							try
 							{
-								instance.getListener().getActiveTrails().remove(player.getUniqueId().toString());
+								TrailManager.getTaskMap().remove(player.getUniqueId());
 							}
 							catch (NullPointerException e)
 							{
-								// Player doesnt have an active trail to hide
+								// Player doesn't have an active trail to hide
 								// e.printStackTrace();
 							}
 						}
@@ -142,10 +143,10 @@ public class MySQLRunnable implements Runnable
 		//Remove
 		else
 		{
-			trailMap.put(uuid.toString(), new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
-			if(instance.getListener().getActiveTrails().containsKey(uuid))
+			trailMap.put(uuid, new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
+			if(TrailManager.getTaskMap().containsKey(uuid))
 			{
-				Bukkit.getServer().getScheduler().cancelTask(instance.getListener().getActiveTrails().remove(uuid));
+				Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().remove(uuid));
 			}
 			
 			try

@@ -1,36 +1,36 @@
 package net.auscraft.BlivTrails;
 
-import java.util.regex.Pattern;
-
-import net.auscraft.BlivTrails.config.ConfigAccessor;
-import net.auscraft.BlivTrails.utils.Utilities;
-
+import com.darkblade12.ParticleEffect.ParticleEffect;
+import net.auscraft.BlivTrails.config.FlatFile;
+import net.auscraft.BlivTrails.listeners.GUIListener;
+import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.darkblade12.ParticleEffect.ParticleEffect;
+import java.util.regex.Pattern;
 
 public class TrailCommand implements CommandExecutor
 {
 
 	private BlivTrails instance;
-	private ConfigAccessor cfg;
+	private FlatFile cfg;
 
 	public TrailCommand(BlivTrails instance)
 	{
 		this.instance = instance;
-		this.cfg = instance.getCfg();
+		cfg = FlatFile.getInstance();
 	}
 
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String args[])
 	{
 		if (cmd.getName().equalsIgnoreCase("trail"))
 		{
-			instance.getListener().mainMenu((Player) sender);
+			GUIListener.mainMenu((Player) sender);
 			return true;
 		}
 		else if (cmd.getName().equalsIgnoreCase("trailadmin") && sender.hasPermission("blivtrails.admin"))
@@ -44,12 +44,12 @@ public class TrailCommand implements CommandExecutor
 			{
 				if (args[0].equalsIgnoreCase("particles")) // /trailadmin particles|types|lengths|heights|colours
 				{
-					String output = " ";
-					for (ParticleEffect particleEff : TrailListener.usedTrails)
+					StringBuilder output = new StringBuilder(" ");
+					for (ParticleEffect particleEff : TrailManager.usedTrails)
 					{
-						output += Utilities.stripColours(cfg.getString("trails." + Utilities.trailConfigName(particleEff.toString()) + ".name")).replaceAll("[ ]", "_") + ", ";
+						output.append(cfg.getString("trails." + BUtil.trailConfigName(particleEff.toString()) + ".name").replaceAll("[ ]", "_")).append(", ");
 					}
-					sender.sendMessage(ChatColor.GREEN + "Available Particles:\n" + ChatColor.WHITE + output);
+					sender.sendMessage(ChatColor.GREEN + "Available Particles:\n" + ChatColor.WHITE + BUtil.stripColours(output.toString()));
 				}
 				else if (args[0].equalsIgnoreCase("types"))
 				{
@@ -69,19 +69,14 @@ public class TrailCommand implements CommandExecutor
 				}
 				else if (args[0].equalsIgnoreCase("remove"))
 				{
-					try
+					OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+					if (offlinePlayer == null || !offlinePlayer.isOnline())
 					{
-						Player player = Bukkit.getPlayer(args[1]);
-						if (player != null)
-						{
-							sender.sendMessage(instance.getListener().removePlayer(player.getUniqueId().toString()));
-						}
+						BUtil.printError(sender, "Player is not currently online. Cannot remove.");
+						return true;
 					}
-					catch (NullPointerException e)
-					{
-						Utilities.printError(sender, "Player is not currently online. Cannot remove.");
-					}
-					return true;
+
+					sender.sendMessage(TrailManager.removePlayer(offlinePlayer.getUniqueId()));
 				}
 				else if (args[0].equalsIgnoreCase("add"))
 				{
@@ -95,17 +90,17 @@ public class TrailCommand implements CommandExecutor
 
 							if (args.length == 3)
 							{
-								Utilities.printPlain(sender, instance.getListener().addTrail(player.getUniqueId().toString(), particle, "", "", "", ""));
+								BUtil.printPlain(sender, TrailManager.addTrail(player.getUniqueId(), particle, "", "", "", ""));
 							}
 							else if (args.length >= 4)
 							{
 								try
 								{
-									Utilities.printPlain(sender, Utilities.translateColours(instance.getListener().addTrail(player.getUniqueId().toString(), particle, args[3], args[4], args[5], args[6])));
+									BUtil.printPlain(sender, BUtil.translateColours(TrailManager.addTrail(player.getUniqueId(), particle, args[3], args[4], args[5], args[6])));
 								}
 								catch(ArrayIndexOutOfBoundsException e)
 								{
-									Utilities.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
+									BUtil.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
 									return true;
 								}
 							}
@@ -114,22 +109,21 @@ public class TrailCommand implements CommandExecutor
 					}
 					else
 					{
-						Utilities.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
+						BUtil.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
 						return true;
 					}
 
 				}
 				else if (args[0].equalsIgnoreCase("reload"))
 				{
-					if (ConfigAccessor.getInstance().reloadConfig())
+					if (FlatFile.getInstance().reloadFile())
 					{
-						Utilities.printError(sender, "You have config errors -- See Console for full printout");
+						BUtil.printError(sender, "You have config errors -- See Console for full printout");
 					}
 					instance.getMessages().reloadFile();
-					instance.getListener().loadDefaultOptions();
-					Utilities.setConfig(instance.getCfg());
-					Utilities.logSuccess("Config and Messages Reloaded!");
-					Utilities.printSuccess(sender, "Config and Messages Reloaded!");
+					TrailManager.loadDefaultOptions();
+					BUtil.logSuccess("Config and Messages Reloaded!");
+					BUtil.printSuccess(sender, "Config and Messages Reloaded!");
 					return true;
 				}
 				else

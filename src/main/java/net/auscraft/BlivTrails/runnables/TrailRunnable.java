@@ -1,22 +1,20 @@
 package net.auscraft.BlivTrails.runnables;
 
-import java.util.Random;
-
-import net.auscraft.BlivTrails.BlivTrails;
-import net.auscraft.BlivTrails.PlayerConfig;
-import net.auscraft.BlivTrails.TrailListener;
-import net.auscraft.BlivTrails.config.TrailDefaults;
-import net.auscraft.BlivTrails.config.TrailDefaults.particleDefaultStorage;
-import net.auscraft.BlivTrails.utils.Utilities;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
-
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import com.darkblade12.ParticleEffect.ParticleEffect.NoteColor;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleColor;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleProperty;
+import net.auscraft.BlivTrails.BlivTrails;
+import net.auscraft.BlivTrails.PlayerConfig;
+import net.auscraft.BlivTrails.config.TrailDefaults;
+import net.auscraft.BlivTrails.config.TrailDefaults.ParticleDefaultStorage;
+import net.auscraft.BlivTrails.TrailManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
+import java.util.Random;
+import java.util.UUID;
 
 public class TrailRunnable implements Runnable
 {
@@ -71,10 +69,11 @@ public class TrailRunnable implements Runnable
 	}
 
 	private BlivTrails plugin;
-	private TrailListener listener;
-	private String uuid;
+
+	private UUID uuid;
 	private Player player;
 	private Random rand;
+
 	double[] heightCfg = new double[3], variationCfg = new double[3];
 	double sprayCfg;
 	
@@ -93,44 +92,45 @@ public class TrailRunnable implements Runnable
 	 * @param pcfg
 	 *            PlayerConfig object of the player receiving the trail
 	 * @param listener
-	 *            TrailListener instance
+	 *            TrailManager instance
 	 * @param rand
 	 *            A Random() Object that is outside this function in order to
 	 *            reduce/stop duplicate results
 	 * @param option
 	 *            Global Option Array
 	 */
-	public TrailRunnable(TrailListener listener, Player player, PlayerConfig pcfg, Random rand, double[] option)
+	public TrailRunnable(Player player, PlayerConfig pcfg, Random rand, double[] option)
 	{
 		this.plugin = BlivTrails.getInstance();
-		this.listener = listener;
 		this.rand = rand;
 		this.player = player;
-		this.uuid = player.getUniqueId().toString();
+		this.uuid = player.getUniqueId();
 		particle = pcfg.getParticle();
-		particleDefaultStorage pDef = TrailDefaults.getInstance().getDefaults(Utilities.trailConfigName(pcfg.getParticle().toString()));
+		ParticleDefaultStorage particleStorage = TrailDefaults.getDefaults(particle);
 
 		// Height Global/Trail-Specific Overrides
 		// If there isnt trail-given override, use the global value
-		if (pDef.getDouble("feetlocation") != 0.0)
+		if (particleStorage.getFeetLocation() != 0D)
 		{
-			heightCfg[0] = pDef.getDouble("feetlocation");
+			heightCfg[0] = particleStorage.getFeetLocation();
 		}
 		else
 		{
 			heightCfg[0] = option[4];
 		}
-		if (pDef.getDouble("waistlocation") != 0.0)
+
+		if (particleStorage.getWaistLocation() != 0D)
 		{
-			heightCfg[1] = pDef.getDouble("waistlocation");
+			heightCfg[1] = particleStorage.getWaistLocation();
 		}
 		else
 		{
 			heightCfg[1] = option[5];
 		}
-		if (pDef.getDouble("halolocation") != 0.0)
+
+		if (particleStorage.getHaloLocation() != 0D)
 		{
-			heightCfg[2] = pDef.getDouble("halolocation");
+			heightCfg[2] = particleStorage.getHaloLocation();
 		}
 		else
 		{
@@ -138,25 +138,27 @@ public class TrailRunnable implements Runnable
 		}
 
 		// Random Global/Trail-Specific Overrides
-		if (pDef.getDouble("xvariation") != 0.0)
+		if (particleStorage.getXVariation() != 0D)
 		{
-			variationCfg[0] = pDef.getDouble("xvariation");
+			variationCfg[0] = particleStorage.getXVariation();
 		}
 		else
 		{
 			variationCfg[0] = option[0];
 		}
-		if (pDef.getDouble("yvariation") != 0.0)
+
+		if (particleStorage.getYVariation() != 0D)
 		{
-			variationCfg[1] = pDef.getDouble("yvariation");
+			variationCfg[1] = particleStorage.getYVariation();
 		}
 		else
 		{
 			variationCfg[1] = option[1];
 		}
-		if (pDef.getDouble("zvariation") != 0.0)
+
+		if (particleStorage.getZVariation() != 0D)
 		{
-			variationCfg[2] = pDef.getDouble("zvariation");
+			variationCfg[2] = particleStorage.getZVariation();
 		}
 		else
 		{
@@ -164,9 +166,9 @@ public class TrailRunnable implements Runnable
 		}
 
 		// Dynamic Spread Global/Trail-Specific Overrides
-		if (pDef.getDouble("sprayvariation") != 0.0)
+		if (particleStorage.getSprayVariation() != 0D)
 		{
-			sprayCfg = pDef.getDouble("sprayvariation");
+			sprayCfg = particleStorage.getSprayVariation();
 		}
 		else
 		{
@@ -311,7 +313,7 @@ public class TrailRunnable implements Runnable
 	{
 		try
 		{
-			if (listener.getTrailTimeLeft().get(uuid) > 0)
+			if (TrailManager.getTrailTime().get(uuid) > 0)
 			{
 				final ParticleEffect finalParticle = particle;
 				
@@ -391,20 +393,20 @@ public class TrailRunnable implements Runnable
 						{
 							if(type == 2)
 							{
-								Bukkit.getScheduler().runTaskLater(plugin,
+								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
 										new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 							else
 							{
-								Bukkit.getScheduler().runTaskLater(plugin,
+								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
 										new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 						}
 						else
 						{
-							Bukkit.getScheduler().runTaskLater(plugin, 
+							Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
 									new DisplayRegularRunnable(finalParticle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 							// public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
 									
@@ -418,18 +420,18 @@ public class TrailRunnable implements Runnable
 			e.printStackTrace();
 			try
 			{
-				listener.getPlayerConfig().remove(uuid);
+				TrailManager.getTrailMap().remove(uuid);
 			}
 			catch (NullPointerException e2)
 			{
 				//
 			}
 
-			Bukkit.getServer().getScheduler().cancelTask(listener.getActiveTrails().get(uuid)); // Cancel Self
+			Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().get(uuid)); // Cancel Self
 		}
 		catch(NullPointerException e)
 		{
-			Bukkit.getServer().getScheduler().cancelTask(listener.getActiveTrails().get(uuid)); // Cancel Self
+			Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().get(uuid)); // Cancel Self
 		}
 	}
 	

@@ -5,7 +5,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import lombok.Getter;
 import lombok.Setter;
 import net.auscraft.BlivTrails.storage.mysql.ByteArray;
-import net.auscraft.BlivTrails.utils.UUIDUtils;
+import net.auscraft.BlivTrails.util.UUIDUtils;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;

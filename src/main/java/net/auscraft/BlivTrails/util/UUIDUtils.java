@@ -1,4 +1,4 @@
-package net.auscraft.BlivTrails.utils;
+package net.auscraft.BlivTrails.util;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;

@@ -4,15 +4,16 @@ import com.j256.ormlite.jdbc.JdbcPooledConnectionSource;
 import com.j256.ormlite.logger.LocalLog;
 import com.j256.ormlite.table.TableUtils;
 import lombok.Getter;
-import lombok.Setter;
-import net.auscraft.BlivTrails.config.ConfigAccessor;
 import net.auscraft.BlivTrails.config.FlatFile;
+import net.auscraft.BlivTrails.config.FlatFileStorage;
 import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.hooks.EssentialsListener;
 import net.auscraft.BlivTrails.hooks.VanishListener;
+import net.auscraft.BlivTrails.listeners.GUIListener;
+import net.auscraft.BlivTrails.listeners.TrailListener;
 import net.auscraft.BlivTrails.storage.ParticleData;
 import net.auscraft.BlivTrails.storage.ParticleStorage;
-import net.auscraft.BlivTrails.utils.Utilities;
+import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -20,49 +21,48 @@ import org.bukkit.scheduler.BukkitScheduler;
 import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BlivTrails extends JavaPlugin
 {
 
 	@Getter
-	@Setter
-	private TrailListener listener;
+	private static BlivTrails instance = null;
+
 	private JdbcPooledConnectionSource ds = null;
-	@Getter
-	private ConfigAccessor cfg;
-	private FlatFile flatfile = null;
+
+	private FlatFileStorage flatFileStorage = null;
+
 	@Getter
 	private Messages messages;
-	@Getter
-	private Random rand;
+
+	public static final Random rand = new Random();
+
 	@Getter
 	private ParticleStorage particleStorage;
-	
-	private static BlivTrails instance = null;
-	
-	public static BlivTrails getInstance()
-	{
-		if(instance == null)
-		{
-			instance = (BlivTrails) Bukkit.getPluginManager().getPlugin("BlivTrails");
-		}
-		return instance;
-	}
+
+	//Variables
+
+	private int trailTimeoutCheckTime = 20;
 
 	@Override
 	public void onEnable()
 	{
+		instance = this;
+
 		messages = Messages.getInstance();
-		cfg = ConfigAccessor.getInstance();
+		FlatFile cfg = FlatFile.getInstance();
+
+		BUtil.DEBUG = cfg.getBoolean("misc.debug"); //Init here, since we're not using constructors in BUtil
 
 		if (cfg.getBoolean("database.mysql"))
 		{
-			Utilities.logInfo("Using MySQL as the storage option");
+			BUtil.logInfo("Using MySQL as the storage option");
 			disableDatabaseLogging();
 			try
 			{
-				SQLSetup();
+				sqlSetup();
 			}
 			catch (SQLException e)
 			{
@@ -73,17 +73,23 @@ public class BlivTrails extends JavaPlugin
 		}
 		else
 		{
-			Utilities.logInfo("Using FlatFile as the storage option");
-			flatfile = FlatFile.getInstance();
+			BUtil.logInfo("Using FlatFile as the storage option");
+			flatFileStorage = FlatFileStorage.getInstance();
 		}
-		getServer().getPluginManager().registerEvents(new TrailListener(this), this);
+
+		TrailManager.init(this);
+		getServer().getPluginManager().registerEvents(new TrailListener(), this);
+
+		GUIListener.reload();
+		getServer().getPluginManager().registerEvents(new GUIListener(), this);
+
 		getCommand("trail").setExecutor(new TrailCommand(this));
 		getCommand("trailadmin").setExecutor(new TrailCommand(this));
 		doHooks();
-		rand = new Random(System.currentTimeMillis());
 
 		if (!cfg.getBoolean("trails.misc.display-when-still"))
 		{
+			trailTimeoutCheckTime = cfg.getInt("trails.scheduler.check-time");
 			doTrailTimeouts();
 		}
 	}
@@ -91,7 +97,7 @@ public class BlivTrails extends JavaPlugin
 	@Override
 	public void onDisable()
 	{
-		this.getListener().doDisable();
+		TrailManager.doDisable();
 		try
 		{
 			ds.closeQuietly();
@@ -104,16 +110,7 @@ public class BlivTrails extends JavaPlugin
 
 	public void doItemListener()
 	{
-		getServer().getPluginManager().registerEvents(new ItemListener(this), this);
-	}
-
-	public Object getSave()
-	{
-		if (ds != null)
-		{
-			return ds;
-		}
-		return flatfile;
+		getServer().getPluginManager().registerEvents(new ItemListener(), this);
 	}
 
 	private void doHooks()
@@ -122,15 +119,15 @@ public class BlivTrails extends JavaPlugin
 		{
 			if (this.getServer().getPluginManager().getPlugin("VanishNoPacket") != null)
 			{
-				getServer().getPluginManager().registerEvents(new VanishListener(this), this);
+				getServer().getPluginManager().registerEvents(new VanishListener(), this);
 			}
 			else if (this.getServer().getPluginManager().getPlugin("Essentials") != null)
 			{
-				getServer().getPluginManager().registerEvents(new EssentialsListener(this), this);
+				getServer().getPluginManager().registerEvents(new EssentialsListener(), this);
 			}
 			else
 			{
-				Utilities.logInfo("No Vanish Plugin Hooked.");
+				BUtil.logInfo("No Vanish Plugin Hooked.");
 			}
 		}
 		catch (NullPointerException e)
@@ -139,8 +136,10 @@ public class BlivTrails extends JavaPlugin
 		}
 	}
 
-	private void SQLSetup() throws SQLException
+	private void sqlSetup() throws SQLException
 	{
+		FlatFile cfg = FlatFile.getInstance();
+
 		ds = new JdbcPooledConnectionSource(cfg.getString("database.url"));
 
 		if (!cfg.getString("database.username").isEmpty())
@@ -175,6 +174,15 @@ public class BlivTrails extends JavaPlugin
 		}
 	}
 
+	public Object getSave()
+	{
+		if (ds != null)
+		{
+			return ds;
+		}
+		return flatFileStorage;
+	}
+
 	private void disableDatabaseLogging()
 	{
 		System.setProperty(LocalLog.LOCAL_LOG_LEVEL_PROPERTY, "INFO");
@@ -182,22 +190,20 @@ public class BlivTrails extends JavaPlugin
 
 	private void doTrailTimeouts()
 	{
-		final int checkTime = cfg.getInt("trails.scheduler.check-time");
-
 		Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable()
 		{
 
 			public void run()
 			{
 				BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-				ConcurrentHashMap<String, Integer> trailTasks = listener.getActiveTrails();
-				ConcurrentHashMap<String, Float> trailTime = listener.getTrailTimeLeft();
+				ConcurrentHashMap<UUID, Integer> trailTasks = TrailManager.getTaskMap();
+				ConcurrentHashMap<UUID, Float> trailTime = TrailManager.getTrailTime();
 
-				int taskId = 0;
-				float resultingTime = 0;
+				int taskId;
+				float resultingTime;
 
-				String uuid = "";
-				final Enumeration<String> itr = trailTasks.keys();
+				UUID uuid;
+				final Enumeration<UUID> itr = trailTasks.keys();
 				while (itr.hasMoreElements())
 				{
 					uuid = itr.nextElement();
@@ -206,23 +212,18 @@ public class BlivTrails extends JavaPlugin
 					//If trail is active for the current player
 					if (scheduler.isQueued(taskId) || scheduler.isCurrentlyRunning(taskId)) 
 					{
-						resultingTime = trailTime.get(uuid) - checkTime;
+						resultingTime = trailTime.get(uuid) - trailTimeoutCheckTime;
 						if (resultingTime > 0)
 						{
 							trailTime.replace(uuid, resultingTime);
-						}
-						else
-						{
-							trailTime.remove(uuid);
+							continue;
 						}
 					}
-					else
-					{
-						trailTasks.remove(uuid); // TaskID is stale and not in use anymore. Cleanup.
-					}
+
+					trailTasks.remove(uuid); // TaskID is stale and not in use anymore. Cleanup.
 				}
 			}
-		}, 0L, checkTime * 20);
+		}, 0L, trailTimeoutCheckTime * 20L);
 
 	}
 

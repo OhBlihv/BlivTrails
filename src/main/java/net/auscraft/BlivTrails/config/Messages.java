@@ -1,30 +1,27 @@
 package net.auscraft.BlivTrails.config;
 
-import net.auscraft.BlivTrails.utils.Utilities;
-
+import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 
 public class Messages extends FlatFile
 {
-	private static Messages instance;
-	
-	private Messages()
-	{
-		super();
-		
-		save.options().copyDefaults(true);
-		doDefaults();
-	}
-	
+	private static Messages instance = null;
 	public static Messages getInstance()
 	{
 		if(instance == null)
 		{
-			fileName = "messages.yml";
 			instance = new Messages();
 		}
 		return instance;
+	}
+
+	private Messages()
+	{
+		super("messages.yml");
+
+		save.options().copyDefaults(true);
+		doDefaults();
 	}
 
 	public void doDefaults() // Add in config options which were added in versions newer than 1.0
@@ -41,7 +38,7 @@ public class Messages extends FlatFile
 	{
 		try
 		{
-			return Utilities.translateColours(this.save.getString(path));
+			return BUtil.translateColours(super.getString(path));
 		}
 		catch (NullPointerException e)
 		{
