@@ -1,33 +1,26 @@
 package net.auscraft.BlivTrails.hooks;
 
 import net.auscraft.BlivTrails.TrailManager;
-import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.kitteh.vanish.event.VanishStatusChangeEvent;
+import org.bukkit.entity.Player;
 
-public class VanishListener implements Listener
+/**
+ * Created by OhBlihv (Chris) on 31/03/2016.
+ * This file is part of the project BlivTrails
+ */
+public abstract class VanishListener
 {
 
-	public VanishListener()
+	public void onVanishEvent(Player player, boolean isVanishing)
 	{
-		TrailManager.setVanishEnabled(true);
-		TrailManager.setVanishHook(1);
-		BUtil.logInfo("VanishNoPacket loaded | Hooking...");
-	}
-
-	@EventHandler
-	public void onVanish(VanishStatusChangeEvent event)
-	{
-		if (TrailManager.getTrailMap().containsKey(event.getPlayer().getUniqueId()))
+		if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
 		{
-			TrailManager.getTrailMap().get(event.getPlayer().getUniqueId()).setVanished(event.isVanishing());
-			if (event.isVanishing())
+			TrailManager.getTrailMap().get(player.getUniqueId()).setVanished(isVanishing);
+			if (isVanishing)
 			{
 				try
 				{
-					Bukkit.getScheduler().cancelTask(TrailManager.getTaskMap().get(event.getPlayer().getUniqueId()));
+					Bukkit.getScheduler().cancelTask(TrailManager.getTaskMap().get(player.getUniqueId()));
 				}
 				catch (NullPointerException e)
 				{

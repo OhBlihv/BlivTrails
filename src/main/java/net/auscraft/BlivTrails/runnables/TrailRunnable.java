@@ -6,20 +6,21 @@ import com.darkblade12.ParticleEffect.ParticleEffect.ParticleColor;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleProperty;
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.PlayerConfig;
+import net.auscraft.BlivTrails.TrailManager;
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.ParticleDefaultStorage;
-import net.auscraft.BlivTrails.TrailManager;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.Random;
 import java.util.UUID;
+
+import static net.auscraft.BlivTrails.BlivTrails.rand;
 
 public class TrailRunnable implements Runnable
 {
 
-	private class DisplayColourableRunnable implements Runnable
+	private static class DisplayColourableRunnable implements Runnable
 	{
 
 		private ParticleEffect particle;
@@ -40,7 +41,7 @@ public class TrailRunnable implements Runnable
 		}
 	}
 
-	private class DisplayRegularRunnable implements Runnable
+	private static class DisplayRegularRunnable implements Runnable
 	{
 
 		private ParticleEffect particle;
@@ -72,7 +73,6 @@ public class TrailRunnable implements Runnable
 
 	private UUID uuid;
 	private Player player;
-	private Random rand;
 
 	double[] heightCfg = new double[3], variationCfg = new double[3];
 	double sprayCfg;
@@ -93,16 +93,12 @@ public class TrailRunnable implements Runnable
 	 *            PlayerConfig object of the player receiving the trail
 	 * @param listener
 	 *            TrailManager instance
-	 * @param rand
-	 *            A Random() Object that is outside this function in order to
-	 *            reduce/stop duplicate results
 	 * @param option
 	 *            Global Option Array
 	 */
-	public TrailRunnable(Player player, PlayerConfig pcfg, Random rand, double[] option)
+	public TrailRunnable(Player player, PlayerConfig pcfg, double[] option)
 	{
 		this.plugin = BlivTrails.getInstance();
-		this.rand = rand;
 		this.player = player;
 		this.uuid = player.getUniqueId();
 		particle = pcfg.getParticle();
@@ -242,7 +238,7 @@ public class TrailRunnable implements Runnable
 					break; // Orange
 				// CANNOT DO WHITE
 				case 16:
-					data = new NoteColor(rand.nextInt(24));
+					data = new NoteColor(BlivTrails.rand.nextInt(24));
 					break; // Random
 				default:
 					data = new NoteColor(24);
@@ -394,20 +390,20 @@ public class TrailRunnable implements Runnable
 							if(type == 2)
 							{
 								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-										new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
+								                                                 new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 							else
 							{
 								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-										new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
+								                                                 new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 						}
 						else
 						{
 							Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-									new DisplayRegularRunnable(finalParticle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
+							                                                 new DisplayRegularRunnable(finalParticle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 							// public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
 									
 						}

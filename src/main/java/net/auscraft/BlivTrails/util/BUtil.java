@@ -57,7 +57,7 @@ public class BUtil
 	private static boolean useConsoleColours = false;
 	public static boolean DEBUG = false;
 
-	private static final String PLUGIN_NAME = "DWatchdog";
+	private static final String PLUGIN_NAME = "BlivTrails";
 	private static final String prefix = "&f[&b" + PLUGIN_NAME + "&f]&r ";
 	private static final String playerPrefix = "\u00A78[\u00A7e" + PLUGIN_NAME + "\u00A78]\u00A7r ";
 	private static final java.util.logging.Logger log = Bukkit.getLogger();

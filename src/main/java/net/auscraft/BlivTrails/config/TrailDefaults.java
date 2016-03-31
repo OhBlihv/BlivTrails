@@ -45,6 +45,8 @@ public class TrailDefaults
 
 	@Getter
 	private static ConcurrentHashMap<ParticleEffect, ParticleDefaultStorage> particleDefaults = new ConcurrentHashMap<>();
+
+	private static ParticleDefaultStorage defaultParticleOptions = null;
 	
 	public static TrailDefaults getInstance()
 	{
@@ -54,15 +56,19 @@ public class TrailDefaults
 		}
 		return instance;
 	}
-
-	@Getter
-	private static int defaultSpeed = 1;
 	
 	private TrailDefaults()
 	{
 		FlatFile cfg = FlatFile.getInstance();
 
-		defaultSpeed = cfg.getInt("trails.defaults.display-speed");
+		defaultParticleOptions = new ParticleDefaultStorage("", 0, 1, 0, 0, 1,
+		                                                    TrailManager.getOption()[0],
+		                                                    TrailManager.getOption()[1],
+		                                                    TrailManager.getOption()[2],
+		                                                    TrailManager.getOption()[3],
+		                                                    TrailManager.getOption()[4],
+		                                                    TrailManager.getOption()[5],
+		                                                    TrailManager.getOption()[6]);
 
 		String particleString;
 		for (ParticleEffect particle : TrailManager.usedTrails)
@@ -88,7 +94,12 @@ public class TrailDefaults
 
 	public static ParticleDefaultStorage getDefaults(ParticleEffect particle)
 	{
-		return particleDefaults.get(particle);
+		ParticleDefaultStorage particleDefaultOptions = particleDefaults.get(particle);
+		if(particleDefaultOptions == null)
+		{
+			return defaultParticleOptions;
+		}
+		return particleDefaultOptions;
 	}
 
 	public int typeStringtoInt(String typeString)

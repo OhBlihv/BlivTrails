@@ -12,8 +12,7 @@ public class EssentialsListener implements Listener
 
 	public EssentialsListener()
 	{
-		TrailManager.setVanishEnabled(true);
-		TrailManager.setVanishHook(2);
+		TrailManager.setVanishHook(TrailManager.VanishHook.ESSENTIALS);
 		BUtil.logInfo("Essentials loaded | (Limited Support) Hooking...");
 	}
 

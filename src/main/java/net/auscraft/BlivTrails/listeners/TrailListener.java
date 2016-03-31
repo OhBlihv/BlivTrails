@@ -11,12 +11,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.UUID;
 
-import static net.auscraft.BlivTrails.BlivTrails.rand;
+import static net.auscraft.BlivTrails.TrailManager.loadTrail;
 import static net.auscraft.BlivTrails.TrailManager.saveTrail;
 
 /**
@@ -25,6 +26,23 @@ import static net.auscraft.BlivTrails.TrailManager.saveTrail;
  */
 public class TrailListener implements Listener
 {
+
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent event)
+	{
+		final Player player = event.getPlayer();
+		Bukkit.getScheduler().runTaskLater(BlivTrails.getInstance(), new Runnable()
+		{
+
+			@Override
+			public void run()
+			{
+				loadTrail(player);
+				// Wait a few seconds for the async sql read to go through
+			}
+
+		}, 100L);
+	}
 
 	@EventHandler
 	public void onPlayerLeave(PlayerQuitEvent event)
@@ -57,7 +75,7 @@ public class TrailListener implements Listener
 			if (!TrailManager.getTaskMap().containsKey(uuid))
 			{
 				PlayerConfig pcfg = TrailManager.getTrailMap().get(uuid);
-				if (TrailManager.isVanishEnabled() && pcfg.isVanished())
+				if (TrailManager.getVanishHook() != TrailManager.VanishHook.NONE && pcfg.isVanished())
 				{
 					return; // If Vanished, don't do the trail.
 				}
@@ -68,20 +86,20 @@ public class TrailListener implements Listener
 					return;
 				}
 
-				int speed = TrailDefaults.getDefaultSpeed();
-				if (speed == 0) // If config option is not set, will default to 1
-				{
-					speed = 1;
-				}
-
+				int speed = 0;
 				TrailDefaults.ParticleDefaultStorage particleDefaults = TrailDefaults.getDefaults(pcfg.getParticle());
 				if (particleDefaults.getDisplaySpeed() != 0)
 				{
 					speed = particleDefaults.getDisplaySpeed();
 				}
 
+				if(speed == 0)
+				{
+					speed = 1;
+				}
+
 				// public TrailRunnable(BlivTrails instance, Player player, PlayerConfig pcfg, TrailManager listener, Random rand, double[] option)
-				TrailManager.getTaskMap().put(uuid, Bukkit.getScheduler().runTaskTimerAsynchronously(BlivTrails.getInstance(), new TrailRunnable(event.getPlayer(), pcfg, rand, TrailManager.getOption()), 0L, speed).getTaskId());
+				TrailManager.getTaskMap().put(uuid, Bukkit.getScheduler().runTaskTimerAsynchronously(BlivTrails.getInstance(), new TrailRunnable(event.getPlayer(), pcfg, TrailManager.getOption()), 0L, speed).getTaskId());
 				TrailManager.getTrailTime().put(uuid, TrailManager.getTrailLength());
 			}
 			else

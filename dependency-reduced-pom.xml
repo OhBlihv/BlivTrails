@@ -85,6 +85,13 @@
       <systemPath>S:\Google Drive\dev\AusCraft\BlivTrails/lib/VanishNoPacket-3.19.1.jar</systemPath>
     </dependency>
     <dependency>
+      <groupId>de.myzelyam</groupId>
+      <artifactId>SuperVanish</artifactId>
+      <version>5.6.2</version>
+      <scope>system</scope>
+      <systemPath>S:\Google Drive\dev\AusCraft\BlivTrails/lib/SuperVanish.jar</systemPath>
+    </dependency>
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.16.4</version>

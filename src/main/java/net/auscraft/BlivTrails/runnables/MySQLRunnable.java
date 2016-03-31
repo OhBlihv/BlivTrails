@@ -1,6 +1,7 @@
 package net.auscraft.BlivTrails.runnables;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
+import de.myzelyam.api.vanish.VanishAPI;
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailManager;
@@ -20,8 +21,7 @@ public class MySQLRunnable implements Runnable
 	private PlayerConfig pcfg;
 	private BlivTrails instance;
 	private ConcurrentHashMap<UUID, PlayerConfig> trailMap = null;
-	private boolean vanishEnabled;
-	private int vanishHook;
+	private TrailManager.VanishHook vanishHook;
 	private Player player;
 
 	// Control flag to determine if the runnable is saving or loading
@@ -43,7 +43,6 @@ public class MySQLRunnable implements Runnable
 		{
 			this.trailMap = trailMap;
 
-			vanishEnabled = TrailManager.isVanishEnabled();
 			vanishHook = TrailManager.getVanishHook();
 			player = Bukkit.getPlayer(uuid);
 		}
@@ -116,26 +115,50 @@ public class MySQLRunnable implements Runnable
 				}
 			}
 			trailMap.put(uuid, new PlayerConfig(uuid, particleEff, particleData.getType(), particleData.getLength(), particleData.getHeight(), particleData.getColour()));
-			if (vanishEnabled)
+			if (vanishHook != TrailManager.VanishHook.NONE)
 			{
-				if (vanishHook == 1) // VanishNoPacket
+				switch(vanishHook)
 				{
-					// if(isVanished(player))
-					if (player.hasPermission("vanish.silentjoin"))
+					case VANISH_NO_PACKET:
 					{
-						if (trailMap.containsKey(player.getUniqueId()))
+						// if(isVanished(player))
+						if (player.hasPermission("vanish.silentjoin"))
 						{
-							trailMap.get(player.getUniqueId()).setVanished(true);
-							try
+							if (trailMap.containsKey(player.getUniqueId()))
 							{
-								TrailManager.getTaskMap().remove(player.getUniqueId());
-							}
-							catch (NullPointerException e)
-							{
-								// Player doesn't have an active trail to hide
-								// e.printStackTrace();
+								trailMap.get(player.getUniqueId()).setVanished(true);
+								try
+								{
+									TrailManager.getTaskMap().remove(player.getUniqueId());
+								}
+								catch (NullPointerException e)
+								{
+									// Player doesn't have an active trail to hide
+									// e.printStackTrace();
+								}
 							}
 						}
+						break;
+					}
+					case SUPER_PREMIUM_VANISH:
+					{
+						if(VanishAPI.isInvisible(player))
+						{
+							if (trailMap.containsKey(player.getUniqueId()))
+							{
+								trailMap.get(player.getUniqueId()).setVanished(true);
+								try
+								{
+									TrailManager.getTaskMap().remove(player.getUniqueId());
+								}
+								catch (NullPointerException e)
+								{
+									// Player doesn't have an active trail to hide
+									// e.printStackTrace();
+								}
+							}
+						}
+						break;
 					}
 				}
 			}

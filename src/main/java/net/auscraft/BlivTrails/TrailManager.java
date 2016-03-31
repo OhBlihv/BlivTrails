@@ -29,6 +29,24 @@ import java.util.regex.Pattern;
 public class TrailManager
 {
 
+	public enum VanishHook
+	{
+
+		NONE(0),
+		VANISH_NO_PACKET(1),
+		ESSENTIALS(2),
+		SUPER_PREMIUM_VANISH(3);
+
+		@Getter
+		int hookType;
+
+		VanishHook(int hookType)
+		{
+			this.hookType = hookType;
+		}
+
+	}
+
 	public static final ParticleEffect[] usedTrails = { ParticleEffect.VILLAGER_ANGRY, ParticleEffect.BARRIER, ParticleEffect.CLOUD, ParticleEffect.CRIT,
 			ParticleEffect.CRIT_MAGIC, ParticleEffect.DRIP_LAVA, ParticleEffect.DRIP_WATER, ParticleEffect.ENCHANTMENT_TABLE, ParticleEffect.EXPLOSION_NORMAL,
 			ParticleEffect.FIREWORKS_SPARK, ParticleEffect.FLAME, ParticleEffect.HEART, ParticleEffect.LAVA, ParticleEffect.NOTE, ParticleEffect.PORTAL,
@@ -54,9 +72,6 @@ public class TrailManager
 	@Getter
 	private static float trailLength;
 
-	@Getter
-	@Setter
-	private static boolean vanishEnabled;
 	private static BukkitScheduler scheduler;
 
 	/*
@@ -64,7 +79,7 @@ public class TrailManager
 	 */
 	@Getter
 	@Setter
-	private static int vanishHook;
+	private static VanishHook vanishHook = VanishHook.NONE;
 
 	//Prevent accidental construction
 	private TrailManager()
@@ -82,9 +97,6 @@ public class TrailManager
 		msg = Messages.getInstance();
 
 		trailLength = cfg.getFloat("trails.scheduler.trail-length");
-
-		vanishEnabled = false;
-		vanishHook = 0;
 
 		Object saveLoc = plugin.getSave();
 		if (!(saveLoc instanceof JdbcPooledConnectionSource))
@@ -135,23 +147,6 @@ public class TrailManager
 		option[6] = cfg.getDouble("trails.defaults.height.halo-location");
 		
 		BUtil.logInfo("Finished Loading Defaults!");
-	}
-
-	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent event)
-	{
-		final Player player = event.getPlayer();
-		scheduler.runTaskLater(instance, new Runnable()
-		{
-
-			@Override
-			public void run()
-			{
-				loadTrail(player);
-				// Wait a few seconds for the async sql read to go through
-			}
-			
-		}, 100L);
 	}
 
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("[%](\\S+)[%]");
@@ -520,35 +515,39 @@ public class TrailManager
 	public boolean isVanished(Player player)
 	{
 		boolean isVanished = false;
-		if (vanishHook == 1) // VanishNoPacket
+		switch(vanishHook)
 		{
-			try
+			case VANISH_NO_PACKET:
 			{
-				isVanished = ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player);
-				BUtil.logDebug("Player is: " + ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player));
+				try
+				{
+					isVanished = ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player);
+					BUtil.logDebug("Player is: " + ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player));
+				}
+				catch (NullPointerException | NoClassDefFoundError e)
+				{
+					BUtil.logDebug("VanishNoPacket was called, but isn't loaded.");
+					// VanishNoPacket isnt loaded on the server
+				}
+				break;
 			}
-			catch (NullPointerException | NoClassDefFoundError e)
+			case ESSENTIALS:
 			{
-				BUtil.logDebug("VanishNoPacket was called, but isn't loaded.");
-				// VanishNoPacket isnt loaded on the server
+				//?
+				break;
 			}
-		}
-		else if (vanishHook == 2) // Essentials Vanish
-		{
-			//?
+			case SUPER_PREMIUM_VANISH:
+			{
+				break;
+			}
 		}
 
 		return isVanished;
 	}
 
-	public void vanishEnabled(boolean enabled)
+	public static void vanishHook(VanishHook inVanishHook)
 	{
-		vanishEnabled = enabled;
-	}
-
-	public void vanishHook(int i)
-	{
-		vanishHook = i;
+		vanishHook = inVanishHook;
 	}
 
 }

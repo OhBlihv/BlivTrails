@@ -7,14 +7,17 @@ import lombok.Getter;
 import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.config.FlatFileStorage;
 import net.auscraft.BlivTrails.config.Messages;
+import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.hooks.EssentialsListener;
-import net.auscraft.BlivTrails.hooks.VanishListener;
+import net.auscraft.BlivTrails.hooks.SuperPremiumVanishListener;
+import net.auscraft.BlivTrails.hooks.VanishNoPacketListener;
 import net.auscraft.BlivTrails.listeners.GUIListener;
 import net.auscraft.BlivTrails.listeners.TrailListener;
 import net.auscraft.BlivTrails.storage.ParticleData;
 import net.auscraft.BlivTrails.storage.ParticleStorage;
 import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
@@ -31,7 +34,6 @@ public class BlivTrails extends JavaPlugin
 	private static BlivTrails instance = null;
 
 	private JdbcPooledConnectionSource ds = null;
-
 	private FlatFileStorage flatFileStorage = null;
 
 	@Getter
@@ -78,6 +80,8 @@ public class BlivTrails extends JavaPlugin
 		}
 
 		TrailManager.init(this);
+		TrailDefaults.getInstance(); //Init defaults
+
 		getServer().getPluginManager().registerEvents(new TrailListener(), this);
 
 		GUIListener.reload();
@@ -117,13 +121,18 @@ public class BlivTrails extends JavaPlugin
 	{
 		try
 		{
-			if (this.getServer().getPluginManager().getPlugin("VanishNoPacket") != null)
+			PluginManager pluginManager = getServer().getPluginManager();
+			if (pluginManager.getPlugin("VanishNoPacket") != null)
 			{
-				getServer().getPluginManager().registerEvents(new VanishListener(), this);
+				pluginManager.registerEvents(new VanishNoPacketListener(), this);
 			}
-			else if (this.getServer().getPluginManager().getPlugin("Essentials") != null)
+			else if(pluginManager.isPluginEnabled("SuperVanish") || pluginManager.isPluginEnabled("PremiumVanish"))
 			{
-				getServer().getPluginManager().registerEvents(new EssentialsListener(), this);
+				pluginManager.registerEvents(new SuperPremiumVanishListener(), this);
+			}
+			else if (pluginManager.getPlugin("Essentials") != null)
+			{
+				pluginManager.registerEvents(new EssentialsListener(), this);
 			}
 			else
 			{
@@ -210,7 +219,7 @@ public class BlivTrails extends JavaPlugin
 
 					taskId = trailTasks.get(uuid);
 					//If trail is active for the current player
-					if (scheduler.isQueued(taskId) || scheduler.isCurrentlyRunning(taskId)) 
+					if (scheduler.isQueued(taskId) || scheduler.isCurrentlyRunning(taskId))
 					{
 						resultingTime = trailTime.get(uuid) - trailTimeoutCheckTime;
 						if (resultingTime > 0)
@@ -218,12 +227,14 @@ public class BlivTrails extends JavaPlugin
 							trailTime.replace(uuid, resultingTime);
 							continue;
 						}
+
+						scheduler.cancelTask(taskId);
 					}
 
 					trailTasks.remove(uuid); // TaskID is stale and not in use anymore. Cleanup.
 				}
 			}
-		}, 0L, trailTimeoutCheckTime * 20L);
+		}, 20L, trailTimeoutCheckTime * 20L);
 
 	}
 
