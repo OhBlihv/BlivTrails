@@ -65,7 +65,9 @@ menu:
         #                   Use -1 to disable the back button
         back-button:
             position: 9
-            material: BARRIER
+            #Barrier is a great option on 1.8+
+            #material: BARRIER
+            material: PAPER
         config:
         #Player Config Options:
         #enabled: If the option is available for players to change to
@@ -181,7 +183,9 @@ trails:
     remove-trail:
         display: true
         position: 30
-        material: BARRIER
+        #Barrier is a great option on 1.8+
+        #material: BARRIER
+        material: PAPER
         name: "&cRemove Trail"
         lore: {}
     options-menu:

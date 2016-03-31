@@ -90,6 +90,13 @@ public class GUIListener implements Listener
 			{
 				if (player.hasPermission("blivtrails.options"))
 				{
+					PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+					if(playerConfig == null || playerConfig.getParticle() == null || playerConfig.getParticle() == ParticleEffect.FOOTSTEP)
+					{
+						BUtil.printPlain(((Player) event.getWhoClicked()), msg.getString("messages.error.no-trail"));
+						return;
+					}
+
 					try
 					{
 						optionsMenu(player);
@@ -1232,7 +1239,7 @@ public class GUIListener implements Listener
 
 	public static ItemStack backButton()
 	{
-		ItemStack item = new ItemStack(Material.getMaterial(cfg.getString("menu.options.back-button.material")), 1);
+		ItemStack item = getVersionSafeItemStack(cfg.getString("menu.options.back-button.material"));
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(msg.getString("messages.options.titles.back"));
 		item.setItemMeta(meta);
@@ -1251,7 +1258,12 @@ public class GUIListener implements Listener
 
 	public static ItemStack menuItem(String material, String name, List<String> lore, boolean hasPermission, boolean isSelected)
 	{
-		ItemStack item = new ItemStack(Material.getMaterial(material), 1);
+		ItemStack item = getVersionSafeItemStack(material);
+		if(item == INVALID_ITEM) //Don't process the stack if it's invalid.
+		{
+			return item;
+		}
+
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(name);
 		meta.setLore(lore);
@@ -1296,6 +1308,19 @@ public class GUIListener implements Listener
 		}
 		item.setItemMeta(meta);
 		return item;
+	}
+
+	private static final ItemStack INVALID_ITEM = GUIUtil.createItem(Material.POTATO_ITEM, 0, 32, "\u00A7cVersion does not support this Material!", null, null);
+
+	private static ItemStack getVersionSafeItemStack(String materialName)
+	{
+		Material material = Material.getMaterial(materialName);
+		if(material == null)
+		{
+			BUtil.logError("Attempted to use material: '" + materialName + "', which is INVALID at your current version: " + Bukkit.getBukkitVersion() + " reverting to POTATO_ITEM");
+			return INVALID_ITEM;
+		}
+		return new ItemStack(material, 1);
 	}
 
 }
