@@ -1,5 +1,13 @@
 package com.darkblade12.ParticleEffect;
 
+import com.darkblade12.ParticleEffect.ReflectionUtils.PackageType;
+import org.bukkit.Bukkit;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -8,15 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.util.Vector;
-
-import com.darkblade12.ParticleEffect.ReflectionUtils.PackageType;
 
 /**
  * <b>ParticleEffect Library</b>
@@ -43,6 +42,7 @@ import com.darkblade12.ParticleEffect.ReflectionUtils.PackageType;
  * @version 1.7
  */
 public enum ParticleEffect {
+
 	/**
 	 * A particle effect which is displayed by exploding tnt and creepers:
 	 * <ul>
@@ -383,8 +383,27 @@ public enum ParticleEffect {
 	 */
 	MOB_APPEARANCE("mobappearance", 41, 8);
 
-	private static final Map<String, ParticleEffect> NAME_MAP = new HashMap<String, ParticleEffect>();
-	private static final Map<Integer, ParticleEffect> ID_MAP = new HashMap<Integer, ParticleEffect>();
+	//Check if we're running a forge version
+	static boolean isForge = false;
+	static
+	{
+		try
+		{
+			Class craftServerClass = Class.forName("org.bukkit.craftbukkit." + Bukkit.getServer().getClass().getPackage().getName().substring(23) + ".CraftServer");
+			Field serverNameField = craftServerClass.getDeclaredField("serverName");
+			serverNameField.setAccessible(true);
+
+			//Very primitive Forge check, only really tested with Thermos
+			isForge = serverNameField.get(Bukkit.getServer()).equals("Cauldron");
+		}
+		catch(ClassNotFoundException | NoSuchFieldException | IllegalAccessException e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private static final Map<String, ParticleEffect> NAME_MAP = new HashMap<>();
+	private static final Map<Integer, ParticleEffect> ID_MAP = new HashMap<>();
 	private final String name;
 	private final int id;
 	private final int requiredVersion;
@@ -1407,11 +1426,14 @@ public enum ParticleEffect {
 				if (version > 7) {
 					enumParticle = PackageType.MINECRAFT_SERVER.getClass("EnumParticle");
 				}
-				Class<?> packetClass = PackageType.MINECRAFT_SERVER.getClass(version < 7 ? "Packet63WorldParticles" : "PacketPlayOutWorldParticles");
+				Class<?> packetClass = isForge ? Class.forName("hb") :
+						                          PackageType.MINECRAFT_SERVER.getClass(version < 7 ? "Packet63WorldParticles" : "PacketPlayOutWorldParticles");
 				packetConstructor = ReflectionUtils.getConstructor(packetClass);
 				getHandle = ReflectionUtils.getMethod("CraftPlayer", PackageType.CRAFTBUKKIT_ENTITY, "getHandle");
-				playerConnection = ReflectionUtils.getField("EntityPlayer", PackageType.MINECRAFT_SERVER, false, "playerConnection");
-				sendPacket = ReflectionUtils.getMethod(playerConnection.getType(), "sendPacket", PackageType.MINECRAFT_SERVER.getClass("Packet"));
+				playerConnection = isForge ? ReflectionUtils.getField(Class.forName("mw"), false, "field_71135_a") //Normally 'a', but remapping -> 'field_71135_a'
+						                   : ReflectionUtils.getField("EntityPlayer", PackageType.MINECRAFT_SERVER, false, "playerConnection");
+				sendPacket = isForge ? ReflectionUtils.getMethod(Class.forName("nh"), "func_147359_a", Class.forName("ft")) //Normally 'a', but remapping -> 'func_147359_a'
+						             : ReflectionUtils.getMethod(playerConnection.getType(), "sendPacket", PackageType.MINECRAFT_SERVER.getClass("Packet"));
 			} catch (Exception exception) {
 				throw new VersionIncompatibleException("Your current bukkit version seems to be incompatible with this library", exception);
 			}
@@ -1452,28 +1474,43 @@ public enum ParticleEffect {
 			}
 			try {
 				packet = packetConstructor.newInstance();
-				if (version < 8) {
-					String name = effect.getName();
-					if (data != null) {
-						name += data.getPacketDataString();
-					}
-					ReflectionUtils.setValue(packet, true, "a", name);
-				} else {
-					ReflectionUtils.setValue(packet, true, "a", enumParticle.getEnumConstants()[effect.getId()]);
-					ReflectionUtils.setValue(packet, true, "j", longDistance);
-					if (data != null) {
-						int[] packetData = data.getPacketData();
-						ReflectionUtils.setValue(packet, true, "k", effect == ParticleEffect.ITEM_CRACK ? packetData : new int[] { packetData[0] | (packetData[1] << 12) });
-					}
+				if(isForge)
+				{
+					ReflectionUtils.setValue(packet, true, "field_149236_a", effect.getName());
+					ReflectionUtils.setValue(packet, true, "field_149234_b", (float) center.getX());
+					ReflectionUtils.setValue(packet, true, "field_149235_c", (float) center.getY());
+					ReflectionUtils.setValue(packet, true, "field_149232_d", (float) center.getZ());
+					ReflectionUtils.setValue(packet, true, "field_149233_e", offsetX);
+					ReflectionUtils.setValue(packet, true, "field_149230_f", offsetY);
+					ReflectionUtils.setValue(packet, true, "field_149231_g", offsetZ);
+					ReflectionUtils.setValue(packet, true, "field_149237_h", speed);
+					ReflectionUtils.setValue(packet, true, "field_149238_i", amount);
 				}
-				ReflectionUtils.setValue(packet, true, "b", (float) center.getX());
-				ReflectionUtils.setValue(packet, true, "c", (float) center.getY());
-				ReflectionUtils.setValue(packet, true, "d", (float) center.getZ());
-				ReflectionUtils.setValue(packet, true, "e", offsetX);
-				ReflectionUtils.setValue(packet, true, "f", offsetY);
-				ReflectionUtils.setValue(packet, true, "g", offsetZ);
-				ReflectionUtils.setValue(packet, true, "h", speed);
-				ReflectionUtils.setValue(packet, true, "i", amount);
+				else
+				{
+					if (version < 8) {
+						String name = effect.getName();
+						if (data != null) {
+							name += data.getPacketDataString();
+						}
+						ReflectionUtils.setValue(packet, true, "a", name);
+					} else {
+						ReflectionUtils.setValue(packet, true, "a", enumParticle.getEnumConstants()[effect.getId()]);
+						ReflectionUtils.setValue(packet, true, "j", longDistance);
+						if (data != null) {
+							int[] packetData = data.getPacketData();
+							ReflectionUtils.setValue(packet, true, "k", effect == ParticleEffect.ITEM_CRACK ? packetData : new int[] { packetData[0] | (packetData[1] << 12) });
+						}
+					}
+					ReflectionUtils.setValue(packet, true, "b", (float) center.getX());
+					ReflectionUtils.setValue(packet, true, "c", (float) center.getY());
+					ReflectionUtils.setValue(packet, true, "d", (float) center.getZ());
+					ReflectionUtils.setValue(packet, true, "e", offsetX);
+					ReflectionUtils.setValue(packet, true, "f", offsetY);
+					ReflectionUtils.setValue(packet, true, "g", offsetZ);
+					ReflectionUtils.setValue(packet, true, "h", speed);
+					ReflectionUtils.setValue(packet, true, "i", amount);
+				}
 			} catch (Exception exception) {
 				throw new PacketInstantiationException("Packet instantiation failed", exception);
 			}
@@ -1544,7 +1581,7 @@ public enum ParticleEffect {
 		 * @author DarkBlade12
 		 * @since 1.5
 		 */
-		private static final class VersionIncompatibleException extends RuntimeException {
+		public static final class VersionIncompatibleException extends RuntimeException {
 			private static final long serialVersionUID = 3203085387160737484L;
 
 			/**

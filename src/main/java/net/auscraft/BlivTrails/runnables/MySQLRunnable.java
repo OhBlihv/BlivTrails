@@ -99,7 +99,9 @@ public class MySQLRunnable implements Runnable
 			}
 
 			if (particleData == null)
+			{
 				return;
+			}
 
 			ParticleEffect particleEff = null;
 			for (ParticleEffect pEff : ParticleEffect.values())
@@ -114,7 +116,9 @@ public class MySQLRunnable implements Runnable
 					break;
 				}
 			}
+
 			trailMap.put(uuid, new PlayerConfig(uuid, particleEff, particleData.getType(), particleData.getLength(), particleData.getHeight(), particleData.getColour()));
+
 			if (vanishHook != TrailManager.VanishHook.NONE)
 			{
 				switch(vanishHook)

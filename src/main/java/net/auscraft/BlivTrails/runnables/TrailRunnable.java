@@ -307,52 +307,51 @@ public class TrailRunnable implements Runnable
 	@Override
 	public void run()
 	{
-		try
+		Float trailTime;
+		//Implementation of getOrDefault() from Map in Java 7
+		if (((trailTime = TrailManager.getTrailTime().get(uuid)) == null ? -1 : trailTime) > 0)
 		{
-			if (TrailManager.getTrailTime().get(uuid) > 0)
+			if(type == 2)
+			// Random
 			{
-				final ParticleEffect finalParticle = particle;
-				
-				if(type == 2)
-				// Random
+				// Randomise direction of x and z (Independent of type)
+				// 0 = Negative, 1 = Positive
+				int xDir = 1, yDir = 1, zDir = 1;
+				// Properly change the directions
+				if (rand.nextBoolean())
 				{
-					// Randomise direction of x and z (Independent of type)
-					// 0 = Negative, 1 = Positive
-					int xDir = 1, yDir = 1, zDir = 1;
-					// Properly change the directions
-					if (rand.nextBoolean())
-					{
-						xDir = -1;
-					}
-					if (rand.nextBoolean())
-					{
-						yDir = -1;
-					}
-					if (rand.nextBoolean())
-					{
-						zDir = -1;
-					}
-
-					// Offset = (0.0-1.0) * (Variation) * (1 or -1)
-					// Gives (0.0-1.0) * (Variation), with either positive
-					// or negative x/y/z co-ordinates relative to the player
-					// double xvar = variationCfg[0], yvar = variationCfg[1],
-					// zvar = variationCfg[2];
-
-					xOff = (float) (rand.nextFloat() * variationCfg[0] * xDir);
-					yOff = (float) (rand.nextFloat() * variationCfg[1] * yDir);
-					zOff = (float) (rand.nextFloat() * variationCfg[2] * zDir);
+					xDir = -1;
 				}
-				else if (type == 3) // Random Directions from feet (Spray)
+				if (rand.nextBoolean())
 				{
-					// (0.0-1.0)/20.00 * variation (Default is 1)
-					speed = (float) ((rand.nextFloat() / 20.00) * sprayCfg);
+					yDir = -1;
+				}
+				if (rand.nextBoolean())
+				{
+					zDir = -1;
 				}
 
-				
-				if (finalParticle.hasProperty(ParticleProperty.COLORABLE))
+				// Offset = (0.0-1.0) * (Variation) * (1 or -1)
+				// Gives (0.0-1.0) * (Variation), with either positive
+				// or negative x/y/z co-ordinates relative to the player
+				// double xvar = variationCfg[0], yvar = variationCfg[1],
+				// zvar = variationCfg[2];
+
+				xOff = (float) (rand.nextFloat() * variationCfg[0] * xDir);
+				yOff = (float) (rand.nextFloat() * variationCfg[1] * yDir);
+				zOff = (float) (rand.nextFloat() * variationCfg[2] * zDir);
+			}
+			else if (type == 3) // Random Directions from feet (Spray)
+			{
+				// (0.0-1.0)/20.00 * variation (Default is 1)
+				speed = (float) ((rand.nextFloat() / 20.00) * sprayCfg);
+			}
+
+			try
+			{
+				if (particle.hasProperty(ParticleProperty.COLORABLE))
 				{
-					if(finalParticle == ParticleEffect.NOTE)
+					if(particle == ParticleEffect.NOTE)
 					{
 						if(colour == 16)
 						{
@@ -369,65 +368,61 @@ public class TrailRunnable implements Runnable
 
 					if(type == 2)
 					{
-						finalParticle.display(data, player.getLocation().add(xOff, yOff, zOff), 64);
+						particle.display(data, player.getLocation().add(xOff, yOff, zOff), 64);
 					}
 					else
 					{
-						finalParticle.display(data, player.getLocation().add(0.0D, height, 0.0D), 64);
+						particle.display(data, player.getLocation().add(0.0D, height, 0.0D), 64);
 					}
 				}
 				else
 				{
-					finalParticle.display(xOff, yOff, zOff, speed, 1, player.getLocation().add(0.0D, height, 0.0D), 64);
+					particle.display(xOff, yOff, zOff, speed, 1, player.getLocation().add(0.0D, height, 0.0D), 64);
 				}
 
 				if (length > 1)
 				{
 					for (int i = 1; i < (length + 1); i++)
 					{
-						if (particle.hasProperty(ParticleProperty.COLORABLE))
+						if (this.particle.hasProperty(ParticleProperty.COLORABLE))
 						{
 							if(type == 2)
 							{
 								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-								                                                 new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
+								                                                 new DisplayColourableRunnable(particle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 							else
 							{
 								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-								                                                 new DisplayColourableRunnable(finalParticle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
+								                                                 new DisplayColourableRunnable(particle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 						}
 						else
 						{
 							Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-							                                                 new DisplayRegularRunnable(finalParticle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
+							                                                 new DisplayRegularRunnable(particle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 							// public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
-									
+
 						}
 					}
 				}
 			}
-		}
-		catch (ParticleEffect.ParticleVersionException e)
-		{
-			e.printStackTrace();
-			try
+			catch (ParticleEffect.ParticleVersionException | ParticleEffect.ParticlePacket.VersionIncompatibleException e)
 			{
-				TrailManager.getTrailMap().remove(uuid);
-			}
-			catch (NullPointerException e2)
-			{
-				//
-			}
+				e.printStackTrace();
+				try
+				{
+					TrailManager.getTrailMap().remove(uuid);
+				}
+				catch (NullPointerException e2)
+				{
+					//
+				}
 
-			Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().get(uuid)); // Cancel Self
-		}
-		catch(NullPointerException e)
-		{
-			Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().get(uuid)); // Cancel Self
+				Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().get(uuid)); // Cancel Self
+			}
 		}
 	}
 	

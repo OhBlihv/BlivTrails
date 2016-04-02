@@ -15,8 +15,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.kitteh.vanish.VanishPlugin;
@@ -476,6 +474,7 @@ public class TrailManager
 				}
 			}
 		}
+
 		trailMap.put(uuid, new PlayerConfig(uuid, particleEff, type, length, height, colour));
 		BUtil.logDebug("Trail Successfully Applied");
 		return "&aTrail Successfully Applied";
@@ -483,7 +482,7 @@ public class TrailManager
 
 	public static String removePlayer(UUID uuid)
 	{
-		PlayerConfig pcfg = trailMap.get(uuid);
+		PlayerConfig pcfg = trailMap.remove(uuid);
 		if (pcfg != null)
 		{
 			if (flatFileStorage == null)
@@ -510,8 +509,6 @@ public class TrailManager
 		return msg.getString("messages.error.unexpected");
 	}
 
-
-
 	public boolean isVanished(Player player)
 	{
 		boolean isVanished = false;
@@ -527,7 +524,7 @@ public class TrailManager
 				catch (NullPointerException | NoClassDefFoundError e)
 				{
 					BUtil.logDebug("VanishNoPacket was called, but isn't loaded.");
-					// VanishNoPacket isnt loaded on the server
+					// VanishNoPacket isn't loaded on the server
 				}
 				break;
 			}
