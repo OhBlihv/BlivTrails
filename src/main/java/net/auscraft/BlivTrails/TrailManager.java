@@ -9,7 +9,9 @@ import net.auscraft.BlivTrails.config.FlatFileStorage;
 import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.ParticleDefaultStorage;
-import net.auscraft.BlivTrails.runnables.MySQLRunnable;
+import net.auscraft.BlivTrails.runnables.LoadRunnable;
+import net.auscraft.BlivTrails.runnables.RemoveRunnable;
+import net.auscraft.BlivTrails.runnables.SaveRunnable;
 import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -203,7 +205,7 @@ public class TrailManager
 		{
 			try
 			{
-				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(player.getUniqueId(), null, (short) 1, trailMap, instance));
+				scheduler.runTaskAsynchronously(instance, new LoadRunnable(player.getUniqueId()));
 			}
 			catch (NullPointerException e)
 			{
@@ -270,15 +272,17 @@ public class TrailManager
 			BUtil.logDebug(player.getName() + "'s trail config is not null");
 			if (flatFileStorage == null)
 			{
+				//Construct this here to avoid constructing it twice if the server is shutting down
+				SaveRunnable saveRunnable = new SaveRunnable(player.getUniqueId(), pcfg);
 				BUtil.logDebug("Using MySQL to save " + player.getName() + "'s trail data");
 				try
 				{
 					// Run MySQL off the main thread to avoid lockups
-					scheduler.runTaskAsynchronously(instance, new MySQLRunnable(player.getUniqueId(), pcfg, (short) 0, null, instance));
+					scheduler.runTaskAsynchronously(instance, saveRunnable);
 				}
 				catch (IllegalPluginAccessException e) // If the plugin is shutting down, tasks cannot be scheduled.
 				{
-					new MySQLRunnable(player.getUniqueId(), pcfg, (short) 0, null, instance);
+					saveRunnable.run();
 				}
 				catch (NullPointerException e)
 				{
@@ -487,7 +491,7 @@ public class TrailManager
 		{
 			if (flatFileStorage == null)
 			{
-				scheduler.runTaskAsynchronously(instance, new MySQLRunnable(uuid, pcfg, (short) 2, trailMap, instance));
+				scheduler.runTaskAsynchronously(instance, new RemoveRunnable(uuid));
 			}
 			else
 			{

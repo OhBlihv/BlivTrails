@@ -3,6 +3,7 @@ package net.auscraft.BlivTrails;
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.listeners.GUIListener;
+import net.auscraft.BlivTrails.runnables.MySQLRunnable;
 import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -122,6 +123,7 @@ public class TrailCommand implements CommandExecutor
 					}
 					instance.getMessages().reloadFile();
 					TrailManager.loadDefaultOptions();
+					MySQLRunnable.reload();
 					BUtil.logSuccess("Config and Messages Reloaded!");
 					BUtil.printSuccess(sender, "Config and Messages Reloaded!");
 					return true;

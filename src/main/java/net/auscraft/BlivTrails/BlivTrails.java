@@ -13,6 +13,7 @@ import net.auscraft.BlivTrails.hooks.SuperPremiumVanishListener;
 import net.auscraft.BlivTrails.hooks.VanishNoPacketListener;
 import net.auscraft.BlivTrails.listeners.GUIListener;
 import net.auscraft.BlivTrails.listeners.TrailListener;
+import net.auscraft.BlivTrails.runnables.MySQLRunnable;
 import net.auscraft.BlivTrails.storage.ParticleData;
 import net.auscraft.BlivTrails.storage.ParticleStorage;
 import net.auscraft.BlivTrails.util.BUtil;
@@ -90,6 +91,8 @@ public class BlivTrails extends JavaPlugin
 		getCommand("trail").setExecutor(new TrailCommand(this));
 		getCommand("trailadmin").setExecutor(new TrailCommand(this));
 		doHooks();
+
+		MySQLRunnable.reload(); //Init this after everything to pick up Vanish Hooking
 
 		if (!cfg.getBoolean("trails.misc.display-when-still"))
 		{
