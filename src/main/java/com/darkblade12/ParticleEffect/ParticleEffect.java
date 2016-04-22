@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -1564,9 +1565,12 @@ public enum ParticleEffect {
 				throw new IllegalArgumentException("The range is lower than 1");
 			}
 			String worldName = center.getWorld().getName();
+			World.Environment worldEnvironment = center.getWorld().getEnvironment();
 			double squared = range * range;
 			for (Player player : Bukkit.getOnlinePlayers()) {
-				if (!player.getWorld().getName().equals(worldName) || player.getLocation().distanceSquared(center) > squared) {
+				//Since most servers will have 3 worlds (Overworld, Nether and End) checking the environment before the
+				//world name is an efficient addition
+				if (worldEnvironment != player.getWorld().getEnvironment() || !player.getWorld().getName().equals(worldName) || player.getLocation().distanceSquared(center) > squared) {
 					continue;
 				}
 				sendTo(center, player);
