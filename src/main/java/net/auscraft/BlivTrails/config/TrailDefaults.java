@@ -73,16 +73,40 @@ public class TrailDefaults
 		String particleString;
 		for (ParticleEffect particle : TrailManager.usedTrails)
 		{
-			particleString = BUtil.trailConfigName(particle.toString());
+			particleString = BUtil.trailConfigName(particle.name());
 			if (!particleString.isEmpty())
 			{
-				particleString = BUtil.trailConfigName(particleString);
-				
+				int particleColour = 15;
+				if(particle.hasProperty(ParticleProperty.COLORABLE))
+				{
+					switch(particle)
+					{
+						case DRAGON_BREATH:
+						{
+							particleColour = 13;
+							break;
+						}
+						case REDSTONE:
+						{
+							particleColour = 1;
+							break;
+						}
+						default:
+						{
+							colourStringtoInt(cfg.getString("trails." + particleString + ".options.colour"));
+							break;
+						}
+
+					}
+				}
+
+				BUtil.logInfo("Loaded: '" + BUtil.translateColours(cfg.getString("trails." + particleString + ".name")) + "'");
+
 				particleDefaults.put(particle,
 				                     new ParticleDefaultStorage(BUtil.translateColours(cfg.getString("trails." + particleString + ".name")),
 						                                        typeStringtoInt(cfg.getString("trails." + particleString + ".options.type")),
 				                                                lengthStringtoInt(cfg.getString("trails." + particleString + ".options.length")), heightStringtoInt(cfg.getString("trails." + particleString + ".options.height")),
-				                                                particle.hasProperty(ParticleProperty.COLORABLE) ? colourStringtoInt(cfg.getString("trails." + particleString + ".options.colour")) : 15,
+				                                                particleColour,
 				                                                cfg.getInt("trails." + particleString + ".options.display-speed"),
 				                                                cfg.getDouble("trails." + particleString + ".options.defaults.random.x-variation"),
 				                                                cfg.getDouble("trails." + particleString + ".options.defaults.random.y-variation"), cfg.getDouble("trails." + particleString + ".options.defaults.random.z-variation"),

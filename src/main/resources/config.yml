@@ -483,3 +483,44 @@ trails:
         material: PRISMARINE_SHARD
         name: "&bWater Splash"
         lore: {}
+    end-rod:
+        display: true
+        position: 28
+        options:
+            type: "trace"
+            length: "short"
+            height: "feet"
+        material: END_ROD
+        name: "&5End Rod"
+        lore: {}
+    dragon-breath:
+        display: true
+        position: 29
+        options:
+            type: "trace"
+            length: "short"
+            height: "feet"
+        material: DRAGONS_BREATH
+        name: "&5Dragon's Breath"
+        lore: {}
+    damage-indicator:
+        display: true
+        position: 33
+        options:
+            type: "trace"
+            length: "short"
+            height: "feet"
+        material: IRON_SWORD
+        name: "&cDamage Indicator"
+        lore: {}
+    sweep-attack:
+        display: true
+        position: 34
+        options:
+            type: "trace"
+            length: "short"
+            height: "feet"
+        material: WOOD_SWORD
+        name: "&7Sweep Attack"
+        lore: {}
+    

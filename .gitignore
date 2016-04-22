@@ -15,3 +15,5 @@ dependency-reduced-pom.xml
 *.ear
 
 /target
+
+dependency-reduced-pom.xml

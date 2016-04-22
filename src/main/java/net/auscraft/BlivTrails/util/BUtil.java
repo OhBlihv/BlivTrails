@@ -428,6 +428,11 @@ public class BUtil
 			case "TOWN_AURA": return "town-aura";
 			case "WATER_DROP": return "water-drop";
 			case "WATER_SPLASH": return "water-splash";
+			//1.9 Trails
+			case "END_ROD": return "end-rod";
+			case "DRAGON_BREATH": return "dragon-breath";
+			case "DAMAGE_INDICATOR": return "damage-indicator";
+			case "SWEEP_ATTACK": return "sweep-attack";
 			default: return "";
 		}
 	}

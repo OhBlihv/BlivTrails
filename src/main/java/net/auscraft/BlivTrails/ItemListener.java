@@ -51,12 +51,12 @@ public class ItemListener implements Listener
 	{
 		if ((event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) && guiItem != null)
 		{
-			Player player = event.getPlayer();
-
-			if (player.getItemInHand() == null || player.getItemInHand().getType().equals(Material.AIR))
+			if (event.getItem() == null || event.getItem().getType().equals(Material.AIR))
 			{
 				return;
 			}
+
+			Player player = event.getPlayer();
 
 			if (player.getItemInHand().getType() == guiItemMaterial && player.getItemInHand().getItemMeta().getDisplayName().equals(guiItemDisplayname))
 			{

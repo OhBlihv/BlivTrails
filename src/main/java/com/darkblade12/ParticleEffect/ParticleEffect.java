@@ -382,7 +382,38 @@ public enum ParticleEffect {
 	 * <li>The offset values have no influence on this particle effect
 	 * </ul>
 	 */
-	MOB_APPEARANCE("mobappearance", 41, 8);
+	MOB_APPEARANCE("mobappearance", 41, 8),
+	/*
+	 * 1.9 Particles
+	 */
+	/**
+	 * A particle effect displayed from Shulkers(?) and End Rods
+	 * <ul>
+	 *     <li>Slightly smaller and shows for less time than the 'Dragon Breath' particle
+	 * </ul>
+	 */
+	END_ROD("endRod", 42, 9, ParticleProperty.DIRECTIONAL),
+	/**
+	 * A particle effect which is displayed on lingering potions
+	 * <ul>
+	 *     <li>Displays a small purple particle, similar to a witch spell
+	 * </ul>
+	 */
+	DRAGON_BREATH("dragonbreath", 43, 9, ParticleProperty.DIRECTIONAL),
+	/**
+	 * A particle effect that appears when a mob is attacked
+	 * <ul>
+	 *     <li>Displays a small dark-grey heart that raises around a block, then falls.
+	 * </ul>
+	 */
+	DAMAGE_INDICATOR("damageIndicator", 44, 9),
+	/**
+	 * A particle effect that appears when a sweep attack is performed with a sword
+	 * <ul>
+	 *     <li>Displays a arched white particle for ~1/4 of a second
+	 * </ul>
+	 */
+	SWEEP_ATTACK("sweepAttack", 45, 9);
 
 	//Check if we're running a forge version
 	static boolean isForge = false;
@@ -561,7 +592,7 @@ public enum ParticleEffect {
 	 * @return Whether the color type is correct or not
 	 */
 	private static boolean isColorCorrect(ParticleEffect effect, ParticleColor color) {
-		return ((effect == SPELL_MOB || effect == SPELL_MOB_AMBIENT || effect == REDSTONE) && color instanceof OrdinaryColor) || (effect == NOTE && color instanceof NoteColor);
+		return ((effect == SPELL_MOB || effect == SPELL_MOB_AMBIENT || effect == REDSTONE || effect == DRAGON_BREATH) && color instanceof OrdinaryColor) || (effect == NOTE && color instanceof NoteColor);
 	}
 
 	/**
@@ -1570,7 +1601,9 @@ public enum ParticleEffect {
 			for (Player player : Bukkit.getOnlinePlayers()) {
 				//Since most servers will have 3 worlds (Overworld, Nether and End) checking the environment before the
 				//world name is an efficient addition
-				if (worldEnvironment != player.getWorld().getEnvironment() || !player.getWorld().getName().equals(worldName) || player.getLocation().distanceSquared(center) > squared) {
+				if (worldEnvironment != player.getWorld().getEnvironment() ||
+						    !player.getWorld().getName().equals(worldName) ||
+						    player.getLocation().distanceSquared(center) > squared) {
 					continue;
 				}
 				sendTo(center, player);

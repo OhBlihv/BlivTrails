@@ -52,9 +52,9 @@ public class TrailManager
 			ParticleEffect.FIREWORKS_SPARK, ParticleEffect.FLAME, ParticleEffect.HEART, ParticleEffect.LAVA, ParticleEffect.NOTE, ParticleEffect.PORTAL,
 			ParticleEffect.REDSTONE, ParticleEffect.SLIME, ParticleEffect.SMOKE_LARGE, ParticleEffect.SNOW_SHOVEL, ParticleEffect.SNOWBALL,
 			ParticleEffect.SPELL, ParticleEffect.SPELL_INSTANT, ParticleEffect.SPELL_MOB, ParticleEffect.SPELL_WITCH, ParticleEffect.TOWN_AURA,
-			ParticleEffect.VILLAGER_HAPPY, ParticleEffect.WATER_DROP, ParticleEffect.WATER_SPLASH };
-
-	private static BlivTrails instance;
+			ParticleEffect.VILLAGER_HAPPY, ParticleEffect.WATER_DROP, ParticleEffect.WATER_SPLASH,
+	        //1.9 Trails
+			ParticleEffect.END_ROD, ParticleEffect.DRAGON_BREATH, ParticleEffect.DAMAGE_INDICATOR, ParticleEffect.SWEEP_ATTACK};
 
 	@Getter
 	private static ConcurrentHashMap<UUID, PlayerConfig> trailMap = new ConcurrentHashMap<>();
@@ -87,9 +87,8 @@ public class TrailManager
 		//NOOP
 	}
 
-	public static void init(BlivTrails plugin)
+	public static void init()
 	{
-		instance = plugin;
 		loadDefaultOptions();
 		scheduler = Bukkit.getScheduler();
 
@@ -98,7 +97,7 @@ public class TrailManager
 
 		trailLength = cfg.getFloat("trails.scheduler.trail-length");
 
-		Object saveLoc = plugin.getSave();
+		Object saveLoc = BlivTrails.getSave();
 		if (!(saveLoc instanceof JdbcPooledConnectionSource))
 		{
 			flatFileStorage = (FlatFileStorage) saveLoc;
@@ -151,20 +150,6 @@ public class TrailManager
 
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("[%](\\S+)[%]");
 
-	/**
-	 * @param toReplace
-	 *            The string which includes the variable to be replaced
-	 * @param replacee
-	 *            The string including the variable to be used in the toReplace
-	 *            String
-	 *
-	 * @return
-	 */
-	public static String addVariable(String toReplace, String replacee)
-	{
-		return VARIABLE_PATTERN.matcher(toReplace).replaceAll(replacee);
-	}
-
 	public static void doDefaultTrail(UUID uuid, ParticleEffect particle)
 	{
 
@@ -178,12 +163,15 @@ public class TrailManager
 
 		// Trail for the first time
 		String trailName = particleDefaults.getDisplayName();
+
 		//TODO: Include global variable
 		if (!FlatFile.getInstance().getBoolean("misc.trail-name-colour"))
 		{
 			trailName = BUtil.stripColours(trailName);
 		}
-		BUtil.printPlain(Bukkit.getPlayer(uuid), addVariable(msg.getString("messages.generic.trail-applied"), trailName));
+
+		BUtil.printPlain(Bukkit.getPlayer(uuid), msg.getString("messages.generic.trail-applied").replace("%trail%", trailName));
+
 		trailMap.put(uuid, new PlayerConfig(uuid, particle, particleDefaults.getType(), particleDefaults.getLength(), particleDefaults.getHeight(), particleDefaults.getColour()));
 		try
 		{
@@ -193,9 +181,9 @@ public class TrailManager
 		{
 			//
 		}
+
 		taskMap.remove(uuid);
 		trailTime.remove(uuid);
-		BUtil.logDebug("Successfully added trail!");
 		BUtil.logDebug(trailMap.get(uuid).getParticle().getName());
 	}
 
@@ -205,7 +193,7 @@ public class TrailManager
 		{
 			try
 			{
-				scheduler.runTaskAsynchronously(instance, new LoadRunnable(player.getUniqueId()));
+				scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new LoadRunnable(player.getUniqueId()));
 			}
 			catch (NullPointerException e)
 			{
@@ -222,7 +210,7 @@ public class TrailManager
 
 			if(data == null || data.isEmpty())
 			{
-				BUtil.logDebug("Player " + player.getName() + " has no trail config.");
+				//BUtil.logDebug("Player " + player.getName() + " has no trail config.");
 				return;
 			}
 
@@ -247,7 +235,7 @@ public class TrailManager
 			}
 			catch (NullPointerException e)
 			{
-				BUtil.logDebug("Player failed loading: (NPE) " + player.getName());
+				//BUtil.logDebug("Player failed loading: (NPE) " + player.getName());
 				if (BUtil.DEBUG)
 				{
 					e.printStackTrace();
@@ -269,16 +257,16 @@ public class TrailManager
 				removePlayer(player.getUniqueId());
 				return;
 			}
-			BUtil.logDebug(player.getName() + "'s trail config is not null");
+			//BUtil.logDebug(player.getName() + "'s trail config is not null");
 			if (flatFileStorage == null)
 			{
 				//Construct this here to avoid constructing it twice if the server is shutting down
 				SaveRunnable saveRunnable = new SaveRunnable(player.getUniqueId(), pcfg);
-				BUtil.logDebug("Using MySQL to save " + player.getName() + "'s trail data");
+				//BUtil.logDebug("Using MySQL to save " + player.getName() + "'s trail data");
 				try
 				{
 					// Run MySQL off the main thread to avoid lockups
-					scheduler.runTaskAsynchronously(instance, saveRunnable);
+					scheduler.runTaskAsynchronously(BlivTrails.getInstance(), saveRunnable);
 				}
 				catch (IllegalPluginAccessException e) // If the plugin is shutting down, tasks cannot be scheduled.
 				{
@@ -302,10 +290,9 @@ public class TrailManager
 				 */
 				try
 				{
-					String data = pcfg.getParticle().toString() + "," + pcfg.getType() + "," + pcfg.getLength() + "," + pcfg.getHeight() + "," + pcfg.getColour();
-					flatFileStorage.saveEntry(player.getUniqueId().toString(), data);
-					BUtil.logDebug(pcfg.getParticle().toString() + "," + pcfg.getType() + "," + pcfg.getLength() + "," + pcfg.getHeight() + "," + pcfg.getColour());
-					BUtil.logDebug("Successfully saved " + player.getName() + "'s trail config to file");
+					flatFileStorage.saveEntry(player.getUniqueId().toString(),
+					                          pcfg.getParticle().toString() + "," + pcfg.getType() + "," + pcfg.getLength() + "," + pcfg.getHeight() + "," + pcfg.getColour());
+					//BUtil.logDebug("Successfully saved " + player.getName() + "'s trail config to file");
 				}
 				catch (NullPointerException e)
 				{
@@ -491,7 +478,7 @@ public class TrailManager
 		{
 			if (flatFileStorage == null)
 			{
-				scheduler.runTaskAsynchronously(instance, new RemoveRunnable(uuid));
+				scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new RemoveRunnable(uuid));
 			}
 			else
 			{

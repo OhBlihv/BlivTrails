@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static net.auscraft.BlivTrails.TrailManager.usedTrails;
@@ -31,7 +32,7 @@ import static net.auscraft.BlivTrails.TrailManager.usedTrails;
 public class GUIListener implements Listener
 {
 
-	//Keeping these here since 'caching' all variables would be a bitch.
+	//Keeping these here since 'caching' all variables is bad.
 	private static FlatFile cfg = null;
 	private static Messages msg = null;
 
@@ -41,26 +42,35 @@ public class GUIListener implements Listener
 		{
 			cfg = FlatFile.getInstance();
 		}
+		cfg.reloadFile();
 		if(msg == null)
 		{
 			msg = Messages.getInstance();
 		}
+		msg.reloadFile();
 	}
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent event)
 	{
-		if (BUtil.stripColours(event.getInventory().getTitle()).contains(BUtil.stripColours(msg.getString("messages.titles.main-menu"))))
+		if(event.getInventory() == null || event.getInventory().getTitle() == null ||
+				   event.getRawSlot() < 0 || event.getRawSlot() >= 54)
+		{
+			return;
+		}
+
+		if (event.getInventory().getTitle().equals(msg.getString("messages.titles.main-menu")))
 		{
 			event.setCancelled(true);
-			Player player = (Player) event.getWhoClicked();
-			// Slot was empty                                                                              If player clicked a slot in their hotbar
-			if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.AIR) || event.getRawSlot() >= cfg.getInt("menu.main.size"))
+
+			if (event.getRawSlot() >= cfg.getInt("menu.main.size"))
 			{
 				return;
 			}
 
-			if (event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.remove-trail.material"))))
+			Player player = (Player) event.getWhoClicked();
+
+			if (event.getRawSlot() == cfg.getInt("trails.remove-trail.position")) //Remove Trail
 			{
 				if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
 				{
@@ -86,14 +96,14 @@ public class GUIListener implements Listener
 				}
 
 			}
-			else if (event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails.options-menu.material"))))
+			else if (event.getRawSlot() == cfg.getInt("trails.options-menu.position"))
 			{
 				if (player.hasPermission("blivtrails.options"))
 				{
 					PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
 					if(playerConfig == null || playerConfig.getParticle() == null || playerConfig.getParticle() == ParticleEffect.FOOTSTEP)
 					{
-						BUtil.printPlain(((Player) event.getWhoClicked()), msg.getString("messages.error.no-trail"));
+						BUtil.printPlain(event.getWhoClicked(), msg.getString("messages.error.no-trail"));
 						return;
 					}
 
@@ -104,7 +114,7 @@ public class GUIListener implements Listener
 					catch (NullPointerException e)
 					{
 						e.printStackTrace();
-						BUtil.printPlain(((Player) event.getWhoClicked()), msg.getString("messages.error.no-trail"));
+						BUtil.printPlain(event.getWhoClicked(), msg.getString("messages.error.no-trail"));
 					}
 				}
 				else
@@ -120,6 +130,12 @@ public class GUIListener implements Listener
 					particleString = BUtil.trailConfigName(particleEff.toString());
 					if (event.getCurrentItem().getType().equals(Material.getMaterial(cfg.getString("trails." + particleString + ".material"))))
 					{
+						if(!particleEff.isSupported())
+						{
+							player.sendMessage("§cThis trail is not supported by your server version.");
+							return;
+						}
+
 						if (player.hasPermission("blivtrails." + particleString))
 						{
 							TrailManager.doDefaultTrail(player.getUniqueId(), particleEff);
@@ -132,15 +148,16 @@ public class GUIListener implements Listener
 						{
 							BUtil.printPlain(player, msg.getString("messages.no-permission.trail"));
 						}
+						break; //Don't loop through all trails once we've found ours
 					}
 				}
 			}
 		}
-		else if (BUtil.stripColours(event.getInventory().getTitle()).contains(BUtil.stripColours(msg.getString("messages.titles.main-options"))))
+		else if (event.getInventory().getTitle().equals(msg.getString("messages.titles.main-options")))
 		{
 			event.setCancelled(true);
-			// Slot was empty                                         If player clicked something in their hotbar
-			if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.AIR) || event.getRawSlot() >= cfg.getInt("menu.options.size"))
+
+			if (event.getRawSlot() >= 18)
 			{
 				return;
 			}
@@ -148,7 +165,7 @@ public class GUIListener implements Listener
 			Player player = (Player) event.getWhoClicked();
 			PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
 
-			if (event.getCurrentItem().getItemMeta().getDisplayName().equals(msg.getString("messages.options.titles.categories.type")))
+			if (event.getRawSlot() == cfg.getInt("menu.options.config.type.position"))
 			{
 				if(player.hasPermission("blivtrails.options.type"))
 				{
@@ -160,7 +177,7 @@ public class GUIListener implements Listener
 				}
 
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.categories.length")))
+			else if (event.getRawSlot() == cfg.getInt("menu.options.config.length.position"))
 			{
 				if(player.hasPermission("blivtrails.options.length"))
 				{
@@ -171,7 +188,7 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.length.base"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.categories.height")))
+			else if (event.getRawSlot() == cfg.getInt("menu.options.config.height.position"))
 			{
 				if(player.hasPermission("blivtrails.options.height"))
 				{
@@ -182,7 +199,7 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.height.base"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.categories.colour")))
+			else if (event.getRawSlot() == cfg.getInt("menu.options.config.colour.position"))
 			{
 				if (playerConfig.getParticle().hasProperty(ParticleEffect.ParticleProperty.COLORABLE) && !playerConfig.getParticle().equals(ParticleEffect.FOOTSTEP))
 				{
@@ -200,27 +217,27 @@ public class GUIListener implements Listener
 					BUtil.printError(player, msg.getString("messages.error.option-trail-no-support"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.back")))
+			else if (event.getRawSlot() == cfg.getInt("menu.options.back-button.position"))
 			{
 				mainMenu(player);
 			}
-			else if (event.getCurrentItem().getType().equals(Material.BOOK))
+			/*else //if (event.getCurrentItem().getType().equals(Material.BOOK))
 			{
-				// Do nothing -- Is just information
-			}
-			else
+				//This should include all custom items for this menu with no actions
+			}*/
+			/*else
 			{
 				BUtil.logError(msg.getString("messages.error.no-exist"));
-			}
+			}*/
 		}
 		/*
 		 * Sub-Options-Menu Handling
 		 */
-		else if (BUtil.stripColours(event.getInventory().getTitle()).contains(BUtil.stripColours(msg.getString("messages.titles.type"))))
+		else if (event.getInventory().getTitle().equals(msg.getString("messages.titles.type")))
 		{
 			event.setCancelled(true);
-			// Slot was empty
-			if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.AIR) || event.getRawSlot() >= cfg.getInt("menu.options.size"))
+
+			if (event.getRawSlot() >= 18)
 			{
 				return;
 			}
@@ -228,7 +245,8 @@ public class GUIListener implements Listener
 			Player player = (Player) event.getWhoClicked();
 			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
 
-			if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.type.trace")))
+			//Here come the hardcoded options positions
+			if (event.getRawSlot() == 3)
 			{
 				if(player.hasPermission("blivtrails.options.type.trace"))
 				{
@@ -240,14 +258,8 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.type.trace"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.type.random")))
+			if (event.getRawSlot() == 4)
 			{
-				/*if (pcfg.getParticle().hasProperty(ParticleProperty.COLORABLE)) // If the particle is colourable, it doesnt support directional/randomisation
-				{
-					util.printError(player, msg.getString("messages.error.option-trail-no-support"));
-					return;
-				}*/
-
 				if(player.hasPermission("blivtrails.options.type.random"))
 				{
 					pcfg.setType(2);
@@ -258,9 +270,10 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.type.random"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.type.dynamic")))
+			if (event.getRawSlot() == 5)
 			{
-				if (pcfg.getParticle().hasProperty(ParticleEffect.ParticleProperty.COLORABLE))
+				if (pcfg.getParticle().hasProperty(ParticleEffect.ParticleProperty.COLORABLE) ||
+						!pcfg.getParticle().hasProperty(ParticleEffect.ParticleProperty.DIRECTIONAL))
 				{
 					BUtil.printError(player, msg.getString("messages.error.option-trail-no-support"));
 					return;
@@ -276,32 +289,32 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.type.dynamic"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.back")))
+			else if (event.getRawSlot() == cfg.getInt("menu.options.back-button.position"))
 			{
 				optionsMenu(player);
 			}
-			else if (event.getCurrentItem().getType().equals(Material.BOOK))
+			/*else //if (event.getCurrentItem().getType().equals(Material.BOOK))
 			{
-				// Do nothing -- Is just information
-			}
-			else
+				// Do nothing -- This is all other cases (Custom Items)
+			}*
+			/*else
 			{
 				BUtil.printPlain(player, msg.getString("messages.error.no-exist"));
-			}
+			}*/
 		}
-		else if (BUtil.stripColours(event.getInventory().getTitle()).contains(BUtil.stripColours(msg.getString("messages.titles.length"))))
+		else if (event.getInventory().getTitle().equals(msg.getString("messages.titles.length")))
 		{
 			event.setCancelled(true);
 
-			// Slot was empty
-			if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.AIR) || event.getRawSlot() >= cfg.getInt("menu.options.size"))
+			if (event.getRawSlot() >= 18)
 			{
 				return;
 			}
 
 			Player player = (Player) event.getWhoClicked();
 			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
-			if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.length.short")))
+
+			if (event.getRawSlot() == 3)
 			{
 				if(player.hasPermission("blivtrails.options.length.short"))
 				{
@@ -313,7 +326,7 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.length.short"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.length.medium")))
+			else if (event.getRawSlot() == 4)
 			{
 				if(player.hasPermission("blivtrails.options.length.medium"))
 				{
@@ -325,7 +338,7 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.length.medium"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.length.long")))
+			else if (event.getRawSlot() == 5)
 			{
 				if(player.hasPermission("blivtrails.options.length.long"))
 				{
@@ -337,7 +350,7 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.length.long"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.back")))
+			else if (event.getRawSlot() == cfg.getInt("menu.options.back-button.position"))
 			{
 				optionsMenu(player);
 			}
@@ -345,17 +358,16 @@ public class GUIListener implements Listener
 			{
 				// Do nothing -- Is just information
 			}
-			else
+			/*else
 			{
 				BUtil.printPlain(player, msg.getString("messages.error.no-exist"));
-			}
+			}*/
 		}
-		else if (BUtil.stripColours(event.getInventory().getTitle()).contains(BUtil.stripColours(msg.getString("messages.titles.height"))))
+		else if (event.getInventory().getTitle().equals(msg.getString("messages.titles.height")))
 		{
 			event.setCancelled(true);
 
-			// Slot was empty
-			if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.AIR) || event.getRawSlot() >= cfg.getInt("menu.options.size"))
+			if (event.getRawSlot() >= 18)
 			{
 				return;
 			}
@@ -363,7 +375,7 @@ public class GUIListener implements Listener
 			Player player = (Player) event.getWhoClicked();
 			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
 
-			if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.height.feet")))
+			if (event.getRawSlot() == 3)
 			{
 				if(player.hasPermission("blivtrails.options.height.feet"))
 				{
@@ -375,7 +387,7 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.height.feet"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.height.waist")))
+			if (event.getRawSlot() == 4)
 			{
 				if(player.hasPermission("blivtrails.options.height.waist"))
 				{
@@ -387,7 +399,7 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.height.waist"));
 				}
 			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.height.halo")))
+			if (event.getRawSlot() == 5)
 			{
 				if(player.hasPermission("blivtrails.options.height.halo"))
 				{
@@ -399,25 +411,24 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.height.halo"));
 				}
 			}
-			else if (event.getCurrentItem().getType().equals(Material.BOOK))
+			/*else if (event.getCurrentItem().getType().equals(Material.BOOK))
 			{
 				// Do nothing -- Is just information
-			}
-			else if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.back")))
+			}*/
+			else if (event.getRawSlot() == cfg.getInt("menu.options.back-button.position"))
 			{
 				optionsMenu(player);
 			}
-			else
+			/*else
 			{
 				BUtil.printPlain(player, msg.getString("messages.error.no-exist"));
-			}
+			}*/
 		}
 		else if (BUtil.stripColours(event.getInventory().getTitle()).contains(BUtil.stripColours(msg.getString("messages.titles.colours"))))
 		{
 			event.setCancelled(true);
 
-			// Slot was empty
-			if (event.getCurrentItem() == null || event.getCurrentItem().getType().equals(Material.AIR) || event.getRawSlot() >= cfg.getInt("menu.options.config.colour.size"))
+			if (event.getRawSlot() >= 18)
 			{
 				return;
 			}
@@ -425,13 +436,13 @@ public class GUIListener implements Listener
 			Player player = (Player) event.getWhoClicked();
 			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
 
-			if (event.getCurrentItem().getItemMeta().getDisplayName().contains(msg.getString("messages.options.titles.back")))
+			if (event.getRawSlot() == cfg.getInt("menu.options.back-button.position"))
 			{
 				optionsMenu(player);
 			}
 			else if (event.getCurrentItem().getType().equals(Material.INK_SACK))
 			{
-				if (pcfg.getParticle() == ParticleEffect.NOTE) // Disable some colours which dont exist for notes
+				if (pcfg.getParticle() == ParticleEffect.NOTE) // Disable some colours which don't exist for notes
 				{
 					switch (event.getCurrentItem().getDurability())
 					{
@@ -624,7 +635,12 @@ public class GUIListener implements Listener
 				{
 					if(cfg.getString("menu.extras." + extra + ".menu").equals("TYPE"))
 					{
-						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), GUIUtil.createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),  cfg.getInt("menu.extras." + extra + ".damage"), 1, cfg.getString("menu.extras." + extra + ".title"), null, cfg.getStringList("menu.extras." + extra + ".lore")));
+						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"),
+						            GUIUtil.createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),
+						                               cfg.getInt("menu.extras." + extra + ".damage"), 1,
+						                               cfg.getString("menu.extras." + extra + ".title"),
+						                               null,
+						                               cfg.getStringList("menu.extras." + extra + ".lore")));
 					}
 				}
 			}
@@ -944,7 +960,7 @@ public class GUIListener implements Listener
 		meta.setDisplayName(msg.getString("messages.options.titles.categories.length"));
 		if(!player.hasPermission("blivtrails.options.length"))
 		{
-			meta.setLore(Arrays.asList(BUtil.translateColours("messages.indicators.dont-have-permission")));
+			meta.setLore(Collections.singletonList(BUtil.translateColours("messages.indicators.dont-have-permission")));
 		}
 		item.setItemMeta(meta);
 		return item;
@@ -1248,12 +1264,7 @@ public class GUIListener implements Listener
 
 	public static ItemStack informationItem(List<String> list)
 	{
-		ItemStack item = new ItemStack(Material.BOOK, 1);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.information"));
-		meta.setLore(list);
-		item.setItemMeta(meta);
-		return item;
+		return GUIUtil.createItem(Material.BOOK, 0, 1, msg.getString("messages.options.titles.information"), null, list);
 	}
 
 	public static ItemStack menuItem(String material, String name, List<String> lore, boolean hasPermission, boolean isSelected)

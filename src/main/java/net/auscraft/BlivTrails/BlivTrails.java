@@ -34,8 +34,8 @@ public class BlivTrails extends JavaPlugin
 	@Getter
 	private static BlivTrails instance = null;
 
-	private JdbcPooledConnectionSource ds = null;
-	private FlatFileStorage flatFileStorage = null;
+	private static JdbcPooledConnectionSource ds = null;
+	private static FlatFileStorage flatFileStorage = null;
 
 	@Getter
 	private Messages messages;
@@ -80,7 +80,7 @@ public class BlivTrails extends JavaPlugin
 			flatFileStorage = FlatFileStorage.getInstance();
 		}
 
-		TrailManager.init(this);
+		TrailManager.init();
 		TrailDefaults.getInstance(); //Init defaults
 
 		getServer().getPluginManager().registerEvents(new TrailListener(), this);
@@ -186,7 +186,7 @@ public class BlivTrails extends JavaPlugin
 		}
 	}
 
-	public Object getSave()
+	public static Object getSave()
 	{
 		if (ds != null)
 		{

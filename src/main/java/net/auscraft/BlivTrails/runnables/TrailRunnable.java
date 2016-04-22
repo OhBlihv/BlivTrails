@@ -11,6 +11,7 @@ import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.ParticleDefaultStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -23,9 +24,9 @@ public class TrailRunnable implements Runnable
 	private static class DisplayColourableRunnable implements Runnable
 	{
 
-		private ParticleEffect particle;
-		private ParticleColor data;
-		private Location loc;
+		ParticleEffect particle;
+		ParticleColor data;
+		Location loc;
 
 		public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 		{
@@ -44,12 +45,12 @@ public class TrailRunnable implements Runnable
 	private static class DisplayRegularRunnable implements Runnable
 	{
 
-		private ParticleEffect particle;
-		private float xOff;
-		private float yOff;
-		private float zOff;
-		private float speed;
-		private Location loc;
+		ParticleEffect particle;
+		float xOff;
+		float yOff;
+		float zOff;
+		float speed;
+		Location loc;
 
 		public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
 		{
@@ -67,6 +68,27 @@ public class TrailRunnable implements Runnable
 			// particle.display(offsetX, offsetY, offsetZ, speed, amount,
 			// center, range);
 		}
+	}
+
+	private static class DragonsBreathRunnable extends DisplayRegularRunnable implements Runnable
+	{
+
+		Particle enumParticle;
+
+		public DragonsBreathRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
+		{
+			super(particle, xOff, yOff, zOff, speed, loc);
+
+			this.enumParticle = Particle.valueOf(particle.name());
+		}
+
+		@Override
+		public void run()
+		{
+			loc.getWorld().spawnParticle(enumParticle, loc, 1, (double) xOff, (double) yOff, (double) zOff, (double) speed);
+			//void spawnParticle(Particle var1, Location var2, int var3, double var4, double var6, double var8, double var10);
+		}
+
 	}
 
 	private BlivTrails plugin;
@@ -344,7 +366,7 @@ public class TrailRunnable implements Runnable
 			else if (type == 3) // Random Directions from feet (Spray)
 			{
 				// (0.0-1.0)/20.00 * variation (Default is 1)
-				speed = (float) ((rand.nextFloat() / 20.00) * sprayCfg);
+				speed = (float) ((rand.nextFloat() / 20.00D) * sprayCfg);
 			}
 
 			try
@@ -377,7 +399,14 @@ public class TrailRunnable implements Runnable
 				}
 				else
 				{
-					particle.display(xOff, yOff, zOff, speed, 1, player.getLocation().add(0.0D, height, 0.0D), 64);
+					if(particle == ParticleEffect.DRAGON_BREATH)
+					{
+						player.getWorld().spawnParticle(Particle.valueOf(particle.name()), player.getLocation(), 1, (double) xOff, (double) yOff, (double) zOff, (double) speed);
+					}
+					else
+					{
+						particle.display(xOff, yOff, zOff, speed, 1, player.getLocation().add(0.0D, height, 0.0D), 64);
+					}
 				}
 
 				if (length > 1)
@@ -389,21 +418,30 @@ public class TrailRunnable implements Runnable
 							if(type == 2)
 							{
 								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-								                                                 new DisplayColourableRunnable(particle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
+								                      new DisplayColourableRunnable(particle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 							else
 							{
 								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-								                                                 new DisplayColourableRunnable(particle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
+								                      new DisplayColourableRunnable(particle, data, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 								// public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
 							}
 						}
 						else
 						{
-							Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
-							                                                 new DisplayRegularRunnable(particle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
-							// public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
+							if(particle == ParticleEffect.DRAGON_BREATH)
+							{
+								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
+								                      new DragonsBreathRunnable(particle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
+							}
+							else
+							{
+								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
+								                      new DisplayRegularRunnable(particle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
+								// public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
+							}
+
 
 						}
 					}

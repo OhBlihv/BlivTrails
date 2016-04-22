@@ -2,9 +2,12 @@ package net.auscraft.BlivTrails.util;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.minecraft.server.v1_9_R1.NBTTagCompound;
+import net.minecraft.server.v1_9_R1.NBTTagList;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -12,7 +15,6 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -113,6 +115,10 @@ public class GUIUtil
 			{
 				meta.setLore(lore);
 			}
+			if(isEnchanted != -1)
+			{
+				original = isEnchanted == 1 ? addEnchantmentEffect(original) : removeEnchantmentEffect(original);
+			}
 			if(enchantmentMap != null)
 			{
 				for(Enchantment enchantment : original.getEnchantments().keySet())
@@ -154,7 +160,7 @@ public class GUIUtil
 
 			itemStack.setItemMeta(itemMeta);
 
-			return itemStack;
+			return isEnchanted == 1 ? addEnchantmentEffect(itemStack) : itemStack;
 		}
 
 		//Use the same method, but with a control flag to avoid the bad material check.
@@ -181,12 +187,7 @@ public class GUIUtil
 				}
 			}
 			int damage = configurationSection.getInt("damage", 0), amount = configurationSection.getInt("amount", 1);
-			String displayName = BUtil.translateColours(configurationSection.getString("displayname", ""));
-			if(displayName.isEmpty())
-			{
-				//Support for the BlivTrails gui-item
-				displayName = BUtil.translateColours(configurationSection.getString("name", ""));
-			}
+			String displayName = BUtil.translateColours(configurationSection.getString("title", ""));
 
 			Map<Enchantment, Integer> enchantmentMap = null;
 			int isEnchanted = -1;
@@ -355,7 +356,7 @@ public class GUIUtil
 	}
 
 	private static final int STACK_SIZE = 64;
-	public static final ItemStack DEFAULT_ITEMSTACK = new ItemStack(Material.POTATO_ITEM, 1, (short) 15);
+	public static final ItemStack DEFAULT_ITEMSTACK = addEnchantmentEffect(new ItemStack(Material.POTATO_ITEM, 1, (short) 15));
 
 	public static ItemStack loadItem(ConfigurationSection configurationSection)
 	{
@@ -376,7 +377,8 @@ public class GUIUtil
 
 	public static ItemStack createItem(ItemContainer itemContainer)
 	{
-		return createItem(itemContainer.getMaterial(), itemContainer.getDamage(), itemContainer.getAmount(), itemContainer.getDisplayName(), itemContainer.getEnchantmentMap(), itemContainer.getLore());
+		ItemStack item = createItem(itemContainer.getMaterial(), itemContainer.getDamage(), itemContainer.getAmount(), itemContainer.getDisplayName(), itemContainer.getEnchantmentMap(), itemContainer.getLore());
+		return itemContainer.getIsEnchanted() == 1 ? addEnchantmentEffect(item) : item;
 	}
 
 	public static ItemStack createItem(Material material, int damage, int amount, String displayName, Map<Enchantment, Integer> enchants, List<String> lore)
@@ -414,6 +416,43 @@ public class GUIUtil
 		}
 
 		return item;
+	}
+
+	public static ItemStack addEnchantmentEffect(ItemStack item)
+	{
+		net.minecraft.server.v1_9_R1.ItemStack nmsStack = CraftItemStack.asNMSCopy(item);
+		NBTTagCompound tag = null;
+		if (!nmsStack.hasTag())
+		{
+			tag = new NBTTagCompound();
+			nmsStack.setTag(tag);
+		}
+		if (tag == null)
+		{
+			tag = nmsStack.getTag();
+		}
+		NBTTagList ench = new NBTTagList();
+		tag.set("ench", ench);
+		nmsStack.setTag(tag);
+		return CraftItemStack.asCraftMirror(nmsStack);
+	}
+
+	public static ItemStack removeEnchantmentEffect(ItemStack item)
+	{
+		net.minecraft.server.v1_9_R1.ItemStack nmsStack = CraftItemStack.asNMSCopy(item);
+		NBTTagCompound tag = null;
+		if (!nmsStack.hasTag())
+		{
+			tag = new NBTTagCompound();
+			nmsStack.setTag(tag);
+		}
+		if (tag == null)
+		{
+			tag = nmsStack.getTag();
+		}
+		tag.remove("ench");
+		nmsStack.setTag(tag);
+		return CraftItemStack.asCraftMirror(nmsStack);
 	}
 
 	private static final Pattern COLON_SPLIT = Pattern.compile("[:]");
@@ -569,8 +608,6 @@ public class GUIUtil
 			System.arraycopy(mergedStacks, 0, mergedStacksTemp, 0, usedElements);
 			mergedStacks = mergedStacksTemp;
 		}
-
-		BUtil.logInfo("Returning a set of " + Arrays.toString(mergedStacks));
 
 		return mergedStacks;
 	}

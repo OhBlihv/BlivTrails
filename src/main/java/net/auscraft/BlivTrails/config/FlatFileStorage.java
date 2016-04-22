@@ -1,10 +1,7 @@
 package net.auscraft.BlivTrails.config;
 
-import lombok.Getter;
 import net.auscraft.BlivTrails.BlivTrails;
 import org.bukkit.Bukkit;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class FlatFileStorage extends FlatFile
 {
@@ -19,14 +16,9 @@ public class FlatFileStorage extends FlatFile
 		return instance;
 	}
 
-	@Getter
-	private static AtomicInteger totalBans = new AtomicInteger();
-
 	private FlatFileStorage()
 	{
 		super("trails.yml");
-
-		load();
 
 		Bukkit.getScheduler().runTaskTimerAsynchronously(BlivTrails.getInstance(), new Runnable()
 		{
@@ -37,17 +29,19 @@ public class FlatFileStorage extends FlatFile
 				save();
 			}
 
-		}, 36000L, 36000L);
-	}
-
-	public void load()
-	{
-		totalBans = new AtomicInteger(getInt("total"));
+		}, 18000L, 18000L); //Save every 15 minutes
 	}
 
 	public void save()
 	{
-		saveValue("total", totalBans.intValue());
+		saveToFile();
+	}
+
+	@Override
+	public void saveEntry(String path, String entry)
+	{
+		save.set(path, entry);
+		//saveToFile(); //Save this to the async saving task
 	}
 
 }
