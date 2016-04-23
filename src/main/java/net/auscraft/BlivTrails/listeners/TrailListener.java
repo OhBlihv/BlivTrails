@@ -50,14 +50,14 @@ public class TrailListener implements Listener
 		Player player = event.getPlayer();
 		if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
 		{
-			BUtil.logDebug(player.getName() + " has a trail.");
+			//BUtil.logDebug(player.getName() + " has a trail.");
 			saveTrail(player);
 			TrailManager.getTrailMap().remove(player.getUniqueId());
 		}
-		else
+		/*else
 		{
 			BUtil.logDebug(player.getName() + " doesn't have an active trail");
-		}
+		}*/
 	}
 
 	@EventHandler
@@ -106,7 +106,7 @@ public class TrailListener implements Listener
 				}
 				catch(Exception e)
 				{
-					BUtil.logError("An error occured while displaying " + event.getPlayer().getName() + "'s trail. It will be disabled.");
+					BUtil.logError("An error occurred while displaying " + event.getPlayer().getName() + "'s trail. It will be disabled.");
 					e.printStackTrace();
 
 					//Remove the PlayerConfig, since it is now invalid.

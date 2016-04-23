@@ -2,6 +2,7 @@ package net.auscraft.BlivTrails;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import net.auscraft.BlivTrails.config.FlatFile;
+import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.listeners.GUIListener;
 import net.auscraft.BlivTrails.runnables.MySQLRunnable;
 import net.auscraft.BlivTrails.util.BUtil;
@@ -121,7 +122,7 @@ public class TrailCommand implements CommandExecutor
 					{
 						BUtil.printError(sender, "You have config errors -- See Console for full printout");
 					}
-					instance.getMessages().reloadFile();
+					Messages.getInstance().reloadFile();
 					TrailManager.loadDefaultOptions();
 					MySQLRunnable.reload();
 					BUtil.logSuccess("Config and Messages Reloaded!");

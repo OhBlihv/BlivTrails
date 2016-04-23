@@ -51,10 +51,28 @@ permissions:
       blivtrails.town-aura: true
       blivtrails.water-drop: true
       blivtrails.water-splash: true
+      blivtrails.end-rod: true
+      blivtrails.dragon-breath: true
+      blivtrails.damage-indicator: true
+      blivtrails.sweep-attack: true
   blivtrails.remove-trail:
     description: Gives access to removing your own trail
   blivtrails.options:
-    description: Gives access to the trail options menu
+    description: Grants access to all options
+    children:
+      blivtrails.options.type: true
+      blivtrails.options.type.trace: true
+      blivtrails.options.type.random: true
+      blivtrails.options.type.dynamic: true
+      blivtrails.options.length: true
+      blivtrails.options.length.short: true
+      blivtrails.options.length.medium: true
+      blivtrails.options.length.long: true
+      blivtrails.options.height: true
+      blivtrails.options.height.feet: true
+      blivtrails.options.height.waist: true
+      blivtrails.options.height.halo: true
+
   blivtrails.angry-villager:
     description: Gives access to the trail
   blivtrails.barrier:

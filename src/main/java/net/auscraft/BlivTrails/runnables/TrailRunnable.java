@@ -401,7 +401,7 @@ public class TrailRunnable implements Runnable
 				{
 					if(particle == ParticleEffect.DRAGON_BREATH)
 					{
-						player.getWorld().spawnParticle(Particle.valueOf(particle.name()), player.getLocation(), 1, (double) xOff, (double) yOff, (double) zOff, (double) speed);
+						player.getWorld().spawnParticle(Particle.valueOf(particle.name()), player.getLocation().add(0.0D, height, 0.0D), 1, (double) xOff, (double) yOff, (double) zOff, (double) speed);
 					}
 					else
 					{
@@ -441,8 +441,6 @@ public class TrailRunnable implements Runnable
 								                      new DisplayRegularRunnable(particle, xOff, yOff, zOff, speed, player.getLocation().add(0.0D, height, 0.0D)), i * 5);
 								// public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
 							}
-
-
 						}
 					}
 				}
