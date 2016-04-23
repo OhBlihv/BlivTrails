@@ -25,6 +25,7 @@ permissions:
     children:
       blivtrails.remove-trail: true
       blivtrails.angry-villager: true
+      blivtrails.barrier: true
       blivtrails.cloud: true
       blivtrails.criticals: true
       blivtrails.criticals-magic: true
@@ -72,7 +73,6 @@ permissions:
       blivtrails.options.height.feet: true
       blivtrails.options.height.waist: true
       blivtrails.options.height.halo: true
-
   blivtrails.angry-villager:
     description: Gives access to the trail
   blivtrails.barrier:
