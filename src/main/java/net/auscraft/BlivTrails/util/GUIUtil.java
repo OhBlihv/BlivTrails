@@ -1,13 +1,11 @@
 package net.auscraft.BlivTrails.util;
 
+import com.darkblade12.ParticleEffect.ReflectionUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import net.minecraft.server.v1_9_R1.NBTTagCompound;
-import net.minecraft.server.v1_9_R1.NBTTagList;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -15,6 +13,8 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -418,41 +418,127 @@ public class GUIUtil
 		return item;
 	}
 
+	private static Class<?>     NMS_ItemStack = null,
+								NMS_NBTTagCompound = null,
+								NMS_NBTTagList = null,
+								CRAFT_ItemStack = null;
+
+	private static Method       NMS_ItemStack_hasTag = null,
+						        NMS_ItemStack_setTag = null,
+						        NMS_ItemStack_getTag = null,
+								NMS_NBTTagCompound_set = null,
+								NMS_NBTTagCompound_remove = null,
+								CRAFT_ItemStack_asNMSCopy = null,
+								CRAFT_ItemStack_asCraftMirror = null;
+
+	/**
+	 *
+	 * @return False if this did not init correctly
+	 */
+	private static boolean initEnchantmentNMS()
+	{
+		try
+		{
+			if(NMS_ItemStack == null) //Attempt to resolve one, if one is null they all should be un-initialized
+			{
+				NMS_ItemStack = ReflectionUtils.PackageType.MINECRAFT_SERVER.getClass("ItemStack");
+				NMS_NBTTagCompound = ReflectionUtils.PackageType.MINECRAFT_SERVER.getClass("NBTTagCompound");
+				NMS_NBTTagList = ReflectionUtils.PackageType.MINECRAFT_SERVER.getClass("NBTTagList");
+
+				CRAFT_ItemStack = ReflectionUtils.PackageType.CRAFTBUKKIT_INVENTORY.getClass("CraftItemStack");
+
+				//Only used for getting methods below
+				Class   NMS_NBTBase = ReflectionUtils.PackageType.MINECRAFT_SERVER.getClass("NBTBase");
+
+				NMS_ItemStack_hasTag = NMS_ItemStack.getMethod("hasTag");
+				NMS_ItemStack_setTag = NMS_ItemStack.getMethod("setTag", NMS_NBTTagCompound);
+				NMS_ItemStack_getTag = NMS_ItemStack.getMethod("getTag");
+				NMS_NBTTagCompound_set = NMS_NBTTagCompound.getMethod("set", String.class, NMS_NBTBase);
+				NMS_NBTTagCompound_remove = NMS_NBTTagCompound.getMethod("remove", String.class);
+				CRAFT_ItemStack_asNMSCopy = CRAFT_ItemStack.getMethod("asNMSCopy", ItemStack.class);
+				CRAFT_ItemStack_asCraftMirror = CRAFT_ItemStack.getMethod("asCraftMirror", NMS_ItemStack);
+			}
+			return true;
+		}
+		catch(ClassNotFoundException | NoSuchMethodException e)
+		{
+			e.printStackTrace();
+			BUtil.logError("Your minecraft version seems to be modded. Enchantment effects will not be supported in this version.");
+			return false;
+		}
+	}
+
 	public static ItemStack addEnchantmentEffect(ItemStack item)
 	{
-		net.minecraft.server.v1_9_R1.ItemStack nmsStack = CraftItemStack.asNMSCopy(item);
-		NBTTagCompound tag = null;
-		if (!nmsStack.hasTag())
+		if(!initEnchantmentNMS())
 		{
-			tag = new NBTTagCompound();
-			nmsStack.setTag(tag);
+			return item; //Return the item without enchantment effects
 		}
-		if (tag == null)
+
+		try
 		{
-			tag = nmsStack.getTag();
+			Object  nmsStack = CRAFT_ItemStack_asNMSCopy.invoke(null, item),
+					tag = null, //NBTTagCompound
+					enchTag;    //NBTTagList
+
+			if(!((boolean) NMS_ItemStack_hasTag.invoke(nmsStack)))
+			{
+				tag = NMS_NBTTagCompound.newInstance();
+				NMS_ItemStack_setTag.invoke(nmsStack, tag);
+			}
+
+			if (tag == null)
+			{
+				tag = NMS_ItemStack_getTag.invoke(nmsStack);
+			}
+
+			enchTag = NMS_NBTTagList.newInstance();
+			NMS_NBTTagCompound_set.invoke(tag, "ench", enchTag);
+			NMS_ItemStack_setTag.invoke(nmsStack, tag);
+
+			return (ItemStack) CRAFT_ItemStack_asCraftMirror.invoke(null, nmsStack);
 		}
-		NBTTagList ench = new NBTTagList();
-		tag.set("ench", ench);
-		nmsStack.setTag(tag);
-		return CraftItemStack.asCraftMirror(nmsStack);
+		catch(ClassCastException | IllegalAccessException | InvocationTargetException | InstantiationException e)
+		{
+			e.printStackTrace();
+			BUtil.logError("Your minecraft version seems to be modded. Enchantment effects will not be supported in this version.");
+			return item;
+		}
 	}
 
 	public static ItemStack removeEnchantmentEffect(ItemStack item)
 	{
-		net.minecraft.server.v1_9_R1.ItemStack nmsStack = CraftItemStack.asNMSCopy(item);
-		NBTTagCompound tag = null;
-		if (!nmsStack.hasTag())
+		if(!initEnchantmentNMS())
 		{
-			tag = new NBTTagCompound();
-			nmsStack.setTag(tag);
+			return item; //Return the item without enchantment effects
 		}
-		if (tag == null)
+
+		try
 		{
-			tag = nmsStack.getTag();
+			Object  nmsStack = CRAFT_ItemStack_asNMSCopy.invoke(item),
+					tag = null;
+
+			if(!((boolean) NMS_ItemStack_hasTag.invoke(nmsStack)))
+			{
+				tag = NMS_NBTTagCompound.newInstance();
+				NMS_ItemStack_setTag.invoke(nmsStack, tag);
+			}
+
+			if (tag == null)
+			{
+				tag = NMS_ItemStack_getTag.invoke(nmsStack);
+			}
+
+			NMS_NBTTagCompound_remove.invoke(tag, "ench");
+			NMS_ItemStack_setTag.invoke(nmsStack, tag);
+			return (ItemStack) CRAFT_ItemStack_asCraftMirror.invoke(nmsStack);
 		}
-		tag.remove("ench");
-		nmsStack.setTag(tag);
-		return CraftItemStack.asCraftMirror(nmsStack);
+		catch(InvocationTargetException | IllegalAccessException | InstantiationException e)
+		{
+			e.printStackTrace();
+			BUtil.logError("Your minecraft version seems to be modded. Enchantment effects will not be supported in this version.");
+			return item;
+		}
 	}
 
 	private static final Pattern COLON_SPLIT = Pattern.compile("[:]");
