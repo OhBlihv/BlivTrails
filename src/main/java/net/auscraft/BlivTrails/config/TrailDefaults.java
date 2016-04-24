@@ -100,8 +100,6 @@ public class TrailDefaults
 					}
 				}
 
-				BUtil.logInfo("Loaded: '" + BUtil.translateColours(cfg.getString("trails." + particleString + ".name")) + "'");
-
 				particleDefaults.put(particle,
 				                     new ParticleDefaultStorage(BUtil.translateColours(cfg.getString("trails." + particleString + ".name")),
 						                                        typeStringtoInt(cfg.getString("trails." + particleString + ".options.type")),

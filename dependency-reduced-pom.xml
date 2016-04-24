@@ -82,7 +82,7 @@
       <artifactId>spigot</artifactId>
       <version>1.9.2-SNAPSHOT</version>
       <scope>system</scope>
-      <systemPath>S:/Google Drive/dev/AusCraft/lib/spigot-1.9.2.jar</systemPath>
+      <systemPath>${env.AUSCRAFT_DEV}/lib/spigot-1.9.2.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.kitteh</groupId>

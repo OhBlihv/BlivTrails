@@ -42,12 +42,19 @@ public class GUIListener implements Listener
 		{
 			cfg = FlatFile.getInstance();
 		}
-		cfg.reloadFile();
+		else
+		{
+			cfg.reloadFile();
+		}
+
 		if(msg == null)
 		{
 			msg = Messages.getInstance();
 		}
-		msg.reloadFile();
+		else
+		{
+			msg.reloadFile();
+		}
 	}
 
 	@EventHandler
