@@ -496,17 +496,20 @@ public class GUIListener implements Listener
 		}
 
 		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		for(String extra : extraItemSection.getKeys(false))
+		if(extraItemSection != null)
 		{
-			if(extraItemSection.getString(extra + ".menu").equals("MAIN"))
+			for(String extra : extraItemSection.getKeys(false))
 			{
-				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-				                                    extraItemSection.getInt(extra + ".damage"),
-				                                    1,
-				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-				                                    null,
-				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				if(extraItemSection.getString(extra + ".menu").equals("MAIN"))
+				{
+					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+					                                    extraItemSection.getInt(extra + ".damage"),
+					                                    1,
+					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+					                                    null,
+					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				}
 			}
 		}
 
@@ -551,17 +554,20 @@ public class GUIListener implements Listener
 		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
 
 		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		for(String extra : extraItemSection.getKeys(false))
+		if(extraItemSection != null)
 		{
-			if(extraItemSection.getString(extra + ".menu").equals("OPTIONS"))
+			for(String extra : extraItemSection.getKeys(false))
 			{
-				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-				                                    extraItemSection.getInt(extra + ".damage"),
-				                                    1,
-				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-				                                    null,
-				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				if(extraItemSection.getString(extra + ".menu").equals("OPTIONS"))
+				{
+					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+					                                    extraItemSection.getInt(extra + ".damage"),
+					                                    1,
+					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+					                                    null,
+					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				}
 			}
 		}
 
@@ -613,17 +619,20 @@ public class GUIListener implements Listener
 		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
 
 		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		for(String extra : extraItemSection.getKeys(false))
+		if(extraItemSection != null)
 		{
-			if(extraItemSection.getString(extra + ".menu").equals("TYPE"))
+			for(String extra : extraItemSection.getKeys(false))
 			{
-				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-				                                    extraItemSection.getInt(extra + ".damage"),
-				                                    1,
-				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-				                                    null,
-				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				if(extraItemSection.getString(extra + ".menu").equals("TYPE"))
+				{
+					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+					                                    extraItemSection.getInt(extra + ".damage"),
+					                                    1,
+					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+					                                    null,
+					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				}
 			}
 		}
 
@@ -652,17 +661,20 @@ public class GUIListener implements Listener
 		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
 
 		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		for(String extra : extraItemSection.getKeys(false))
+		if(extraItemSection != null)
 		{
-			if(extraItemSection.getString(extra + ".menu").equals("LENGTH"))
+			for(String extra : extraItemSection.getKeys(false))
 			{
-				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-				                                    extraItemSection.getInt(extra + ".damage"),
-				                                    1,
-				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-				                                    null,
-				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				if(extraItemSection.getString(extra + ".menu").equals("LENGTH"))
+				{
+					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+					                                    extraItemSection.getInt(extra + ".damage"),
+					                                    1,
+					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+					                                    null,
+					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				}
 			}
 		}
 
@@ -690,17 +702,20 @@ public class GUIListener implements Listener
 		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
 
 		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		for(String extra : extraItemSection.getKeys(false))
+		if(extraItemSection != null)
 		{
-			if(extraItemSection.getString(extra + ".menu").equals("HEIGHT"))
+			for(String extra : extraItemSection.getKeys(false))
 			{
-				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-				                                    extraItemSection.getInt(extra + ".damage"),
-				                                    1,
-				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-				                                    null,
-				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				if(extraItemSection.getString(extra + ".menu").equals("HEIGHT"))
+				{
+					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+					                                    extraItemSection.getInt(extra + ".damage"),
+					                                    1,
+					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+					                                    null,
+					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				}
 			}
 		}
 
@@ -782,17 +797,20 @@ public class GUIListener implements Listener
 		setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.back-button-pos"), backButton());
 
 		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		for(String extra : extraItemSection.getKeys(false))
+		if(extraItemSection != null)
 		{
-			if(extraItemSection.getString(extra + ".menu").equals("COLOUR"))
+			for(String extra : extraItemSection.getKeys(false))
 			{
-				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-				                                    extraItemSection.getInt(extra + ".damage"),
-				                                    1,
-				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-				                                    null,
-				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				if(extraItemSection.getString(extra + ".menu").equals("COLOUR"))
+				{
+					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+					                                    extraItemSection.getInt(extra + ".damage"),
+					                                    1,
+					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+					                                    null,
+					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+				}
 			}
 		}
 
