@@ -1,6 +1,7 @@
 package net.auscraft.BlivTrails.util;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
@@ -59,8 +60,10 @@ public class BUtil
 
 	private static final String PLUGIN_NAME = "BlivTrails";
 	private static final String prefix = "&f[&b" + PLUGIN_NAME + "&f]&r ";
-	private static final String playerPrefix = "\u00A78[\u00A7e" + PLUGIN_NAME + "\u00A78]\u00A7r ";
 	private static final java.util.logging.Logger log = Bukkit.getLogger();
+
+	@Setter
+	private static String playerPrefix = "\u00A78[\u00A7e" + PLUGIN_NAME + "\u00A78]\u00A7r ";
 
 	// ------------------------------------------------------------------------------------------------------
 	// Miscellaneous

@@ -58,6 +58,7 @@ public class BlivTrails extends JavaPlugin
 		FlatFile cfg = FlatFile.getInstance();
 
 		BUtil.DEBUG = cfg.getBoolean("misc.debug"); //Init here, since we're not using constructors in BUtil
+		BUtil.setPlayerPrefix(BUtil.translateColours(messages.getString("messages.prefix")));
 
 		if (cfg.getBoolean("database.mysql"))
 		{
