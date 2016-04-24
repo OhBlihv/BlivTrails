@@ -24,7 +24,6 @@ import org.kitteh.vanish.VanishPlugin;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Pattern;
 
 public class TrailManager
 {
@@ -148,17 +147,8 @@ public class TrailManager
 		BUtil.logInfo("Finished Loading Defaults!");
 	}
 
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile("[%](\\S+)[%]");
-
 	public static void doDefaultTrail(UUID uuid, ParticleEffect particle)
 	{
-
-		//String particleString = particle.toString();
-		//particleString = BUtil.trailConfigName(particleString);
-		// Do Particle Defaults
-		//String typeString = cfg.getString("trails." + particleString + ".options.type"), lengthString = cfg.getString("trails." + particleString + ".options.length"),
-		//		heightString = cfg.getString("trails." + particleString + ".options.height"),
-		//			colourString = (particle.hasProperty(ParticleProperty.COLORABLE) ? cfg.getString("trails." + particleString + ".options.colour") : "red");
 		ParticleDefaultStorage particleDefaults = TrailDefaults.getDefaults(particle);
 
 		// Trail for the first time
@@ -210,7 +200,6 @@ public class TrailManager
 
 			if(data == null || data.isEmpty())
 			{
-				//BUtil.logDebug("Player " + player.getName() + " has no trail config.");
 				return;
 			}
 
@@ -227,7 +216,6 @@ public class TrailManager
 							return;
 						}
 						particleEff = pEff;
-						BUtil.logDebug("Equal to " + pEff.toString());
 						break;
 					}
 				}
@@ -235,7 +223,6 @@ public class TrailManager
 			}
 			catch (NullPointerException e)
 			{
-				//BUtil.logDebug("Player failed loading: (NPE) " + player.getName());
 				if (BUtil.DEBUG)
 				{
 					e.printStackTrace();
@@ -257,12 +244,10 @@ public class TrailManager
 				removePlayer(player.getUniqueId());
 				return;
 			}
-			//BUtil.logDebug(player.getName() + "'s trail config is not null");
 			if (flatFileStorage == null)
 			{
 				//Construct this here to avoid constructing it twice if the server is shutting down
 				SaveRunnable saveRunnable = new SaveRunnable(player.getUniqueId(), pcfg);
-				//BUtil.logDebug("Using MySQL to save " + player.getName() + "'s trail data");
 				try
 				{
 					// Run MySQL off the main thread to avoid lockups
@@ -467,7 +452,6 @@ public class TrailManager
 		}
 
 		trailMap.put(uuid, new PlayerConfig(uuid, particleEff, type, length, height, colour));
-		BUtil.logDebug("Trail Successfully Applied");
 		return "&aTrail Successfully Applied";
 	}
 
@@ -510,7 +494,6 @@ public class TrailManager
 				try
 				{
 					isVanished = ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player);
-					BUtil.logDebug("Player is: " + ((VanishPlugin) Bukkit.getPluginManager().getPlugin("VanishNoPacket")).getManager().isVanished(player));
 				}
 				catch (NullPointerException | NoClassDefFoundError e)
 				{

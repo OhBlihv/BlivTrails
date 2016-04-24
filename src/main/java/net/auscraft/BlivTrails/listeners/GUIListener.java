@@ -10,6 +10,7 @@ import net.auscraft.BlivTrails.util.GUIUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -82,13 +83,10 @@ public class GUIListener implements Listener
 				if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
 				{
 					TrailManager.getTrailMap().put(player.getUniqueId(), new PlayerConfig(player.getUniqueId(), ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
-					try
+					int taskId = TrailManager.getTaskMap().remove(player.getUniqueId());
+					if(taskId > 0)
 					{
-						Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().remove(player.getUniqueId()));
-					}
-					catch(NullPointerException e)
-					{
-
+						Bukkit.getServer().getScheduler().cancelTask(taskId);
 					}
 					TrailManager.removePlayer(player.getUniqueId());
 					BUtil.printPlain(player, msg.getString("messages.generic.trail-removed"));
@@ -114,13 +112,8 @@ public class GUIListener implements Listener
 						return;
 					}
 
-					try
+					if(!optionsMenu(player))
 					{
-						optionsMenu(player);
-					}
-					catch (NullPointerException e)
-					{
-						e.printStackTrace();
 						BUtil.printPlain(event.getWhoClicked(), msg.getString("messages.error.no-trail"));
 					}
 				}
@@ -228,14 +221,6 @@ public class GUIListener implements Listener
 			{
 				mainMenu(player);
 			}
-			/*else //if (event.getCurrentItem().getType().equals(Material.BOOK))
-			{
-				//This should include all custom items for this menu with no actions
-			}*/
-			/*else
-			{
-				BUtil.logError(msg.getString("messages.error.no-exist"));
-			}*/
 		}
 		/*
 		 * Sub-Options-Menu Handling
@@ -300,14 +285,6 @@ public class GUIListener implements Listener
 			{
 				optionsMenu(player);
 			}
-			/*else //if (event.getCurrentItem().getType().equals(Material.BOOK))
-			{
-				// Do nothing -- This is all other cases (Custom Items)
-			}*
-			/*else
-			{
-				BUtil.printPlain(player, msg.getString("messages.error.no-exist"));
-			}*/
 		}
 		else if (event.getInventory().getTitle().equals(msg.getString("messages.titles.length")))
 		{
@@ -361,14 +338,6 @@ public class GUIListener implements Listener
 			{
 				optionsMenu(player);
 			}
-			else if (event.getCurrentItem().getType().equals(Material.BOOK))
-			{
-				// Do nothing -- Is just information
-			}
-			/*else
-			{
-				BUtil.printPlain(player, msg.getString("messages.error.no-exist"));
-			}*/
 		}
 		else if (event.getInventory().getTitle().equals(msg.getString("messages.titles.height")))
 		{
@@ -418,18 +387,10 @@ public class GUIListener implements Listener
 					BUtil.printPlain(player, msg.getString("messages.no-permission.height.halo"));
 				}
 			}
-			/*else if (event.getCurrentItem().getType().equals(Material.BOOK))
-			{
-				// Do nothing -- Is just information
-			}*/
 			else if (event.getRawSlot() == cfg.getInt("menu.options.back-button.position"))
 			{
 				optionsMenu(player);
 			}
-			/*else
-			{
-				BUtil.printPlain(player, msg.getString("messages.error.no-exist"));
-			}*/
 		}
 		else if (BUtil.stripColours(event.getInventory().getTitle()).contains(BUtil.stripColours(msg.getString("messages.titles.colours"))))
 		{
@@ -501,58 +462,55 @@ public class GUIListener implements Listener
 			pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
 		}
 		else
-		// Put a temp entry in
+		// Use a temporary/blank PlayerConfig
 		{
 			pcfg = new PlayerConfig(player.getUniqueId(), null, 0, 0, 0, 0);
 		}
-		try
+
+		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.main.size"), msg.getString("messages.titles.main-menu"));
+		if (cfg.getBoolean("trails.remove-trail.display"))
 		{
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.main.size"), msg.getString("messages.titles.main-menu"));
-			if (cfg.getBoolean("trails.remove-trail.display"))
+			setInventoryItem(inventory, cfg.getInt("trails.remove-trail.position"),
+			                 menuItem(cfg.getString("trails.remove-trail.material"), BUtil.translateColours(cfg.getString("trails.remove-trail.name")),
+			                          BUtil.translateColours(cfg.getStringList("trails.remove-trail.lore")), player.hasPermission("blivtrails.remove-trail"), false));
+		}
+		String particleString;
+		for (ParticleEffect particleEff : usedTrails)
+		{
+			particleString = BUtil.trailConfigName(particleEff.toString());
+			if(!cfg.getBoolean("trails." + particleString + ".display"))
 			{
-				inv.setItem(cfg.getInt("trails.remove-trail.position"),
-				            menuItem(cfg.getString("trails.remove-trail.material"), BUtil.translateColours(cfg.getString("trails.remove-trail.name")),
-				                     BUtil.translateColours(cfg.getStringList("trails.remove-trail.lore")), player.hasPermission("blivtrails.remove-trail"), false));
-			}
-			String particleString;
-			for (ParticleEffect particleEff : usedTrails)
-			{
-				particleString = BUtil.trailConfigName(particleEff.toString());
-				inv.setItem(cfg.getInt("trails." + particleString + ".position"),
-				            menuItem(cfg.getString("trails." + particleString + ".material"), BUtil.translateColours(cfg.getString("trails." + particleString + ".name")),
-				                     BUtil.translateColours(cfg.getStringList("trails." + particleString + ".lore")),
-				                     player.hasPermission("blivtrails." + particleString), pcfg.getParticle() == particleEff));
-			}
-			if (cfg.getBoolean("trails.options-menu.display"))
-			{
-				inv.setItem(cfg.getInt("trails.options-menu.position"),
-				            menuItem(cfg.getString("trails.options-menu.material"), BUtil.translateColours(cfg.getString("trails.options-menu.name")),
-				                     BUtil.translateColours(cfg.getStringList("trails.options-menu.lore")), player.hasPermission("blivtrails.options-menu"), false));
+				continue;
 			}
 
-			try
-			{
-				for(String extra : cfg.getSave().getConfigurationSection("menu.extras").getKeys(false))
-				{
-					if(cfg.getString("menu.extras." + extra + ".menu").equals("MAIN"))
-					{
-						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), GUIUtil.createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),  cfg.getInt("menu.extras." + extra + ".damage"), 1, cfg.getString("menu.extras." + extra + ".title"), null, cfg.getStringList("menu.extras." + extra + ".lore")));
-					}
-				}
-			}
-			catch(NullPointerException e)
-			{
-				//No extras in config.
-				//Continue as usual
-			}
-
-			player.openInventory(inv);
+			setInventoryItem(inventory, cfg.getInt("trails." + particleString + ".position"),
+			                 menuItem(cfg.getString("trails." + particleString + ".material"), BUtil.translateColours(cfg.getString("trails." + particleString + ".name")),
+			                          BUtil.translateColours(cfg.getStringList("trails." + particleString + ".lore")),
+			                          player.hasPermission("blivtrails." + particleString), pcfg.getParticle() == particleEff));
 		}
-		catch (ArrayIndexOutOfBoundsException e)
+		if (cfg.getBoolean("trails.options-menu.display"))
 		{
-			BUtil.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			BUtil.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			setInventoryItem(inventory, cfg.getInt("trails.options-menu.position"),
+			                 menuItem(cfg.getString("trails.options-menu.material"), BUtil.translateColours(cfg.getString("trails.options-menu.name")),
+			                          BUtil.translateColours(cfg.getStringList("trails.options-menu.lore")), player.hasPermission("blivtrails.options-menu"), false));
 		}
+
+		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
+		for(String extra : extraItemSection.getKeys(false))
+		{
+			if(extraItemSection.getString(extra + ".menu").equals("MAIN"))
+			{
+				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+				                                    extraItemSection.getInt(extra + ".damage"),
+				                                    1,
+				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+				                                    null,
+				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+			}
+		}
+
+		player.openInventory(inventory);
 	}
 
 	/*
@@ -560,53 +518,72 @@ public class GUIListener implements Listener
 	 * --------------------------------------------------------------------
 	 */
 
-	public static void optionsMenu(Player player) throws NullPointerException
+	/**
+	 *
+	 * @param player
+	 * @return False is an error occurred, or if the player does not have an active trail
+	 */
+	public static boolean optionsMenu(Player player)
 	{
 		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
-		try
+		if(pcfg == null)
 		{
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.main-options"));
-			if (cfg.getBoolean("menu.options.config.type.enabled"))
-			{
-				inv.setItem(cfg.getInt("menu.options.config.type.position"), optionsType(player));
-			}
-			if (cfg.getBoolean("menu.options.config.length.enabled"))
-			{
-				inv.setItem(cfg.getInt("menu.options.config.length.position"), optionsLength(player));
-			}
-			if (cfg.getBoolean("menu.options.config.height.enabled"))
-			{
-				inv.setItem(cfg.getInt("menu.options.config.height.position"), optionsHeight(player));
-			}
-			if (cfg.getBoolean("menu.options.config.colour.enabled"))
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.position"), optionsColour(player, pcfg.getParticle()));
-			}
-			inv.setItem(cfg.getInt("menu.options.back-button.position"), backButton());
-
-			try
-			{
-				for(String extra : cfg.getSave().getConfigurationSection("menu.extras").getKeys(false))
-				{
-					if(cfg.getString("menu.extras." + extra + ".menu").equals("OPTIONS"))
-					{
-						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), GUIUtil.createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),  cfg.getInt("menu.extras." + extra + ".damage"), 1, cfg.getString("menu.extras." + extra + ".title"), null, cfg.getStringList("menu.extras." + extra + ".lore")));
-					}
-				}
-			}
-			catch(NullPointerException e)
-			{
-				//No extras in config.
-				//Continue as usual
-			}
-
-			player.openInventory(inv);
+			return false;
 		}
-		catch (ArrayIndexOutOfBoundsException e)
+
+		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.main-options"));
+		if (cfg.getBoolean("menu.options.config.type.enabled"))
 		{
-			BUtil.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			BUtil.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.type.position"), optionsType(player));
 		}
+		if (cfg.getBoolean("menu.options.config.length.enabled"))
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.length.position"), optionsLength(player));
+		}
+		if (cfg.getBoolean("menu.options.config.height.enabled"))
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.height.position"), optionsHeight(player));
+		}
+		if (cfg.getBoolean("menu.options.config.colour.enabled"))
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.position"), optionsColour(player, pcfg.getParticle()));
+		}
+		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
+
+		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
+		for(String extra : extraItemSection.getKeys(false))
+		{
+			if(extraItemSection.getString(extra + ".menu").equals("OPTIONS"))
+			{
+				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+				                                    extraItemSection.getInt(extra + ".damage"),
+				                                    1,
+				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+				                                    null,
+				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+			}
+		}
+
+		player.openInventory(inventory);
+		return true;
+	}
+
+	private static void setInventoryItem(Inventory inventory, int slot, ItemStack itemStack)
+	{
+		if(inventory == null || itemStack == null)
+		{
+			return; //We can safely ignore this entirely
+		}
+
+		if(slot < 0 || slot >= inventory.getSize())
+		{
+			BUtil.logError("Attempted to place " + itemStack.getType() + " - " + itemStack.getItemMeta().getDisplayName() +
+				               " outside of inventory " + inventory.getType() + ".");
+			return;
+		}
+
+		inventory.setItem(slot, itemStack);
 	}
 
 	/*
@@ -616,248 +593,210 @@ public class GUIListener implements Listener
 	public static void optionsMenuType(Player player)
 	{
 		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
-		try
-		{
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.type"));
-			if (cfg.getBoolean("menu.options.config.type.trace"))
-			{
-				inv.setItem(3, optionsTypeTrace(player, pcfg.getType() == 1));
-				inv.setItem(12, informationItem(msg.getStringList("messages.information.type.trace")));
-			}
-			if (cfg.getBoolean("menu.options.config.type.random"))
-			{
-				inv.setItem(4, optionsTypeRandom(player, pcfg.getType() == 2));
-				inv.setItem(13, informationItem(msg.getStringList("messages.information.type.random")));
-			}
-			if (cfg.getBoolean("menu.options.config.type.dynamic"))
-			{
-				inv.setItem(5, optionsTypeDynamic(player, pcfg.getType() == 3, pcfg.getParticle()));
-				inv.setItem(14, informationItem(msg.getStringList("messages.information.type.dynamic")));
-			}
-			inv.setItem(cfg.getInt("menu.options.back-button.position"), backButton());
 
-			try
-			{
-				for(String extra : cfg.getSave().getConfigurationSection("menu.extras").getKeys(false))
-				{
-					if(cfg.getString("menu.extras." + extra + ".menu").equals("TYPE"))
-					{
-						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"),
-						            GUIUtil.createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),
-						                               cfg.getInt("menu.extras." + extra + ".damage"), 1,
-						                               cfg.getString("menu.extras." + extra + ".title"),
-						                               null,
-						                               cfg.getStringList("menu.extras." + extra + ".lore")));
-					}
-				}
-			}
-			catch(NullPointerException e)
-			{
-				//No extras in config.
-				//Continue as usual
-			}
-
-			player.openInventory(inv);
-		}
-		catch (ArrayIndexOutOfBoundsException e)
+		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.type"));
+		if (cfg.getBoolean("menu.options.config.type.trace"))
 		{
-			BUtil.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			BUtil.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			setInventoryItem(inventory, 3, optionsTypeTrace(player, pcfg.getType() == 1));
+			setInventoryItem(inventory, 12, informationItem(msg.getStringList("messages.information.type.trace")));
 		}
+		if (cfg.getBoolean("menu.options.config.type.random"))
+		{
+			setInventoryItem(inventory, 4, optionsTypeRandom(player, pcfg.getType() == 2));
+			setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information.type.random")));
+		}
+		if (cfg.getBoolean("menu.options.config.type.dynamic"))
+		{
+			setInventoryItem(inventory, 5, optionsTypeDynamic(player, pcfg.getType() == 3, pcfg.getParticle()));
+			setInventoryItem(inventory, 14, informationItem(msg.getStringList("messages.information.type.dynamic")));
+		}
+		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
+
+		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
+		for(String extra : extraItemSection.getKeys(false))
+		{
+			if(extraItemSection.getString(extra + ".menu").equals("TYPE"))
+			{
+				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+				                                    extraItemSection.getInt(extra + ".damage"),
+				                                    1,
+				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+				                                    null,
+				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+			}
+		}
+
+		player.openInventory(inventory);
 
 	}
 
 	public static void optionsMenuLength(Player player)
 	{
 		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
-		try
-		{
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.length"));
-			if (cfg.getBoolean("menu.options.config.length.short"))
-			{
-				inv.setItem(3, optionsLengthShort(player, pcfg.getLength() == 1));
-			}
-			if (cfg.getBoolean("menu.options.config.length.medium"))
-			{
-				inv.setItem(4, optionsLengthMedium(player, pcfg.getLength() == 2));
-			}
-			if (cfg.getBoolean("menu.options.config.length.long"))
-			{
-				inv.setItem(5, optionsLengthLong(player, pcfg.getLength() == 3));
-			}
-			inv.setItem(13, informationItem(msg.getStringList("messages.information.length.info")));
-			inv.setItem(cfg.getInt("menu.options.back-button.position"), backButton());
 
-			try
-			{
-				for(String extra : cfg.getSave().getConfigurationSection("menu.extras").getKeys(false))
-				{
-					if(cfg.getString("menu.extras." + extra + ".menu").equals("LENGTH"))
-					{
-						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), GUIUtil.createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),  cfg.getInt("menu.extras." + extra + ".damage"), 1, cfg.getString("menu.extras." + extra + ".title"), null, cfg.getStringList("menu.extras." + extra + ".lore")));
-					}
-				}
-			}
-			catch(NullPointerException e)
-			{
-				//No extras in config.
-				//Continue as usual
-			}
-
-			player.openInventory(inv);
-		}
-		catch (ArrayIndexOutOfBoundsException e)
+		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.length"));
+		if (cfg.getBoolean("menu.options.config.length.short"))
 		{
-			BUtil.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			BUtil.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			setInventoryItem(inventory, 3, optionsLengthShort(player, pcfg.getLength() == 1));
 		}
+		if (cfg.getBoolean("menu.options.config.length.medium"))
+		{
+			setInventoryItem(inventory, 4, optionsLengthMedium(player, pcfg.getLength() == 2));
+		}
+		if (cfg.getBoolean("menu.options.config.length.long"))
+		{
+			setInventoryItem(inventory, 5, optionsLengthLong(player, pcfg.getLength() == 3));
+		}
+		setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information.length.info")));
+		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
+
+		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
+		for(String extra : extraItemSection.getKeys(false))
+		{
+			if(extraItemSection.getString(extra + ".menu").equals("LENGTH"))
+			{
+				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+				                                    extraItemSection.getInt(extra + ".damage"),
+				                                    1,
+				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+				                                    null,
+				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+			}
+		}
+
+		player.openInventory(inventory);
 	}
 
 	public static void optionsMenuHeight(Player player)
 	{
-		try
-		{
-			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.height"));
-			if (cfg.getBoolean("menu.options.config.height.feet"))
-			{
-				inv.setItem(3, optionsHeightFeet(player, pcfg.getHeight() == 0));
-			}
-			if (cfg.getBoolean("menu.options.config.height.waist"))
-			{
-				inv.setItem(4, optionsHeightWaist(player, pcfg.getHeight() == 1));
-			}
-			if (cfg.getBoolean("menu.options.config.height.halo"))
-			{
-				inv.setItem(5, optionsHeightHead(player, pcfg.getHeight() == 2));
-			}
-			inv.setItem(13, informationItem(msg.getStringList("messages.information.height.info")));
-			inv.setItem(cfg.getInt("menu.options.back-button.position"), backButton());
+		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
 
-			try
-			{
-				for(String extra : cfg.getSave().getConfigurationSection("menu.extras").getKeys(false))
-				{
-					if(cfg.getString("menu.extras." + extra + ".menu").equals("HEIGHT"))
-					{
-						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), GUIUtil.createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),  cfg.getInt("menu.extras." + extra + ".damage"), 1, cfg.getString("menu.extras." + extra + ".title"), null, cfg.getStringList("menu.extras." + extra + ".lore")));
-					}
-				}
-			}
-			catch(NullPointerException e)
-			{
-				//No extras in config.
-				//Continue as usual
-			}
-
-			player.openInventory(inv);
-		}
-		catch (ArrayIndexOutOfBoundsException e)
+		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.height"));
+		if (cfg.getBoolean("menu.options.config.height.feet"))
 		{
-			BUtil.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			BUtil.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			setInventoryItem(inventory, 3, optionsHeightFeet(player, pcfg.getHeight() == 0));
 		}
+		if (cfg.getBoolean("menu.options.config.height.waist"))
+		{
+			setInventoryItem(inventory, 4, optionsHeightWaist(player, pcfg.getHeight() == 1));
+		}
+		if (cfg.getBoolean("menu.options.config.height.halo"))
+		{
+			setInventoryItem(inventory, 5, optionsHeightHead(player, pcfg.getHeight() == 2));
+		}
+		setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information.height.info")));
+		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
+
+		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
+		for(String extra : extraItemSection.getKeys(false))
+		{
+			if(extraItemSection.getString(extra + ".menu").equals("HEIGHT"))
+			{
+				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+				                                    extraItemSection.getInt(extra + ".damage"),
+				                                    1,
+				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+				                                    null,
+				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+			}
+		}
+
+		player.openInventory(inventory);
 	}
 
 	public static void optionsMenuColour(Player player)
 	{
-		try
+		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.config.colour.size"), msg.getString("messages.titles.colours"));
+		if (cfg.getInt("menu.options.config.colour.black-pos") != -1)
 		{
-			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
-			Inventory inv = Bukkit.createInventory(null, cfg.getInt("menu.options.config.colour.size"), msg.getString("messages.titles.colours"));
-			if (cfg.getInt("menu.options.config.colour.black-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.black-pos"), optionsColourItem(player, pcfg.getColour() == 0, 0, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.red-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.red-pos"), optionsColourItem(player, pcfg.getColour() == 1, 1, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.green-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.green-pos"), optionsColourItem(player, pcfg.getColour() == 2, 2, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.brown-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.brown-pos"), optionsColourItem(player, pcfg.getColour() == 3, 3, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.blue-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.blue-pos"), optionsColourItem(player, pcfg.getColour() == 4, 4, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.purple-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.purple-pos"), optionsColourItem(player, pcfg.getColour() == 5, 5, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.cyan-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.cyan-pos"), optionsColourItem(player, pcfg.getColour() == 6, 6, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.light-grey-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.light-grey-pos"), optionsColourItem(player, pcfg.getColour() == 7, 7, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.grey-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.grey-pos"), optionsColourItem(player, pcfg.getColour() == 8, 8, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.pink-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.pink-pos"), optionsColourItem(player, pcfg.getColour() == 9, 9, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.lime-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.pink-pos"), optionsColourItem(player, pcfg.getColour() == 10, 10, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.lime-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.yellow-pos"), optionsColourItem(player, pcfg.getColour() == 11, 11, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.light-blue-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.light-blue-pos"), optionsColourItem(player, pcfg.getColour() == 12, 12, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.magenta-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.magenta-pos"), optionsColourItem(player, pcfg.getColour() == 13, 13, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.orange-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.orange-pos"), optionsColourItem(player, pcfg.getColour() == 14, 14, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.white-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.white-pos"), optionsColourItem(player, pcfg.getColour() == 15, 15, pcfg.getParticle()));
-			}
-			if (cfg.getInt("menu.options.config.colour.random-pos") != -1)
-			{
-				inv.setItem(cfg.getInt("menu.options.config.colour.random-pos"), optionsColourItem(player, pcfg.getColour() == 16, 16, pcfg.getParticle()));
-			}
-			inv.setItem(cfg.getInt("menu.options.config.colour.back-button-pos"), backButton());
-
-			try
-			{
-				for(String extra : cfg.getSave().getConfigurationSection("menu.extras").getKeys(false))
-				{
-					if(cfg.getString("menu.extras." + extra + ".menu").equals("COLOUR"))
-					{
-						inv.setItem(cfg.getInt("menu.extras." + extra + ".position"), GUIUtil.createItem(Material.getMaterial(cfg.getString("menu.extras." + extra + ".material")),  cfg.getInt("menu.extras." + extra + ".damage"), 1, cfg.getString("menu.extras." + extra + ".title"), null, cfg.getStringList("menu.extras." + extra + ".lore")));
-					}
-				}
-			}
-			catch(NullPointerException e)
-			{
-				//No extras in config.
-				//Continue as usual
-			}
-
-			player.openInventory(inv);
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.black-pos"), optionsColourItem(player, pcfg.getColour() == 0, 0, pcfg.getParticle()));
 		}
-		catch (ArrayIndexOutOfBoundsException e)
+		if (cfg.getInt("menu.options.config.colour.red-pos") != -1)
 		{
-			BUtil.printError(player, msg.getString("messages.error.player-misplaced-gui-option"));
-			BUtil.logError(msg.getString("messages.error.misplaced-gui-option") + "\n" + e.getMessage());
+			setInventoryItem(inventory cfg.getInt("menu.options.config.colour.red-pos"), optionsColourItem(player, pcfg.getColour() == 1, 1, pcfg.getParticle()));
 		}
+		if (cfg.getInt("menu.options.config.colour.green-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.green-pos"), optionsColourItem(player, pcfg.getColour() == 2, 2, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.brown-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.brown-pos"), optionsColourItem(player, pcfg.getColour() == 3, 3, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.blue-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.blue-pos"), optionsColourItem(player, pcfg.getColour() == 4, 4, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.purple-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.purple-pos"), optionsColourItem(player, pcfg.getColour() == 5, 5, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.cyan-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.cyan-pos"), optionsColourItem(player, pcfg.getColour() == 6, 6, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.light-grey-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.light-grey-pos"), optionsColourItem(player, pcfg.getColour() == 7, 7, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.grey-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.grey-pos"), optionsColourItem(player, pcfg.getColour() == 8, 8, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.pink-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.pink-pos"), optionsColourItem(player, pcfg.getColour() == 9, 9, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.lime-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.pink-pos"), optionsColourItem(player, pcfg.getColour() == 10, 10, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.lime-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.yellow-pos"), optionsColourItem(player, pcfg.getColour() == 11, 11, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.light-blue-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.light-blue-pos"), optionsColourItem(player, pcfg.getColour() == 12, 12, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.magenta-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.magenta-pos"), optionsColourItem(player, pcfg.getColour() == 13, 13, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.orange-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.orange-pos"), optionsColourItem(player, pcfg.getColour() == 14, 14, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.white-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.white-pos"), optionsColourItem(player, pcfg.getColour() == 15, 15, pcfg.getParticle()));
+		}
+		if (cfg.getInt("menu.options.config.colour.random-pos") != -1)
+		{
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.random-pos"), optionsColourItem(player, pcfg.getColour() == 16, 16, pcfg.getParticle()));
+		}
+		setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.back-button-pos"), backButton());
+
+		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
+		for(String extra : extraItemSection.getKeys(false))
+		{
+			if(extraItemSection.getString(extra + ".menu").equals("COLOUR"))
+			{
+				setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+				                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
+				                                    extraItemSection.getInt(extra + ".damage"),
+				                                    1,
+				                                    extraItemSection.getString("menu.extras." + extra + ".title"),
+				                                    null,
+				                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
+			}
+		}
+
+		player.openInventory(inventory);
 	}
 
 	/*
@@ -1289,7 +1228,7 @@ public class GUIListener implements Listener
 		{
 			if (meta.getLore() == null)
 			{
-				meta.setLore(Arrays.asList(msg.getString("messages.indicators.have-permission")));
+				meta.setLore(Collections.singletonList(msg.getString("messages.indicators.have-permission")));
 			}
 			else
 			{
@@ -1302,7 +1241,7 @@ public class GUIListener implements Listener
 		{
 			if (meta.getLore() == null)
 			{
-				meta.setLore(Arrays.asList(msg.getString("messages.indicators.dont-have-permission")));
+				meta.setLore(Collections.singletonList(msg.getString("messages.indicators.dont-have-permission")));
 			}
 			else
 			{
@@ -1315,7 +1254,7 @@ public class GUIListener implements Listener
 		{
 			if (meta.getLore() == null)
 			{
-				meta.setLore(Arrays.asList(msg.getString("messages.indicators.trail-selected")));
+				meta.setLore(Collections.singletonList(msg.getString("messages.indicators.trail-selected")));
 			}
 			else
 			{

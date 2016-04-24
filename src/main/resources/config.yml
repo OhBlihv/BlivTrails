@@ -207,8 +207,6 @@ trails:
         material: COAL
         name: "&cLightning Cloud"
         lore: {}
-    #Even if the barrier trail is enabled, you cant see it unless the player has permission to use the trail.
-    #Because it's that bad.
     barrier:
         display: true
         position: 1
