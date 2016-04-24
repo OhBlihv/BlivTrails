@@ -658,18 +658,9 @@ public class GUIListener implements Listener
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.type"));
 
-		if(addOptionItemIfEnabled(inventory, 3, player, OptionType.TYPE_TRACE, playerConfig))
-		{
-			setInventoryItem(inventory, 12, informationItem(msg.getStringList("messages.information." + OptionType.TYPE_TRACE.configName)));
-		}
-		if(addOptionItemIfEnabled(inventory, 4, player, OptionType.TYPE_RANDOM, playerConfig))
-		{
-			setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information." + OptionType.TYPE_RANDOM.configName)));
-		}
-		if(addOptionItemIfEnabled(inventory, 5, player, OptionType.TYPE_DYNAMIC, playerConfig))
-		{
-			setInventoryItem(inventory, 14, informationItem(msg.getStringList("messages.information." + OptionType.TYPE_DYNAMIC.configName)));
-		}
+		addOptionItemIfEnabled(inventory, 3, player, OptionType.TYPE_TRACE, playerConfig);
+		addOptionItemIfEnabled(inventory, 4, player, OptionType.TYPE_RANDOM, playerConfig);
+		addOptionItemIfEnabled(inventory, 5, player, OptionType.TYPE_DYNAMIC, playerConfig);
 
 		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), BACK_BUTTON);
 

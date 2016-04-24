@@ -56,8 +56,51 @@ menu:
         #    lore:                      #Lore to appear on the item
         #    - "&6Line One"
         #    - "&6Line Two"
-            
-        
+        information-item:
+            title: "&eInformation"
+            material: BOOK
+            position: 40
+            menu: MAIN
+            damage: 0
+            lore:
+            - "&7How does this plugin work?"
+            - "&7Simply click a trail icon that"
+            - "&7you have permission to enable."
+            - "&7Click the 'options' icon to change"
+            - "&7your trail's length, type or height!"
+            - "&7Thanks for using BlivTrails!"
+        info-type-trace:
+            title: "&f&l&oInformation"
+            material: BOOK
+            position: 12
+            menu: TYPE
+            damage: 0
+            lore:
+            - "&7The 'Trace' Trail Type is the traditional"
+            - "&7trail. This trail type appears in"
+            - "&7a line following your every move."
+        info-type-random:
+            title: "&f&l&oInformation"
+            material: BOOK
+            position: 13
+            menu: TYPE
+            damage: 0
+            lore:
+            - "&7A 'Random' Trail Type spawns your trail"
+            - "&7all around your body in a 'starfield' kind"
+            - "&7of pattern."
+        info-type-dynamic:
+            title: "&f&l&oInformation"
+            material: BOOK
+            position: 14
+            menu: TYPE
+            damage: 0
+            lore:
+            - "&7The 'Dynamic' Trail Type spawns particles"
+            - "&7similarly to the 'Trace' style, but gives"
+            - "&7their speed some variability, making the"
+            - "&7trail appear to fray in all directions."
+
     options:
         #size: Must be a multiple of 9
         size: 18

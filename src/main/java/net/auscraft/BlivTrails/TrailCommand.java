@@ -124,6 +124,7 @@ public class TrailCommand implements CommandExecutor
 					}
 					Messages.getInstance().reloadFile();
 					TrailManager.loadDefaultOptions();
+					GUIListener.reload();
 					MySQLRunnable.reload();
 					BUtil.logSuccess("Config and Messages Reloaded!");
 					BUtil.printSuccess(sender, "Config and Messages Reloaded!");
