@@ -8,7 +8,6 @@ import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.util.BUtil;
 import net.auscraft.BlivTrails.util.GUIUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
@@ -20,7 +19,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,9 +31,52 @@ import static net.auscraft.BlivTrails.TrailManager.usedTrails;
 public class GUIListener implements Listener
 {
 
+	public enum OptionType
+	{
+
+		//Type
+		TYPE("type", 0),
+		TYPE_TRACE("type.trace", 1),
+		TYPE_RANDOM("type.random", 2),
+		TYPE_DYNAMIC("type.dynamic", 3),
+
+		//Length
+		LENGTH("length", 0),
+		LENGTH_SHORT("length.short", 1),
+		LENGTH_MEDIUM("length.medium", 2),
+		LENGTH_LONG("length.long", 3),
+
+		//Height
+		HEIGHT("height", 0),
+		HEIGHT_FEET("height.feet", 0),
+		HEIGHT_WAIST("height.waist", 1),
+		HEIGHT_HALO("height.halo", 2);
+
+		//Colour?
+
+		private String configName;
+
+		private int cfgId;
+
+		OptionType(String configName, int cfgId)
+		{
+			this.configName = configName;
+			this.cfgId = cfgId;
+		}
+
+		public boolean isOptionActive(int activeCfgId)
+		{
+			return activeCfgId == cfgId;
+		}
+
+	}
+
 	//Keeping these here since 'caching' all variables is bad.
 	private static FlatFile cfg = null;
 	private static Messages msg = null;
+
+	//Cache regularly used ItemStacks instead of using a method-call every time
+	private static ItemStack    BACK_BUTTON = null;
 
 	public static void reload()
 	{
@@ -56,6 +97,13 @@ public class GUIListener implements Listener
 		{
 			msg.reloadFile();
 		}
+
+		BACK_BUTTON = GUIUtil.createItem(getVersionSafeMaterial(cfg.getString("menu.options.back-button.material")),
+		                                 0,
+		                                 1,
+		                                 msg.getString("messages.options.titles.back"),
+		                                 null,
+		                                 cfg.getStringList("menu.options.back-button.lore"));
 	}
 
 	@EventHandler
@@ -464,7 +512,7 @@ public class GUIListener implements Listener
 		else
 		// Use a temporary/blank PlayerConfig
 		{
-			pcfg = new PlayerConfig(player.getUniqueId(), null, 0, 0, 0, 0);
+			pcfg = new PlayerConfig(player.getUniqueId());
 		}
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.main.size"), msg.getString("messages.titles.main-menu"));
@@ -495,23 +543,7 @@ public class GUIListener implements Listener
 			                          BUtil.translateColours(cfg.getStringList("trails.options-menu.lore")), player.hasPermission("blivtrails.options-menu"), false));
 		}
 
-		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		if(extraItemSection != null)
-		{
-			for(String extra : extraItemSection.getKeys(false))
-			{
-				if(extraItemSection.getString(extra + ".menu").equals("MAIN"))
-				{
-					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-					                                    extraItemSection.getInt(extra + ".damage"),
-					                                    1,
-					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-					                                    null,
-					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
-				}
-			}
-		}
+		addCustomInventoryItems(inventory, "MAIN");
 
 		player.openInventory(inventory);
 	}
@@ -535,61 +567,85 @@ public class GUIListener implements Listener
 		}
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.main-options"));
-		if (cfg.getBoolean("menu.options.config.type.enabled"))
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.type.position"), optionsType(player));
-		}
-		if (cfg.getBoolean("menu.options.config.length.enabled"))
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.length.position"), optionsLength(player));
-		}
-		if (cfg.getBoolean("menu.options.config.height.enabled"))
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.height.position"), optionsHeight(player));
-		}
+
+		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.TYPE.configName + ".position"),
+		                           player, OptionType.TYPE, Material.GLASS_BOTTLE);
+		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.LENGTH.configName + ".position"),
+		                           player, OptionType.LENGTH, Material.ARROW);
+		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.HEIGHT.configName + ".position"),
+		                           player, OptionType.HEIGHT, Material.FENCE);
+
+		//Colour is done differently.
 		if (cfg.getBoolean("menu.options.config.colour.enabled"))
 		{
 			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.position"), optionsColour(player, pcfg.getParticle()));
 		}
-		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
+		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), BACK_BUTTON);
 
-		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		if(extraItemSection != null)
-		{
-			for(String extra : extraItemSection.getKeys(false))
-			{
-				if(extraItemSection.getString(extra + ".menu").equals("OPTIONS"))
-				{
-					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-					                                    extraItemSection.getInt(extra + ".damage"),
-					                                    1,
-					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-					                                    null,
-					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
-				}
-			}
-		}
+		addCustomInventoryItems(inventory, "OPTIONS");
 
 		player.openInventory(inventory);
 		return true;
 	}
 
-	private static void setInventoryItem(Inventory inventory, int slot, ItemStack itemStack)
+	private static void addCustomInventoryItems(Inventory inventory, String menuId)
 	{
-		if(inventory == null || itemStack == null)
+		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
+		if(extraItemSection != null)
 		{
-			return; //We can safely ignore this entirely
+			for(String extra : extraItemSection.getKeys(false))
+			{
+				if(extraItemSection.getString(extra + ".menu").equals(menuId))
+				{
+					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
+					                 GUIUtil.createItem(getVersionSafeMaterial(extraItemSection.getString(extra + ".material")),
+					                                    extraItemSection.getInt(extra + ".damage"),
+					                                    1,
+					                                    extraItemSection.getString(extra + ".title"),
+					                                    null,
+					                                    extraItemSection.getStringList(extra + ".lore")));
+				}
+			}
+		}
+	}
+
+	/**
+	 *
+	 * @param inventory
+	 * @param slot
+	 * @param player
+	 * @param optionType
+	 * @param material
+	 * @return True if the item was added
+	 */
+	private static boolean addMenuOptionItemIfEnabled(Inventory inventory, int slot, Player player, OptionType optionType, Material material)
+	{
+		if (cfg.getBoolean("menu.options.config." + optionType.configName + ".enabled"))
+		{
+			return setInventoryItem(inventory, slot, optionMenuItem(player, material, optionType));
 		}
 
-		if(slot < 0 || slot >= inventory.getSize())
+		return false;
+	}
+
+	/**
+	 *
+	 * @param inventory
+	 * @param slot
+	 * @param player
+	 * @param optionType
+	 * @param playerConfig
+	 * @return True if Item was added
+	 */
+	private static boolean addOptionItemIfEnabled(Inventory inventory, int slot, Player player, OptionType optionType, PlayerConfig playerConfig)
+	{
+		if (cfg.getBoolean("menu.options.config." + optionType.configName))
 		{
-			BUtil.logError("Attempted to place " + itemStack.getType() + " - " + itemStack.getItemMeta().getDisplayName() +
-				               " outside of inventory " + inventory.getType() + ".");
-			return;
+			return setInventoryItem(inventory, slot, optionItem(player, optionType, optionType.isOptionActive(playerConfig.getEnabledOption(optionType)),
+				                                             playerConfig.getParticle()));
 		}
 
-		inventory.setItem(slot, itemStack);
+		return false;
 	}
 
 	/*
@@ -598,490 +654,187 @@ public class GUIListener implements Listener
 
 	public static void optionsMenuType(Player player)
 	{
-		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.type"));
-		if (cfg.getBoolean("menu.options.config.type.trace"))
-		{
-			setInventoryItem(inventory, 3, optionsTypeTrace(player, pcfg.getType() == 1));
-			setInventoryItem(inventory, 12, informationItem(msg.getStringList("messages.information.type.trace")));
-		}
-		if (cfg.getBoolean("menu.options.config.type.random"))
-		{
-			setInventoryItem(inventory, 4, optionsTypeRandom(player, pcfg.getType() == 2));
-			setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information.type.random")));
-		}
-		if (cfg.getBoolean("menu.options.config.type.dynamic"))
-		{
-			setInventoryItem(inventory, 5, optionsTypeDynamic(player, pcfg.getType() == 3, pcfg.getParticle()));
-			setInventoryItem(inventory, 14, informationItem(msg.getStringList("messages.information.type.dynamic")));
-		}
-		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
 
-		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		if(extraItemSection != null)
+		if(addOptionItemIfEnabled(inventory, 3, player, OptionType.TYPE_TRACE, playerConfig))
 		{
-			for(String extra : extraItemSection.getKeys(false))
-			{
-				if(extraItemSection.getString(extra + ".menu").equals("TYPE"))
-				{
-					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-					                                    extraItemSection.getInt(extra + ".damage"),
-					                                    1,
-					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-					                                    null,
-					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
-				}
-			}
+			setInventoryItem(inventory, 12, informationItem(msg.getStringList("messages.information." + OptionType.TYPE_TRACE.configName)));
 		}
+		if(addOptionItemIfEnabled(inventory, 4, player, OptionType.TYPE_RANDOM, playerConfig))
+		{
+			setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information." + OptionType.TYPE_RANDOM.configName)));
+		}
+		if(addOptionItemIfEnabled(inventory, 5, player, OptionType.TYPE_DYNAMIC, playerConfig))
+		{
+			setInventoryItem(inventory, 14, informationItem(msg.getStringList("messages.information." + OptionType.TYPE_DYNAMIC.configName)));
+		}
+
+		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), BACK_BUTTON);
+
+		addCustomInventoryItems(inventory, "TYPE");
 
 		player.openInventory(inventory);
-
 	}
 
 	public static void optionsMenuLength(Player player)
 	{
-		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.length"));
-		if (cfg.getBoolean("menu.options.config.length.short"))
-		{
-			setInventoryItem(inventory, 3, optionsLengthShort(player, pcfg.getLength() == 1));
-		}
-		if (cfg.getBoolean("menu.options.config.length.medium"))
-		{
-			setInventoryItem(inventory, 4, optionsLengthMedium(player, pcfg.getLength() == 2));
-		}
-		if (cfg.getBoolean("menu.options.config.length.long"))
-		{
-			setInventoryItem(inventory, 5, optionsLengthLong(player, pcfg.getLength() == 3));
-		}
-		setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information.length.info")));
-		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
 
-		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		if(extraItemSection != null)
-		{
-			for(String extra : extraItemSection.getKeys(false))
-			{
-				if(extraItemSection.getString(extra + ".menu").equals("LENGTH"))
-				{
-					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-					                                    extraItemSection.getInt(extra + ".damage"),
-					                                    1,
-					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-					                                    null,
-					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
-				}
-			}
-		}
+		addOptionItemIfEnabled(inventory, 3, player, OptionType.LENGTH_SHORT, playerConfig);
+		addOptionItemIfEnabled(inventory, 4, player, OptionType.LENGTH_MEDIUM, playerConfig);
+		addOptionItemIfEnabled(inventory, 5, player, OptionType.LENGTH_LONG, playerConfig);
+
+		setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information.length.info")));
+		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), BACK_BUTTON);
+
+		addCustomInventoryItems(inventory, "LENGTH");
 
 		player.openInventory(inventory);
 	}
 
 	public static void optionsMenuHeight(Player player)
 	{
-		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.height"));
-		if (cfg.getBoolean("menu.options.config.height.feet"))
-		{
-			setInventoryItem(inventory, 3, optionsHeightFeet(player, pcfg.getHeight() == 0));
-		}
-		if (cfg.getBoolean("menu.options.config.height.waist"))
-		{
-			setInventoryItem(inventory, 4, optionsHeightWaist(player, pcfg.getHeight() == 1));
-		}
-		if (cfg.getBoolean("menu.options.config.height.halo"))
-		{
-			setInventoryItem(inventory, 5, optionsHeightHead(player, pcfg.getHeight() == 2));
-		}
-		setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information.height.info")));
-		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), backButton());
 
-		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		if(extraItemSection != null)
-		{
-			for(String extra : extraItemSection.getKeys(false))
-			{
-				if(extraItemSection.getString(extra + ".menu").equals("HEIGHT"))
-				{
-					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-					                                    extraItemSection.getInt(extra + ".damage"),
-					                                    1,
-					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-					                                    null,
-					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
-				}
-			}
-		}
+		addOptionItemIfEnabled(inventory, 3, player, OptionType.HEIGHT_FEET, playerConfig);
+		addOptionItemIfEnabled(inventory, 4, player, OptionType.HEIGHT_WAIST, playerConfig);
+		addOptionItemIfEnabled(inventory, 5, player, OptionType.HEIGHT_HALO, playerConfig);
+
+		setInventoryItem(inventory, 13, informationItem(msg.getStringList("messages.information.height.info")));
+		setInventoryItem(inventory, cfg.getInt("menu.options.back-button.position"), BACK_BUTTON);
+
+		addCustomInventoryItems(inventory, "HEIGHT");
 
 		player.openInventory(inventory);
 	}
+
+	private static final String[] colourCfgName = new String[]
+	{
+		"black", "red", "green", "brown", "blue", "purple", "cyan", "light-grey", "grey", "pink", "lime",
+	    "yellow", "light-blue", "magenta", "orange", "white", "random"
+	};
 
 	public static void optionsMenuColour(Player player)
 	{
 		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.config.colour.size"), msg.getString("messages.titles.colours"));
-		if (cfg.getInt("menu.options.config.colour.black-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.black-pos"), optionsColourItem(player, pcfg.getColour() == 0, 0, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.red-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.red-pos"), optionsColourItem(player, pcfg.getColour() == 1, 1, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.green-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.green-pos"), optionsColourItem(player, pcfg.getColour() == 2, 2, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.brown-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.brown-pos"), optionsColourItem(player, pcfg.getColour() == 3, 3, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.blue-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.blue-pos"), optionsColourItem(player, pcfg.getColour() == 4, 4, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.purple-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.purple-pos"), optionsColourItem(player, pcfg.getColour() == 5, 5, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.cyan-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.cyan-pos"), optionsColourItem(player, pcfg.getColour() == 6, 6, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.light-grey-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.light-grey-pos"), optionsColourItem(player, pcfg.getColour() == 7, 7, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.grey-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.grey-pos"), optionsColourItem(player, pcfg.getColour() == 8, 8, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.pink-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.pink-pos"), optionsColourItem(player, pcfg.getColour() == 9, 9, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.lime-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.pink-pos"), optionsColourItem(player, pcfg.getColour() == 10, 10, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.lime-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.yellow-pos"), optionsColourItem(player, pcfg.getColour() == 11, 11, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.light-blue-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.light-blue-pos"), optionsColourItem(player, pcfg.getColour() == 12, 12, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.magenta-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.magenta-pos"), optionsColourItem(player, pcfg.getColour() == 13, 13, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.orange-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.orange-pos"), optionsColourItem(player, pcfg.getColour() == 14, 14, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.white-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.white-pos"), optionsColourItem(player, pcfg.getColour() == 15, 15, pcfg.getParticle()));
-		}
-		if (cfg.getInt("menu.options.config.colour.random-pos") != -1)
-		{
-			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.random-pos"), optionsColourItem(player, pcfg.getColour() == 16, 16, pcfg.getParticle()));
-		}
-		setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.back-button-pos"), backButton());
 
-		ConfigurationSection extraItemSection = cfg.getSave().getConfigurationSection("menu.extras");
-		if(extraItemSection != null)
+		ConfigurationSection colourPositionSection = cfg.getConfigurationSection("menu.options.config.colour");
+		if(colourPositionSection == null)
 		{
-			for(String extra : extraItemSection.getKeys(false))
+			BUtil.logError("The colour position configuration section has been removed at 'menu.options.config.colour', but it is still enabled." +
+				               " Are you sure you know what you're doing?");
+			return;
+		}
+
+		for(int colourId = 0;colourId < colourCfgName.length;colourId++)
+		{
+			if (cfg.getInt("menu.options.config.colour." + colourCfgName[colourId]) != -1)
 			{
-				if(extraItemSection.getString(extra + ".menu").equals("COLOUR"))
-				{
-					setInventoryItem(inventory, extraItemSection.getInt(extra + ".position"),
-					                 GUIUtil.createItem(Material.getMaterial(extraItemSection.getString(extra + ".material")),
-					                                    extraItemSection.getInt(extra + ".damage"),
-					                                    1,
-					                                    extraItemSection.getString("menu.extras." + extra + ".title"),
-					                                    null,
-					                                    extraItemSection.getStringList("menu.extras." + extra + ".lore")));
-				}
+				setInventoryItem(inventory, cfg.getInt("menu.options.config.colour." + colourCfgName[colourId]),
+				                 optionsColourItem(player, pcfg.getColour() == colourId, colourId, pcfg.getParticle()));
 			}
 		}
+		setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.back-button-pos"), BACK_BUTTON);
+
+		addCustomInventoryItems(inventory, "COLOUR");
 
 		player.openInventory(inventory);
 	}
 
 	/*
-	 * Options Type
+	 * Item Creation Helper Methods
 	 */
 
-	public static ItemStack optionsType(Player player)
-	{
-		ItemStack item = new ItemStack(Material.GLASS_BOTTLE, 1);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.categories.type"));
-		if(!player.hasPermission("blivtrails.options.type"))
-		{
-			meta.setLore(Arrays.asList(msg.getString("messages.indicators.dont-have-permission")));
-		}
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	public static ItemStack optionsTypeTrace(Player player, boolean isEnabled)
-	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.type.trace"));
-
-		ArrayList<String> lore = new ArrayList<>();
-		if(!player.hasPermission("blivtrails.options.type.trace"))
-		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
-		}
-
-		if (isEnabled)
-		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-			item.setDurability((short) 10);
-		}
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	public static ItemStack optionsTypeRandom(Player player, boolean isEnabled)
-	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.type.random"));
-		ArrayList<String> lore = new ArrayList<>();
-
-		if(!player.hasPermission("blivtrails.options.type.random"))
-		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
-		}
-
-		if (isEnabled)
-		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-
-			item.setDurability((short) 10);
-		}
-
-		lore.add(msg.getString("messages.options.supports-randomisation"));
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	public static ItemStack optionsTypeDynamic(Player player, boolean isEnabled, ParticleEffect particle)
-	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.type.dynamic"));
-		ArrayList<String> lore = new ArrayList<>();
-		if(!player.hasPermission("blivtrails.options.type.dynamic"))
-		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
-		}
-
-		if (isEnabled)
-		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-
-			item.setDurability((short) 10);
-		}
-
-		if (particle.hasProperty(ParticleEffect.ParticleProperty.DIRECTIONAL))
-		{
-			lore.add(msg.getString("messages.options.supports-dynamic"));
-		}
-		else
-		{
-			lore.add(msg.getString("messages.options.doesnt-support-dynamic"));
-		}
-
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	/*
-	 * Options Length
+	/**
+	 *
+	 * @param inventory
+	 * @param slot
+	 * @param itemStack
+	 * @return True if the ItemStack was added to the inventory
 	 */
-
-	public static ItemStack optionsLength(Player player)
+	private static boolean setInventoryItem(Inventory inventory, int slot, ItemStack itemStack)
 	{
-		ItemStack item = new ItemStack(Material.ARROW, 1);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.categories.length"));
-		if(!player.hasPermission("blivtrails.options.length"))
+		if(inventory == null || itemStack == null)
 		{
-			meta.setLore(Collections.singletonList(BUtil.translateColours("messages.indicators.dont-have-permission")));
+			return false; //We can safely ignore this entirely
 		}
-		item.setItemMeta(meta);
-		return item;
+
+		if(slot < 0 || slot >= inventory.getSize())
+		{
+			//I've stated that a position of -1 can disable items
+			if(slot != -1)
+			{
+				BUtil.logError("Attempted to place " + itemStack.getType() + " - " + itemStack.getItemMeta().getDisplayName() +
+					               " outside of inventory " + inventory.getType() + ".");
+			}
+			return false;
+		}
+
+		inventory.setItem(slot, itemStack);
+
+		return true;
 	}
 
-	public static ItemStack optionsLengthShort(Player player, boolean isEnabled)
+	public static ItemStack optionMenuItem(Player player, Material material, OptionType optionType)
 	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.length.short"));
+		ItemStack itemStack = GUIUtil.createItem(material, 0, 1, msg.getString("messages.options.titles.categories." + optionType.configName),
+		                                         null, null);
 
-		ArrayList<String> lore = new ArrayList<>();
-		if(!player.hasPermission("blivtrails.options.length.short"))
+		if(!player.hasPermission("blivtrails.options." + optionType.configName))
 		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
+			ItemMeta itemMeta = itemStack.getItemMeta();
+			itemMeta.setLore(Collections.singletonList(BUtil.translateColours(cfg.getString("messages.indicators.dont-have-permission"))));
+			itemStack.setItemMeta(itemMeta);
 		}
 
+		return itemStack;
+	}
+
+	public static ItemStack optionItem(Player player, OptionType optionType, boolean isEnabled, ParticleEffect particleEffect)
+	{
+		ItemStack itemStack = GUIUtil.createItem(Material.INK_SACK, 8, 1,
+		                                         msg.getString("messages.options.titles." + optionType.configName),
+												 null, null);
 		if (isEnabled)
 		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-			item.setDurability((short) 10);
+			itemStack.setDurability((short) 10);
+
+			ItemMeta itemMeta = itemStack.getItemMeta();
+
+			List<String> lore = new ArrayList<>();
+			if(!player.hasPermission("blivtrails.options." + optionType.configName))
+			{
+				lore.add(msg.getString("messages.indicators.dont-have-permission"));
+			}
+			else
+			{
+				lore.add(msg.getString("messages.generic.enabled-lore"));
+			}
+
+			if(optionType == OptionType.TYPE_DYNAMIC)
+			{
+				if (particleEffect.hasProperty(ParticleEffect.ParticleProperty.DIRECTIONAL))
+				{
+					lore.add(msg.getString("messages.options.supports-dynamic"));
+				}
+				else
+				{
+					lore.add(msg.getString("messages.options.doesnt-support-dynamic"));
+				}
+			}
+
+			itemMeta.setLore(lore);
+			itemStack.setItemMeta(itemMeta);
 		}
 
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	public static ItemStack optionsLengthMedium(Player player, boolean isEnabled)
-	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.length.medium"));
-
-		ArrayList<String> lore = new ArrayList<>();
-		if(!player.hasPermission("blivtrails.options.length.medium"))
-		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
-		}
-
-		if (isEnabled)
-		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-			item.setDurability((short) 10);
-		}
-
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	public static ItemStack optionsLengthLong(Player player, boolean isEnabled)
-	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.length.long"));
-
-		ArrayList<String> lore = new ArrayList<>();
-		if(!player.hasPermission("blivtrails.options.length.long"))
-		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
-		}
-
-		if (isEnabled)
-		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-			item.setDurability((short) 10);
-		}
-
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	/*
-	 * Options Height
-	 */
-
-	public static ItemStack optionsHeight(Player player)
-	{
-		ItemStack item = new ItemStack(Material.FENCE, 1);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.categories.height"));
-		if(!player.hasPermission("blivtrails.options.height"))
-		{
-			meta.setLore(Arrays.asList(BUtil.translateColours("messages.indicators.dont-have-permission")));
-		}
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	public static ItemStack optionsHeightFeet(Player player, boolean isEnabled)
-	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.height.feet"));
-
-		ArrayList<String> lore = new ArrayList<>();
-		if(!player.hasPermission("blivtrails.options.height.feet"))
-		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
-		}
-
-		if (isEnabled)
-		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-			item.setDurability((short) 10);
-		}
-
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	public static ItemStack optionsHeightWaist(Player player, boolean isEnabled)
-	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.height.waist"));
-
-		ArrayList<String> lore = new ArrayList<>();
-		if(!player.hasPermission("blivtrails.options.height.waist"))
-		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
-		}
-
-		if (isEnabled)
-		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-			item.setDurability((short) 10);
-		}
-
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
-	}
-
-	public static ItemStack optionsHeightHead(Player player, boolean isEnabled)
-	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 8);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.height.halo"));
-
-		ArrayList<String> lore = new ArrayList<>();
-		if(!player.hasPermission("blivtrails.options.height.halo"))
-		{
-			lore.add(msg.getString("messages.indicators.dont-have-permission"));
-		}
-
-		if (isEnabled)
-		{
-			lore.add(msg.getString("messages.generic.enabled-lore"));
-			meta.setLore(lore);
-			item.setDurability((short) 10);
-		}
-		item.setItemMeta(meta);
-		return item;
+		return itemStack;
 	}
 
 	/*
@@ -1090,123 +843,94 @@ public class GUIListener implements Listener
 
 	public static ItemStack optionsColour(Player player, ParticleEffect particle)
 	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) 14);
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.categories.colour"));
+		ItemStack itemStack = GUIUtil.createItem(Material.INK_SACK, 14, 1,
+		                                    msg.getString("messages.options.titles.categories.colour"),
+		                                    null, null);
+		ItemMeta itemMeta = itemStack.getItemMeta();
+
 		ArrayList<String> lore = new ArrayList<>();
-		if (particle.hasProperty(ParticleEffect.ParticleProperty.COLORABLE))
-		{
-			lore.add(msg.getString("messages.options.supports-colours"));
-		}
-		else
-		{
-			lore.add(msg.getString("messages.options.doesnt-support-colours"));
-		}
 		if(!player.hasPermission("blivtrails.options.colour"))
 		{
 			lore.add(BUtil.translateColours("messages.indicators.dont-have-permission"));
 		}
-		meta.setLore(lore);
-		item.setItemMeta(meta);
-		return item;
+		else
+		{
+			if (particle.hasProperty(ParticleEffect.ParticleProperty.COLORABLE))
+			{
+				lore.add(msg.getString("messages.options.supports-colours"));
+			}
+			else
+			{
+				lore.add(msg.getString("messages.options.doesnt-support-colours"));
+			}
+		}
+
+		itemMeta.setLore(lore);
+		itemStack.setItemMeta(itemMeta);
+		return itemStack;
 	}
 
-	public static ItemStack optionsColourItem(Player player, boolean isEnabled, int value, ParticleEffect particle)
+	private static final String[] colourNames = new String[]
 	{
-		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) value);
-		if (value == 16)
+		"§0Black", //0
+		"§cRed", //1
+		"§2Green", //2
+		"§6Brown", //3
+		"§9Blue", //4
+		"§5Purple", //5
+		"§3Cyan", //6
+		"§7Light Grey", //7
+		"§8Grey", //8
+		"§dPink", //9
+		"§Lime", //10
+		"§eYellow", //11
+		"§bLight Blue", //12
+		"§dMagenta", //13
+		"§6Orange", //14
+		"§fWhite", //15
+		"§6Random" //16
+	};
+
+	public static ItemStack optionsColourItem(Player player, boolean isEnabled, int colourId, ParticleEffect particle)
+	{
+		ItemStack item = new ItemStack(Material.INK_SACK, 1, (short) colourId);
+		if (colourId == (colourNames.length - 1)) //Random
 		{
 			item = new ItemStack(Material.POTION, 1);
 		}
+
 		ItemMeta meta = item.getItemMeta();
-		String colour;
-		switch (value)
-		{
-			case 0:
-				colour = ChatColor.DARK_GRAY + "Black";
-				break;
-			case 1:
-				colour = ChatColor.RED + "Red";
-				break;
-			case 2:
-				colour = ChatColor.DARK_GREEN + "Green";
-				break;
-			case 3:
-				colour = ChatColor.GOLD + "Brown";
-				break;
-			case 4:
-				colour = ChatColor.BLUE + "Blue";
-				break;
-			case 5:
-				colour = ChatColor.DARK_PURPLE + "Purple";
-				break;
-			case 6:
-				colour = ChatColor.DARK_AQUA + "Cyan";
-				break;
-			case 7:
-				colour = ChatColor.GRAY + "Light Grey";
-				break;
-			case 8:
-				colour = ChatColor.DARK_GRAY + "Gray";
-				break;
-			case 9:
-				colour = ChatColor.LIGHT_PURPLE + "Pink";
-				break;
-			case 10:
-				colour = ChatColor.GREEN + "Lime";
-				break;
-			case 11:
-				colour = ChatColor.YELLOW + "Yellow";
-				break;
-			case 12:
-				colour = ChatColor.AQUA + "Light Blue";
-				break;
-			case 13:
-				colour = ChatColor.LIGHT_PURPLE + "Magenta";
-				break;
-			case 14:
-				colour = ChatColor.GOLD + "Orange";
-				break;
-			case 16:
-				colour = "Random";
-				break;
-			default:
-				colour = "White";
-				break;
-		}
-		meta.setDisplayName(colour);
+		meta.setDisplayName(colourNames[colourId]);
 
 		ArrayList<String> lore = new ArrayList<>();
 
-		if(!player.hasPermission("blivtrails.options.colour." + ChatColor.stripColor(colour.toLowerCase().replaceAll("[ ]", ""))))
+		if(!player.hasPermission("blivtrails.options.colour." + colourCfgName[colourId]))
 		{
 			lore.add(msg.getString("messages.indicators.dont-have-permission"));
 		}
-
-		if (isEnabled)
+		else if (isEnabled) //Cannot be enabled with no permission.
 		{
 			lore.add(msg.getString("messages.generic.enabled-lore"));
 		}
+
 		if (particle == ParticleEffect.NOTE) // Disable some colours which don't exist for notes
 		{
 			String isDisabled = null;
-			switch (value)
+			switch (colourId)
 			{
-				case 0:
-				case 3:
-				case 7:
-				case 8:
-				case 15:
+				case 0: case 3: case 7: case 8: case 15:
 					isDisabled = msg.getString("messages.options.doesnt-apply-to-note");
 					break;
 				default:
 					break;
 			}
+
 			if (isDisabled != null)
 			{
 				lore.add(isDisabled);
 			}
 		}
+
 		meta.setLore(lore);
 
 		item.setItemMeta(meta);
@@ -1216,15 +940,6 @@ public class GUIListener implements Listener
 	/*
 	 * Other
 	 */
-
-	public static ItemStack backButton()
-	{
-		ItemStack item = getVersionSafeItemStack(cfg.getString("menu.options.back-button.material"));
-		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName(msg.getString("messages.options.titles.back"));
-		item.setItemMeta(meta);
-		return item;
-	}
 
 	public static ItemStack informationItem(List<String> list)
 	{
@@ -1297,5 +1012,17 @@ public class GUIListener implements Listener
 		}
 		return new ItemStack(material, 1);
 	}
+
+	public static Material getVersionSafeMaterial(String materialName)
+	{
+		Material material = Material.getMaterial(materialName);
+		if(material == null)
+		{
+			BUtil.logError("Attempted to use material: '" + materialName + "', which is INVALID at your current version: " + Bukkit.getBukkitVersion() + " reverting to POTATO_ITEM");
+			return Material.POTATO_ITEM;
+		}
+		return material;
+	}
+
 
 }

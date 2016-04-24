@@ -1,9 +1,10 @@
 package net.auscraft.BlivTrails;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import com.darkblade12.ParticleEffect.ParticleEffect;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
+import net.auscraft.BlivTrails.listeners.GUIListener;
 
 import java.util.UUID;
 
@@ -16,27 +17,28 @@ public class PlayerConfig
 	 */
 
 	@Getter
+	@NonNull
 	private UUID uuid;
 
 	@Getter
 	@Setter
-	private ParticleEffect particle;
+	private ParticleEffect particle = null;
 
 	@Getter
 	@Setter
-	private int type;
+	private int type = 0;
 
 	@Getter
 	@Setter
-	private int length;
+	private int length = 0;
 
 	@Getter
 	@Setter
-	private int height;
+	private int height = 0;
 
 	@Getter
 	@Setter
-	private int colour;
+	private int colour = 0;
 
 	// Now, it's less of trail config, and just storing values
 	@Getter
@@ -59,6 +61,39 @@ public class PlayerConfig
 		this.length = length;
 		this.height = height;
 		this.colour = colour;
+	}
+
+	public PlayerConfig(UUID uuid)
+	{
+		this.uuid = uuid;
+
+		//Defaults are already set
+	}
+
+	public int getEnabledOption(GUIListener.OptionType optionType)
+	{
+		switch(optionType)
+		{
+			case TYPE:
+			case TYPE_TRACE:
+			case TYPE_RANDOM:
+			case TYPE_DYNAMIC:
+				return getType();
+
+			case LENGTH:
+			case LENGTH_SHORT:
+			case LENGTH_MEDIUM:
+			case LENGTH_LONG:
+				return getLength();
+
+			case HEIGHT:
+			case HEIGHT_FEET:
+			case HEIGHT_WAIST:
+			case HEIGHT_HALO:
+				return getHeight();
+
+			default: return 0; //Base Case -- Nothing is enabled.
+		}
 	}
 
 }
