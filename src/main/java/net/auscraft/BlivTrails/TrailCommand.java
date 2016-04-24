@@ -140,16 +140,20 @@ public class TrailCommand implements CommandExecutor
 		return true;
 	}
 
+	private static final String     BORDER_TOP = "§8§m--------------§6§l BlivTrails Admin §8§m---------------",
+									BORDER_BTM = "§8§m--------------------------------------------",
+									BORDER_LFT = "§8| ";
+
 	private void doMainMenu(CommandSender sender)
 	{
-		sender.sendMessage(ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GOLD + ChatColor.ITALIC
-				+ "BlivTrails Admin " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - "
-				+ ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " -\n" + ChatColor.GREEN + "| " + ChatColor.AQUA + "/trailadmin reload" + ChatColor.RESET + " - Reload Config and Messages\n" + ChatColor.DARK_GREEN + "| " + ChatColor.AQUA
-				+ "/trailadmin <particles|types|lengths|heights|colours>\n" + ChatColor.GREEN + "| " + ChatColor.AQUA + "/trailadmin remove <player>" + ChatColor.RESET + " - Forcefully remove a players trail\n" + ChatColor.DARK_GREEN + "| " + ChatColor.AQUA
-				+ "/trailadmin add <player> <particle> [type] [length] [height]\n" + ChatColor.GREEN + "| " + ChatColor.AQUA + "[colour]" + ChatColor.RESET + " - Forcefully remove a players trail\n" + ChatColor.DARK_GREEN + "| " + ChatColor.WHITE
-				+ "Use an underscore between words when defining a particle\n" + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN
-				+ " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - "
-				+ ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN + " - " + ChatColor.DARK_GREEN + " - " + ChatColor.GREEN
-				+ " - ");
+		sender.sendMessage(
+			BORDER_TOP + "\n" +
+				BORDER_LFT + "§6/trailadmin reload §f- Reload Config and Messages\n" +
+				BORDER_LFT + "§6/trailadmin <particles|types|lengths|heights|colours>\n" +
+				BORDER_LFT + "§6/trailadmin remove <player> §f- Force remove a players trail\n" +
+				BORDER_LFT + "§6/trailadmin add <player> <particle> [type] [length] [height]\n" +
+				BORDER_LFT + "§6[colour] §f- Forcefully remove a players trail\n" +
+				BORDER_LFT + "§6§lNOTE: §fUse a '_' between words when defining particles\n" +
+			BORDER_BTM);
 	}
 }
