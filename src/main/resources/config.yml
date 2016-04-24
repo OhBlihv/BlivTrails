@@ -170,6 +170,12 @@ trails:
         #If this is true, trails will not expire
         #(This option requires a reload of the server, or reload of the plugin (SAFE))
         display-when-still: false
+        #Should a trail activate while spinning
+        #This is ignored when 'display-when-still: true'
+        display-when-spinning: false
+        #How many seconds should we wait before enabling a trail after a players join.
+        #(Note: Lower numbers have a higher chance of not loading a player's previous trail on server-change)
+        join-activation-delay: 5
     #Global Trail Defaults
     defaults:
         #Global | How fast to display the trail in ticks

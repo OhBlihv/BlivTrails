@@ -4,6 +4,7 @@ import com.darkblade12.ParticleEffect.ParticleEffect;
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailManager;
+import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.runnables.TrailRunnable;
 import net.auscraft.BlivTrails.util.BUtil;
@@ -27,21 +28,39 @@ import static net.auscraft.BlivTrails.TrailManager.saveTrail;
 public class TrailListener implements Listener
 {
 
+	private boolean displayWhenSpinning = false;
+	private long joinActivationDelay = 100L;
+
+	public TrailListener()
+	{
+		FlatFile cfg = FlatFile.getInstance();
+
+		displayWhenSpinning = cfg.getSave().getBoolean("trails.misc.display-when-spinning", false);
+		joinActivationDelay = cfg.getSave().getInt("trails.misc.join-activation-delay", 5) * 20L;
+	}
+
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent event)
 	{
 		final Player player = event.getPlayer();
-		Bukkit.getScheduler().runTaskLater(BlivTrails.getInstance(), new Runnable()
+		if(joinActivationDelay > 0)
 		{
-
-			@Override
-			public void run()
+			Bukkit.getScheduler().runTaskLater(BlivTrails.getInstance(), new Runnable()
 			{
-				loadTrail(player);
-				// Wait a few seconds for the async sql read to go through
-			}
 
-		}, 100L);
+				@Override
+				public void run()
+				{
+					loadTrail(player);
+					// Wait a few seconds for the async sql read to go through
+				}
+
+			}, joinActivationDelay);
+		}
+		else
+		{
+			loadTrail(player);
+		}
 	}
 
 	@EventHandler
@@ -64,7 +83,7 @@ public class TrailListener implements Listener
 	public void onPlayerMove(PlayerMoveEvent event)
 	{
 		// Stop the trail from working while the player isn't technically moving
-		if (event.getFrom().getX() == event.getTo().getX() && event.getFrom().getY() == event.getTo().getY() && event.getFrom().getZ() == event.getTo().getZ())
+		if (!displayWhenSpinning && (event.getFrom().getX() == event.getTo().getX() && event.getFrom().getY() == event.getTo().getY() && event.getFrom().getZ() == event.getTo().getZ()))
 		{
 			return;
 		}
@@ -86,16 +105,11 @@ public class TrailListener implements Listener
 					return;
 				}
 
-				int speed = 0;
+				int speed = 1;
 				TrailDefaults.ParticleDefaultStorage particleDefaults = TrailDefaults.getDefaults(playerConfig.getParticle());
-				if (particleDefaults.getDisplaySpeed() != 0)
+				if (particleDefaults.getDisplaySpeed() > 0)
 				{
 					speed = particleDefaults.getDisplaySpeed();
-				}
-
-				if(speed == 0)
-				{
-					speed = 1;
 				}
 
 				TrailRunnable trailRunnable = new TrailRunnable(event.getPlayer(), playerConfig, TrailManager.getOption());
