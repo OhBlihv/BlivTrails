@@ -717,7 +717,7 @@ public class GUIListener implements Listener
 		}
 		if (cfg.getInt("menu.options.config.colour.red-pos") != -1)
 		{
-			setInventoryItem(inventory cfg.getInt("menu.options.config.colour.red-pos"), optionsColourItem(player, pcfg.getColour() == 1, 1, pcfg.getParticle()));
+			setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.red-pos"), optionsColourItem(player, pcfg.getColour() == 1, 1, pcfg.getParticle()));
 		}
 		if (cfg.getInt("menu.options.config.colour.green-pos") != -1)
 		{
