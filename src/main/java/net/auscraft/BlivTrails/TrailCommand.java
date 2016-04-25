@@ -4,7 +4,6 @@ import com.darkblade12.ParticleEffect.ParticleEffect;
 import net.auscraft.BlivTrails.config.FlatFile;
 import net.auscraft.BlivTrails.config.Messages;
 import net.auscraft.BlivTrails.listeners.GUIListener;
-import net.auscraft.BlivTrails.runnables.MySQLRunnable;
 import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -19,12 +18,10 @@ import java.util.regex.Pattern;
 public class TrailCommand implements CommandExecutor
 {
 
-	private BlivTrails instance;
 	private FlatFile cfg;
 
-	public TrailCommand(BlivTrails instance)
+	public TrailCommand()
 	{
-		this.instance = instance;
 		cfg = FlatFile.getInstance();
 	}
 
@@ -51,30 +48,32 @@ public class TrailCommand implements CommandExecutor
 					{
 						output.append(cfg.getString("trails." + BUtil.trailConfigName(particleEff.toString()) + ".name").replaceAll("[ ]", "_")).append(", ");
 					}
-					sender.sendMessage(ChatColor.GREEN + "Available Particles:\n" + ChatColor.WHITE + BUtil.stripColours(output.toString()));
+					sender.sendMessage("6Available Particles:\n§f" + BUtil.stripColours(output.toString()));
 				}
 				else if (args[0].equalsIgnoreCase("types"))
 				{
-					sender.sendMessage(ChatColor.GREEN + "Available Types:\n" + ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "trace, random, dynamic");
+					sender.sendMessage("§6Available Types:§f" + "trace, random, dynamic");
 				}
 				else if (args[0].equalsIgnoreCase("lengths"))
 				{
-					sender.sendMessage(ChatColor.GREEN + "Available Lengths:\n" + ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "short, medium, long");
+					sender.sendMessage("§6Available Lengths:§f" + "short, medium, long");
 				}
 				else if (args[0].equalsIgnoreCase("heights"))
 				{
-					sender.sendMessage(ChatColor.GREEN + "Available Heights:\n" + ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "feet, waist, halo");
+					sender.sendMessage("§6Available Heights:§f" + "feet, waist, halo");
 				}
 				else if (args[0].equalsIgnoreCase("colours"))
 				{
-					sender.sendMessage(ChatColor.GREEN + "Available Colours:\n" + ChatColor.DARK_GREEN + "| " + ChatColor.WHITE + "black, red, green, brown, blue, purple, cyan, light-grey/light gray," + " grey/gray, pink, lime, yellow, light-blue, magenta, orange, white, random");
+					sender.sendMessage("§6Available Colours:\n" + ChatColor.DARK_GREEN +
+						                   "| §fblack, red, green, brown, blue, purple, cyan, light-grey/light-gray," +
+						                   " grey/gray, pink, lime, yellow, light-blue, magenta, orange, white, random");
 				}
 				else if (args[0].equalsIgnoreCase("remove"))
 				{
 					OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
 					if (offlinePlayer == null || !offlinePlayer.isOnline())
 					{
-						BUtil.printError(sender, "Player is not currently online. Cannot remove.");
+						BUtil.printError(sender, "Player is not currently online. Cannot remove this players trail.");
 						return true;
 					}
 
@@ -84,37 +83,32 @@ public class TrailCommand implements CommandExecutor
 				{
 					if (args.length >= 3)
 					{
-						Player player = Bukkit.getPlayer(args[1]);
-						if (player != null)
+						OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+						if (offlinePlayer == null || !offlinePlayer.isOnline())
 						{
-							Pattern underscorePattern = Pattern.compile("[_]");
-							String particle = underscorePattern.matcher(args[2]).replaceAll(" ");
-
-							if (args.length == 3)
-							{
-								BUtil.printPlain(sender, TrailManager.addTrail(player.getUniqueId(), particle, "", "", "", ""));
-							}
-							else if (args.length >= 4)
-							{
-								try
-								{
-									BUtil.printPlain(sender, BUtil.translateColours(TrailManager.addTrail(player.getUniqueId(), particle, args[3], args[4], args[5], args[6])));
-								}
-								catch(ArrayIndexOutOfBoundsException e)
-								{
-									BUtil.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
-									return true;
-								}
-							}
+							BUtil.printError(sender, "Player is not currently online. Cannot add a trail to this player.");
 							return true;
 						}
-					}
-					else
-					{
-						BUtil.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
-						return true;
+
+						Pattern underscorePattern = Pattern.compile("[_]");
+						String particle = underscorePattern.matcher(args[2]).replaceAll(" ");
+
+						if (args.length == 3)
+						{
+							BUtil.printPlain(sender, TrailManager.addTrail(offlinePlayer.getUniqueId(), particle, null, null, null, null));
+							return true;
+						}
+						else if (args.length >= 7)
+						{
+							BUtil.printPlain(sender,
+							                 BUtil.translateColours(TrailManager.addTrail(offlinePlayer.getUniqueId(), particle, args[3], args[4], args[5], args[6])));
+							return true;
+						}
+						//Syntax falls through
 					}
 
+					BUtil.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
+					return true;
 				}
 				else if (args[0].equalsIgnoreCase("reload"))
 				{
@@ -125,8 +119,6 @@ public class TrailCommand implements CommandExecutor
 					Messages.getInstance().reloadFile();
 					TrailManager.loadDefaultOptions();
 					GUIListener.reload();
-					MySQLRunnable.reload();
-					BUtil.logSuccess("Config and Messages Reloaded!");
 					BUtil.printSuccess(sender, "Config and Messages Reloaded!");
 					return true;
 				}

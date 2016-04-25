@@ -4,17 +4,11 @@ import com.darkblade12.ParticleEffect.ParticleEffect;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import net.auscraft.BlivTrails.listeners.GUIListener;
 
 import java.util.UUID;
 
 public class PlayerConfig
 {
-	/*
-	 * Trail Config - Trail Material - Trail Type (Trace, Random, Dynamic)
-	 * (1,2,3) - Length (1,2,3) - Height (Feet, Body, Halo) (0,1,2) - Width of
-	 * trail (1,2,3 particles wide)
-	 */
 
 	@Getter
 	@NonNull
@@ -26,15 +20,15 @@ public class PlayerConfig
 
 	@Getter
 	@Setter
-	private int type = 0;
+	private OptionType type = OptionType.TYPE;
 
 	@Getter
 	@Setter
-	private int length = 0;
+	private OptionType length = OptionType.LENGTH;
 
 	@Getter
 	@Setter
-	private int height = 0;
+	private OptionType height = OptionType.HEIGHT;
 
 	@Getter
 	@Setter
@@ -45,7 +39,15 @@ public class PlayerConfig
 	@Setter
 	private boolean vanished = false;
 
-	public PlayerConfig(UUID uuid, ParticleEffect particle, int type, int length, int height, int colour)
+	@Getter
+	@Setter
+	private int taskId = -1;
+
+	@Getter
+	@Setter
+	private float trailTime = -1;
+
+	public PlayerConfig(UUID uuid, ParticleEffect particle, OptionType type, OptionType length, OptionType height, int colour)
 	{
 		this.uuid = uuid;
 		if (particle != null)
@@ -65,35 +67,39 @@ public class PlayerConfig
 
 	public PlayerConfig(UUID uuid)
 	{
-		this.uuid = uuid;
-
-		//Defaults are already set
+		this.uuid = uuid; //Other defaults are already set
 	}
 
-	public int getEnabledOption(GUIListener.OptionType optionType)
+	public OptionType getEnabledOption(OptionType optionType)
 	{
 		switch(optionType)
 		{
-			case TYPE:
-			case TYPE_TRACE:
-			case TYPE_RANDOM:
-			case TYPE_DYNAMIC:
+			case TYPE: case TYPE_TRACE: case TYPE_RANDOM: case TYPE_DYNAMIC:
 				return getType();
 
-			case LENGTH:
-			case LENGTH_SHORT:
-			case LENGTH_MEDIUM:
-			case LENGTH_LONG:
+			case LENGTH: case LENGTH_SHORT:	case LENGTH_MEDIUM:	case LENGTH_LONG:
 				return getLength();
 
-			case HEIGHT:
-			case HEIGHT_FEET:
-			case HEIGHT_WAIST:
-			case HEIGHT_HALO:
+			case HEIGHT: case HEIGHT_FEET: case HEIGHT_WAIST: case HEIGHT_HALO:
 				return getHeight();
 
-			default: return 0; //Base Case -- Nothing is enabled.
 		}
+		return OptionType.TYPE; //Base case: 0
+	}
+
+	public boolean isScheduled()
+	{
+		return taskId != -1;
+	}
+
+	public boolean hasValidParticle()
+	{
+		return particle != null && particle != ParticleEffect.FOOTSTEP;
+	}
+
+	public boolean canSpawnParticle()
+	{
+		return trailTime > 0;
 	}
 
 }

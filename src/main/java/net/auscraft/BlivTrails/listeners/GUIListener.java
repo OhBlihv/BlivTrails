@@ -1,6 +1,7 @@
 package net.auscraft.BlivTrails.listeners;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
+import net.auscraft.BlivTrails.OptionType;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailManager;
 import net.auscraft.BlivTrails.config.FlatFile;
@@ -30,46 +31,6 @@ import static net.auscraft.BlivTrails.TrailManager.usedTrails;
  */
 public class GUIListener implements Listener
 {
-
-	public enum OptionType
-	{
-
-		//Type
-		TYPE("type", 0),
-		TYPE_TRACE("type.trace", 1),
-		TYPE_RANDOM("type.random", 2),
-		TYPE_DYNAMIC("type.dynamic", 3),
-
-		//Length
-		LENGTH("length", 0),
-		LENGTH_SHORT("length.short", 1),
-		LENGTH_MEDIUM("length.medium", 2),
-		LENGTH_LONG("length.long", 3),
-
-		//Height
-		HEIGHT("height", 0),
-		HEIGHT_FEET("height.feet", 0),
-		HEIGHT_WAIST("height.waist", 1),
-		HEIGHT_HALO("height.halo", 2);
-
-		//Colour?
-
-		private String configName;
-
-		private int cfgId;
-
-		OptionType(String configName, int cfgId)
-		{
-			this.configName = configName;
-			this.cfgId = cfgId;
-		}
-
-		public boolean isOptionActive(int activeCfgId)
-		{
-			return activeCfgId == cfgId;
-		}
-
-	}
 
 	//Keeping these here since 'caching' all variables is bad.
 	private static FlatFile cfg = null;
@@ -130,12 +91,12 @@ public class GUIListener implements Listener
 			{
 				if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
 				{
-					TrailManager.getTrailMap().put(player.getUniqueId(), new PlayerConfig(player.getUniqueId(), ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
+					/*TrailManager.getTrailMap().put(player.getUniqueId(), new PlayerConfig(player.getUniqueId(), ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
 					int taskId = TrailManager.getTaskMap().remove(player.getUniqueId());
 					if(taskId > 0)
 					{
 						Bukkit.getServer().getScheduler().cancelTask(taskId);
-					}
+					}*/
 					TrailManager.removePlayer(player.getUniqueId());
 					BUtil.printPlain(player, msg.getString("messages.generic.trail-removed"));
 				}
@@ -143,11 +104,11 @@ public class GUIListener implements Listener
 				{
 					BUtil.printPlain(player, msg.getString("messages.error.no-trail-remove"));
 				}
+
 				if (cfg.getBoolean("menu.main.minimise-on-select"))
 				{
 					player.closeInventory();
 				}
-
 			}
 			else if (event.getRawSlot() == cfg.getInt("trails.options-menu.position"))
 			{
@@ -290,7 +251,7 @@ public class GUIListener implements Listener
 			{
 				if(player.hasPermission("blivtrails.options.type.trace"))
 				{
-					pcfg.setType(1);
+					pcfg.setType(OptionType.TYPE_TRACE);
 					optionsMenuType(player); // Set the type, and reload the menu
 				}
 				else
@@ -302,7 +263,7 @@ public class GUIListener implements Listener
 			{
 				if(player.hasPermission("blivtrails.options.type.random"))
 				{
-					pcfg.setType(2);
+					pcfg.setType(OptionType.TYPE_RANDOM);
 					optionsMenuType(player); // Set the type, and reload the menu
 				}
 				else
@@ -321,7 +282,7 @@ public class GUIListener implements Listener
 
 				if(player.hasPermission("blivtrails.options.type.dynamic"))
 				{
-					pcfg.setType(3);
+					pcfg.setType(OptionType.TYPE_DYNAMIC);
 					optionsMenuType(player); // Set the type, and reload the menu
 				}
 				else
@@ -350,7 +311,7 @@ public class GUIListener implements Listener
 			{
 				if(player.hasPermission("blivtrails.options.length.short"))
 				{
-					pcfg.setLength(1);
+					pcfg.setLength(OptionType.LENGTH_SHORT);
 					optionsMenuLength(player); // Set the type, and reload the menu
 				}
 				else
@@ -362,7 +323,7 @@ public class GUIListener implements Listener
 			{
 				if(player.hasPermission("blivtrails.options.length.medium"))
 				{
-					pcfg.setLength(2);
+					pcfg.setLength(OptionType.LENGTH_MEDIUM);
 					optionsMenuLength(player); // Set the type, and reload the menu
 				}
 				else
@@ -374,7 +335,7 @@ public class GUIListener implements Listener
 			{
 				if(player.hasPermission("blivtrails.options.length.long"))
 				{
-					pcfg.setLength(3);
+					pcfg.setLength(OptionType.LENGTH_LONG);
 					optionsMenuLength(player); // Set the type, and reload the menu
 				}
 				else
@@ -403,7 +364,7 @@ public class GUIListener implements Listener
 			{
 				if(player.hasPermission("blivtrails.options.height.feet"))
 				{
-					pcfg.setHeight(0);
+					pcfg.setHeight(OptionType.HEIGHT_FEET);
 					optionsMenuHeight(player); // Set the type, and reload the menu
 				}
 				else
@@ -415,7 +376,7 @@ public class GUIListener implements Listener
 			{
 				if(player.hasPermission("blivtrails.options.height.waist"))
 				{
-					pcfg.setHeight(1);
+					pcfg.setHeight(OptionType.HEIGHT_WAIST);
 					optionsMenuHeight(player); // Set the type, and reload the menu
 				}
 				else
@@ -427,7 +388,7 @@ public class GUIListener implements Listener
 			{
 				if(player.hasPermission("blivtrails.options.height.halo"))
 				{
-					pcfg.setHeight(2);
+					pcfg.setHeight(OptionType.HEIGHT_HALO);
 					optionsMenuHeight(player); // Set the type, and reload the menu
 				}
 				else
@@ -568,11 +529,11 @@ public class GUIListener implements Listener
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.main-options"));
 
-		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.TYPE.configName + ".position"),
+		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.TYPE.getConfigName() + ".position"),
 		                           player, OptionType.TYPE, Material.GLASS_BOTTLE);
-		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.LENGTH.configName + ".position"),
+		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.LENGTH.getConfigName() + ".position"),
 		                           player, OptionType.LENGTH, Material.ARROW);
-		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.HEIGHT.configName + ".position"),
+		addMenuOptionItemIfEnabled(inventory, cfg.getInt("menu.options.config." + OptionType.HEIGHT.getConfigName() + ".position"),
 		                           player, OptionType.HEIGHT, Material.FENCE);
 
 		//Colour is done differently.
@@ -620,7 +581,7 @@ public class GUIListener implements Listener
 	 */
 	private static boolean addMenuOptionItemIfEnabled(Inventory inventory, int slot, Player player, OptionType optionType, Material material)
 	{
-		if (cfg.getBoolean("menu.options.config." + optionType.configName + ".enabled"))
+		if (cfg.getBoolean("menu.options.config." + optionType.getConfigName() + ".enabled"))
 		{
 			return setInventoryItem(inventory, slot, optionMenuItem(player, material, optionType));
 		}
@@ -639,7 +600,7 @@ public class GUIListener implements Listener
 	 */
 	private static boolean addOptionItemIfEnabled(Inventory inventory, int slot, Player player, OptionType optionType, PlayerConfig playerConfig)
 	{
-		if (cfg.getBoolean("menu.options.config." + optionType.configName))
+		if (cfg.getBoolean("menu.options.config." + optionType.getConfigName()))
 		{
 			return setInventoryItem(inventory, slot, optionItem(player, optionType, optionType.isOptionActive(playerConfig.getEnabledOption(optionType)),
 				                                             playerConfig.getParticle()));
@@ -775,10 +736,10 @@ public class GUIListener implements Listener
 
 	public static ItemStack optionMenuItem(Player player, Material material, OptionType optionType)
 	{
-		ItemStack itemStack = GUIUtil.createItem(material, 0, 1, msg.getString("messages.options.titles.categories." + optionType.configName),
+		ItemStack itemStack = GUIUtil.createItem(material, 0, 1, msg.getString("messages.options.titles.categories." + optionType.getConfigName()),
 		                                         null, null);
 
-		if(!player.hasPermission("blivtrails.options." + optionType.configName))
+		if(!player.hasPermission("blivtrails.options." + optionType.getConfigName()))
 		{
 			ItemMeta itemMeta = itemStack.getItemMeta();
 			itemMeta.setLore(Collections.singletonList(BUtil.translateColours(cfg.getString("messages.indicators.dont-have-permission"))));
@@ -791,7 +752,7 @@ public class GUIListener implements Listener
 	public static ItemStack optionItem(Player player, OptionType optionType, boolean isEnabled, ParticleEffect particleEffect)
 	{
 		ItemStack itemStack = GUIUtil.createItem(Material.INK_SACK, 8, 1,
-		                                         msg.getString("messages.options.titles." + optionType.configName),
+		                                         msg.getString("messages.options.titles." + optionType.getConfigName()),
 												 null, null);
 		if (isEnabled)
 		{
@@ -800,7 +761,7 @@ public class GUIListener implements Listener
 			ItemMeta itemMeta = itemStack.getItemMeta();
 
 			List<String> lore = new ArrayList<>();
-			if(!player.hasPermission("blivtrails.options." + optionType.configName))
+			if(!player.hasPermission("blivtrails.options." + optionType.getConfigName()))
 			{
 				lore.add(msg.getString("messages.indicators.dont-have-permission"));
 			}

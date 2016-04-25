@@ -4,8 +4,10 @@ import com.darkblade12.ParticleEffect.ParticleEffect;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.auscraft.BlivTrails.OptionType;
 import net.auscraft.BlivTrails.TrailManager;
 import net.auscraft.BlivTrails.util.BUtil;
+import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,11 +26,13 @@ public class TrailDefaults
 		private String displayName;
 
 		@Getter
-		private int type,
-					length,
-					height,
-					colour,
-					displaySpeed;
+		private OptionType  type,
+							length,
+							height;
+
+		@Getter
+		private int     colour,
+						displaySpeed;
 
 		@Getter
 		private double  xVariation,
@@ -61,7 +65,8 @@ public class TrailDefaults
 	{
 		FlatFile cfg = FlatFile.getInstance();
 
-		defaultParticleOptions = new ParticleDefaultStorage("", 0, 1, 0, 0, 1,
+		defaultParticleOptions = new ParticleDefaultStorage("", OptionType.TYPE_TRACE, OptionType.LENGTH_SHORT, OptionType.HEIGHT_FEET,
+		                                                    0, 1,
 		                                                    TrailManager.getOption()[0],
 		                                                    TrailManager.getOption()[1],
 		                                                    TrailManager.getOption()[2],
@@ -71,11 +76,13 @@ public class TrailDefaults
 		                                                    TrailManager.getOption()[6]);
 
 		String particleString;
+		ConfigurationSection trailSection = cfg.getConfigurationSection("trails");
 		for (ParticleEffect particle : TrailManager.usedTrails)
 		{
 			particleString = BUtil.trailConfigName(particle.name());
 			if (!particleString.isEmpty())
 			{
+				ConfigurationSection trailDefaultSection = trailSection.getConfigurationSection(particleString);
 				int particleColour = 15;
 				if(particle.hasProperty(ParticleProperty.COLORABLE))
 				{
@@ -93,7 +100,7 @@ public class TrailDefaults
 						}
 						default:
 						{
-							colourStringtoInt(cfg.getString("trails." + particleString + ".options.colour"));
+							OptionType.parseColourString(trailDefaultSection.getString("options.colour"));
 							break;
 						}
 
@@ -101,15 +108,19 @@ public class TrailDefaults
 				}
 
 				particleDefaults.put(particle,
-				                     new ParticleDefaultStorage(BUtil.translateColours(cfg.getString("trails." + particleString + ".name")),
-						                                        typeStringtoInt(cfg.getString("trails." + particleString + ".options.type")),
-				                                                lengthStringtoInt(cfg.getString("trails." + particleString + ".options.length")), heightStringtoInt(cfg.getString("trails." + particleString + ".options.height")),
+				                     new ParticleDefaultStorage(BUtil.translateColours(trailDefaultSection.getString("name")),
+				                                                OptionType.parseTypeString(trailDefaultSection.getString("options.type")),
+				                                                OptionType.parseLengthString(trailDefaultSection.getString("options.length")),
+				                                                OptionType.parseHeightString(trailDefaultSection.getString("options.height")),
 				                                                particleColour,
-				                                                cfg.getInt("trails." + particleString + ".options.display-speed"),
-				                                                cfg.getDouble("trails." + particleString + ".options.defaults.random.x-variation"),
-				                                                cfg.getDouble("trails." + particleString + ".options.defaults.random.y-variation"), cfg.getDouble("trails." + particleString + ".options.defaults.random.z-variation"),
-				                                                cfg.getDouble("trails." + particleString + ".options.defaults.dynamic.spray-variation"), cfg.getDouble("trails." + particleString + ".options.defaults.height.feet-location"),
-				                                                cfg.getDouble("trails." + particleString + ".options.defaults.height.waist-location"), cfg.getDouble("trails." + particleString + ".options.defaults.height.halo-location")));
+				                                                trailDefaultSection.getInt("options.display-speed"),
+				                                                trailDefaultSection.getInt("options.defaults.random.x-variation"),
+				                                                trailDefaultSection.getInt("options.defaults.random.y-variation"),
+				                                                trailDefaultSection.getInt("options.defaults.random.z-variation"),
+				                                                trailDefaultSection.getInt("options.defaults.dynamic.spray-variation"),
+				                                                trailDefaultSection.getInt("options.defaults.height.feet-location"),
+				                                                trailDefaultSection.getInt("options.defaults.height.waist-location"),
+				                                                trailDefaultSection.getInt("options.defaults.height.halo-location")));
 			}
 		}
 	}
@@ -124,93 +135,4 @@ public class TrailDefaults
 		return particleDefaultOptions;
 	}
 
-	public int typeStringtoInt(String typeString)
-	{
-		if(typeString == null) return 1;
-		
-		switch (typeString)
-		{
-			case "random":
-				return 2;
-			case "dynamic":
-				return 3;
-			default:
-				return 1;
-		}
-	}
-
-	public int lengthStringtoInt(String lengthString)
-	{
-		if(lengthString == null) return 1;
-		
-		switch (lengthString)
-		{
-			case "medium":
-				return 2;
-			case "long":
-				return 3;
-			default:
-				return 1;
-		}
-	}
-
-	public int heightStringtoInt(String heightString)
-	{
-		if(heightString == null) return 0;
-		
-		switch (heightString)
-		{
-			case "waist":
-				return 1;
-			case "halo":
-				return 2;
-			default:
-				return 0;
-		}
-	}
-
-	public int colourStringtoInt(String colourString)
-	{
-		if(colourString == null) return 0;
-		
-		switch (colourString)
-		{
-			case "red":
-				return 1;
-			case "dark green":
-				return 2;
-			case "brown":
-				return 3;
-			case "dark blue":
-				return 4;
-			case "purple":
-				return 5;
-			case "cyan":
-				return 6;
-			case "light grey":
-			case "light gray":
-				return 7;
-			case "grey":
-			case "gray":
-				return 8;
-			case "pink":
-				return 9;
-			case "lime":
-				return 10;
-			case "yellow":
-				return 11;
-			case "light blue":
-				return 12;
-			case "magenta":
-				return 13;
-			case "orange":
-				return 14;
-			case "black":
-				return 15;
-			case "random":
-				return 16;
-			default:
-				return 0;
-		}
-	}
 }

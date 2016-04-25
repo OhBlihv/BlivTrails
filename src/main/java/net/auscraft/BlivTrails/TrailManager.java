@@ -57,16 +57,17 @@ public class TrailManager
 
 	@Getter
 	private static ConcurrentHashMap<UUID, PlayerConfig> trailMap = new ConcurrentHashMap<>();
-	@Getter
-	private static ConcurrentHashMap<UUID, Integer> taskMap = new ConcurrentHashMap<>();
-	@Getter
-	private static ConcurrentHashMap<UUID, Float> trailTime = new ConcurrentHashMap<>();
 
 	private static FlatFileStorage flatFileStorage = null;
+	public static boolean usingSQL()
+	{
+		return flatFileStorage == null;
+	}
+
 	private static Messages msg;
 
 	@Getter
-	private static double option[];
+	private static double[] option;
 
 	@Getter
 	private static float trailLength;
@@ -79,9 +80,13 @@ public class TrailManager
 	@Getter
 	@Setter
 	private static VanishHook vanishHook = VanishHook.NONE;
+	public static boolean hasVanishHook()
+	{
+		return vanishHook != VanishHook.NONE;
+	}
 
 	//Prevent accidental construction
-	private TrailManager()
+	TrailManager()
 	{
 		//NOOP
 	}
@@ -151,6 +156,27 @@ public class TrailManager
 	{
 		ParticleDefaultStorage particleDefaults = TrailDefaults.getDefaults(particle);
 
+		PlayerConfig playerConfig = trailMap.get(uuid);
+		if(playerConfig != null)
+		{
+			if(playerConfig.isScheduled())
+			{
+				Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
+				playerConfig.setTaskId(-1);
+			}
+
+			playerConfig.setType(particleDefaults.getType());
+			playerConfig.setLength(particleDefaults.getLength());
+			playerConfig.setHeight(particleDefaults.getHeight());
+			playerConfig.setColour(particleDefaults.getColour());
+		}
+		else
+		{
+			playerConfig = new PlayerConfig(uuid, particle, particleDefaults.getType(), particleDefaults.getLength(),
+			                                particleDefaults.getHeight(), particleDefaults.getColour());
+			trailMap.put(uuid, playerConfig);
+		}
+
 		// Trail for the first time
 		String trailName = particleDefaults.getDisplayName();
 
@@ -161,35 +187,13 @@ public class TrailManager
 		}
 
 		BUtil.printPlain(Bukkit.getPlayer(uuid), msg.getString("messages.generic.trail-applied").replace("%trail%", trailName));
-
-		trailMap.put(uuid, new PlayerConfig(uuid, particle, particleDefaults.getType(), particleDefaults.getLength(), particleDefaults.getHeight(), particleDefaults.getColour()));
-		try
-		{
-			scheduler.cancelTask(taskMap.get(uuid));
-		}
-		catch (NullPointerException e)
-		{
-			//
-		}
-
-		taskMap.remove(uuid);
-		trailTime.remove(uuid);
-		BUtil.logDebug(trailMap.get(uuid).getParticle().getName());
 	}
 
 	public static void loadTrail(Player player)
 	{
-		if (flatFileStorage == null)
+		if (usingSQL())
 		{
-			try
-			{
-				scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new LoadRunnable(player.getUniqueId()));
-			}
-			catch (NullPointerException e)
-			{
-				e.printStackTrace();
-				// Player has no trail config -- Do nothing
-			}
+			scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new LoadRunnable(player.getUniqueId()));
 		}
 		else
 		{
@@ -219,7 +223,16 @@ public class TrailManager
 						break;
 					}
 				}
-				trailMap.put(player.getUniqueId(), new PlayerConfig(player.getUniqueId(), particleEff, Integer.parseInt(dataSplit[1]), Integer.parseInt(dataSplit[2]), Integer.parseInt(dataSplit[3]), Integer.parseInt(dataSplit[4])));
+				trailMap.put(player.getUniqueId(),
+				             new PlayerConfig(player.getUniqueId(), particleEff,
+				                              OptionType.parseTypeInt(Integer.parseInt(dataSplit[1])),
+				                              OptionType.parseHeightInt(Integer.parseInt(dataSplit[2])),
+				                              OptionType.parseLengthInt(Integer.parseInt(dataSplit[3])),
+				                              Integer.parseInt(dataSplit[4])));
+			}
+			catch(NumberFormatException e)
+			{
+				BUtil.logError(player.getName() + " could not be loaded: One (or more) of the values were non-numerical.");
 			}
 			catch (NullPointerException e)
 			{
@@ -232,35 +245,29 @@ public class TrailManager
 		}
 	}
 
-	//I hate myself for doing this, but there is nothing wrong with creating a new MySQLRunnable there
-	@SuppressWarnings("unused")
 	public static void saveTrail(OfflinePlayer player)
 	{
-		PlayerConfig pcfg = trailMap.get(player.getUniqueId());
-		if (pcfg != null)
+		PlayerConfig playerConfig = trailMap.get(player.getUniqueId());
+		if (playerConfig != null)
 		{
-			if (pcfg.getParticle().equals(ParticleEffect.FOOTSTEP))
+			if (!playerConfig.hasValidParticle())
 			{
 				removePlayer(player.getUniqueId());
 				return;
 			}
-			if (flatFileStorage == null)
+
+			if (usingSQL())
 			{
 				//Construct this here to avoid constructing it twice if the server is shutting down
-				SaveRunnable saveRunnable = new SaveRunnable(player.getUniqueId(), pcfg);
+				SaveRunnable saveRunnable = new SaveRunnable(player.getUniqueId(), playerConfig);
 				try
 				{
 					// Run MySQL off the main thread to avoid lockups
 					scheduler.runTaskAsynchronously(BlivTrails.getInstance(), saveRunnable);
 				}
-				catch (IllegalPluginAccessException e) // If the plugin is shutting down, tasks cannot be scheduled.
+				catch (IllegalPluginAccessException e) // If the server is shutting down, tasks cannot be scheduled.
 				{
 					saveRunnable.run();
-				}
-				catch (NullPointerException e)
-				{
-					// Player has no trail config
-					e.printStackTrace();
 				}
 			}
 			else
@@ -276,8 +283,9 @@ public class TrailManager
 				try
 				{
 					flatFileStorage.saveEntry(player.getUniqueId().toString(),
-					                          pcfg.getParticle().toString() + "," + pcfg.getType() + "," + pcfg.getLength() + "," + pcfg.getHeight() + "," + pcfg.getColour());
-					//BUtil.logDebug("Successfully saved " + player.getName() + "'s trail config to file");
+					                          playerConfig.getParticle().toString() + "," + playerConfig.getType() + "," +
+						                          playerConfig.getLength() + "," + playerConfig.getHeight() + "," +
+						                          playerConfig.getColour());
 				}
 				catch (NullPointerException e)
 				{
@@ -305,7 +313,7 @@ public class TrailManager
 	 */
 	public static String addTrail(UUID uuid, String particleString, String typeString, String lengthString, String heightString, String colourString)
 	{
-		ParticleEffect particleEff = ParticleEffect.FOOTSTEP;
+		ParticleEffect particleEff = null;
 		ParticleDefaultStorage particleDefaults = null;
 
 		for (Map.Entry<ParticleEffect, ParticleDefaultStorage> entry : TrailDefaults.getParticleDefaults().entrySet())
@@ -318,19 +326,24 @@ public class TrailManager
 			}
 		}
 
-		if (particleEff.equals(ParticleEffect.FOOTSTEP))
+		if (particleEff == null)
 		{
 			return ChatColor.RED + "Trail effect does not exist. (/trailadmin particles)";
 		}
 
-		int type, length = 1, height = 0, colour = 0;
+		OptionType  type = OptionType.TYPE_TRACE,
+					length = OptionType.LENGTH_SHORT,
+					height = OptionType.HEIGHT_FEET;
+
+		int colour = 0;
+
 		if (particleEff == ParticleEffect.BARRIER)
 		{
 			// Barriers don't support anything. Give up. Leave everything default
-			return "&aTrail Successfully Applied";
+			return "§aTrail Successfully Applied";
 		}
 
-		if (typeString.isEmpty() && particleDefaults != null) // Use Trail Defaults
+		if (particleDefaults != null) // Use Trail Defaults
 		{
 			type = particleDefaults.getType();
 			length = particleDefaults.getLength();
@@ -338,54 +351,29 @@ public class TrailManager
 			colour = particleDefaults.getColour();
 		}
 		else
-		// Use defined inputs
 		{
-			switch (typeString.toLowerCase())
+			if(typeString != null && !typeString.isEmpty())
 			{
-				case "trace":
-					type = 1;
-					break;
-				case "random":
-					type = 2;
-					break;
-				case "dynamic":
-					type = 3;
-					break;
-				default:
-					return "&cInvalid Type | (trace, random, dynamic)";
+				type = OptionType.parseTypeString(typeString);
+				if(type == OptionType.NONE)
+				{
+					return "§cInvalid Type | (trace, random, dynamic)";
+				}
 			}
 			if (lengthString != null)
 			{
-				switch (lengthString.toLowerCase())
+				length = OptionType.parseLengthString(lengthString);
+				if(length == OptionType.NONE)
 				{
-					case "short":
-						length = 1;
-						break;
-					case "medium":
-						length = 2;
-						break;
-					case "long":
-						length = 3;
-						break;
-					default:
-						return "&cInvalid Length | (short, medium, long)";
+					return "§cInvalid Length | (short, medium, long)";
 				}
 			}
 			if (heightString != null)
 			{
-				switch (heightString.toLowerCase())
+				height = OptionType.parseHeightString(heightString);
+				if(height == OptionType.NONE)
 				{
-					case "feet":
-						height = 0;
-						break;
-					case "waist":
-						height = 1;
-						break;
-					case "halo":
-						height = 2;
-						break;
-					default:
-						return "&cInvalid Height | (feet, waist, halo)";
+					return "§cInvalid Height | (feet, waist, halo)";
 				}
 			}
 			if (colourString != null)
@@ -446,20 +434,26 @@ public class TrailManager
 						colour = 16;
 						break;
 					default:
-						return "&cInvalid Colour. See /trailadmin colours | for colours";
+						return "§cInvalid Colour. See /trailadmin colours | for colours";
 				}
 			}
 		}
 
 		trailMap.put(uuid, new PlayerConfig(uuid, particleEff, type, length, height, colour));
-		return "&aTrail Successfully Applied";
+		return "§aTrail Successfully Applied";
 	}
 
 	public static String removePlayer(UUID uuid)
 	{
-		PlayerConfig pcfg = trailMap.remove(uuid);
-		if (pcfg != null)
+		PlayerConfig playerConfig = trailMap.remove(uuid);
+		if (playerConfig != null)
 		{
+			if(playerConfig.isScheduled())
+			{
+				Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
+				playerConfig.setTaskId(-1);
+			}
+
 			if (flatFileStorage == null)
 			{
 				scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new RemoveRunnable(uuid));
@@ -514,11 +508,6 @@ public class TrailManager
 		}
 
 		return isVanished;
-	}
-
-	public static void vanishHook(VanishHook inVanishHook)
-	{
-		vanishHook = inVanishHook;
 	}
 
 }

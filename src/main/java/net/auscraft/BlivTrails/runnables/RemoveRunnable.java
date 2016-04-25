@@ -1,6 +1,5 @@
 package net.auscraft.BlivTrails.runnables;
 
-import com.darkblade12.ParticleEffect.ParticleEffect;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailManager;
 import org.bukkit.Bukkit;
@@ -23,10 +22,15 @@ public class RemoveRunnable extends MySQLRunnable
 	@Override
 	public void run()
 	{
-		trailMap.put(uuid, new PlayerConfig(uuid, ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
-		if(TrailManager.getTaskMap().containsKey(uuid))
+		PlayerConfig playerConfig = TrailManager.getTrailMap().get(uuid);
+		if(playerConfig == null)
 		{
-			Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().remove(uuid));
+			return;
+		}
+
+		if(playerConfig.isScheduled())
+		{
+			Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
 		}
 
 		try

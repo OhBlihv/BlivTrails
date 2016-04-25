@@ -1,5 +1,6 @@
 package net.auscraft.BlivTrails.hooks;
 
+import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -13,18 +14,15 @@ public abstract class VanishListener
 
 	public void onVanishEvent(Player player, boolean isVanishing)
 	{
-		if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
+		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+		if (playerConfig != null)
 		{
-			TrailManager.getTrailMap().get(player.getUniqueId()).setVanished(isVanishing);
+			playerConfig.setVanished(isVanishing);
 			if (isVanishing)
 			{
-				try
+				if(playerConfig.isScheduled())
 				{
-					Bukkit.getScheduler().cancelTask(TrailManager.getTaskMap().get(player.getUniqueId()));
-				}
-				catch (NullPointerException e)
-				{
-					// Player has no trail, or just joined.
+					Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
 				}
 			}
 		}

@@ -13,20 +13,21 @@ import net.auscraft.BlivTrails.hooks.SuperPremiumVanishListener;
 import net.auscraft.BlivTrails.hooks.VanishNoPacketListener;
 import net.auscraft.BlivTrails.listeners.GUIListener;
 import net.auscraft.BlivTrails.listeners.TrailListener;
-import net.auscraft.BlivTrails.runnables.MySQLRunnable;
 import net.auscraft.BlivTrails.storage.ParticleData;
 import net.auscraft.BlivTrails.storage.ParticleStorage;
 import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.SQLException;
-import java.util.Enumeration;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+
+import static net.auscraft.BlivTrails.TrailManager.loadTrail;
 
 public class BlivTrails extends JavaPlugin
 {
@@ -89,16 +90,21 @@ public class BlivTrails extends JavaPlugin
 		GUIListener.reload();
 		getServer().getPluginManager().registerEvents(new GUIListener(), this);
 
-		getCommand("trail").setExecutor(new TrailCommand(this));
-		getCommand("trailadmin").setExecutor(new TrailCommand(this));
+		getCommand("trail").setExecutor(new TrailCommand());
+		getCommand("trailadmin").setExecutor(new TrailCommand());
 		doHooks();
-
-		MySQLRunnable.reload(); //Init this after everything to pick up Vanish Hooking
 
 		if (!cfg.getBoolean("trails.misc.display-when-still"))
 		{
 			trailTimeoutCheckTime = cfg.getInt("trails.scheduler.check-time");
 			doTrailTimeouts();
+		}
+
+		//Load all players online.
+		//Useful when unloading/reloading this plugin on a live server
+		for(Player player : BUtil.getOnlinePlayers())
+		{
+			loadTrail(player);
 		}
 	}
 
@@ -208,34 +214,35 @@ public class BlivTrails extends JavaPlugin
 
 			public void run()
 			{
-				BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-				ConcurrentHashMap<UUID, Integer> trailTasks = TrailManager.getTaskMap();
-				ConcurrentHashMap<UUID, Float> trailTime = TrailManager.getTrailTime();
+				BukkitScheduler scheduler = Bukkit.getScheduler();
 
 				int taskId;
 				float resultingTime;
 
-				UUID uuid;
-				final Enumeration<UUID> itr = trailTasks.keys();
-				while (itr.hasMoreElements())
+				for(Map.Entry<UUID, PlayerConfig> entry : TrailManager.getTrailMap().entrySet())
 				{
-					uuid = itr.nextElement();
+					if(!entry.getValue().isScheduled())
+					{
+						continue;
+					}
 
-					taskId = trailTasks.get(uuid);
+					taskId = entry.getValue().getTaskId();
+
 					//If trail is active for the current player
+					//This is a double-check, yes.
 					if (scheduler.isQueued(taskId) || scheduler.isCurrentlyRunning(taskId))
 					{
-						resultingTime = trailTime.get(uuid) - trailTimeoutCheckTime;
+						resultingTime = entry.getValue().getTrailTime() - trailTimeoutCheckTime;
 						if (resultingTime > 0)
 						{
-							trailTime.replace(uuid, resultingTime);
+							entry.getValue().setTrailTime(resultingTime);
 							continue;
 						}
 
 						scheduler.cancelTask(taskId);
 					}
 
-					trailTasks.remove(uuid); // TaskID is stale and not in use anymore. Cleanup.
+					entry.getValue().setTaskId(-1); // TaskID is stale and not in use anymore. Cleanup.
 				}
 			}
 		}, 20L, trailTimeoutCheckTime * 20L);

@@ -89,53 +89,53 @@ public class TrailListener implements Listener
 		}
 
 		UUID uuid = event.getPlayer().getUniqueId();
-		if (TrailManager.getTrailMap().containsKey(uuid))
+		PlayerConfig playerConfig = TrailManager.getTrailMap().get(uuid);
+		if (playerConfig != null)
 		{
-			if (!TrailManager.getTaskMap().containsKey(uuid))
+			if (TrailManager.hasVanishHook() && playerConfig.isVanished())
 			{
-				PlayerConfig playerConfig = TrailManager.getTrailMap().get(uuid);
-				if (TrailManager.getVanishHook() != TrailManager.VanishHook.NONE && playerConfig.isVanished())
-				{
-					return; // If Vanished, don't do the trail.
-				}
-
-				if (playerConfig.getParticle().equals(ParticleEffect.FOOTSTEP))
-				{
-					TrailManager.removePlayer(uuid);
-					return;
-				}
-
-				int speed = 1;
-				TrailDefaults.ParticleDefaultStorage particleDefaults = TrailDefaults.getDefaults(playerConfig.getParticle());
-				if (particleDefaults.getDisplaySpeed() > 0)
-				{
-					speed = particleDefaults.getDisplaySpeed();
-				}
-
-				TrailRunnable trailRunnable = new TrailRunnable(event.getPlayer(), playerConfig, TrailManager.getOption());
-				//Fire a test particle to ensure we can actually display it with no errors
-				try
-				{
-					trailRunnable.run();
-				}
-				catch(Exception e)
-				{
-					BUtil.logError("An error occurred while displaying " + event.getPlayer().getName() + "'s trail. It will be disabled.");
-					e.printStackTrace();
-
-					//Remove the PlayerConfig, since it is now invalid.
-					TrailManager.getTrailMap().remove(event.getPlayer().getUniqueId());
-					return;
-				}
-
-				// public TrailRunnable(BlivTrails instance, Player player, PlayerConfig playerConfig, TrailManager listener, Random rand, double[] option)
-				TrailManager.getTaskMap().put(uuid, Bukkit.getScheduler().runTaskTimerAsynchronously(BlivTrails.getInstance(), trailRunnable, 1L, speed).getTaskId());
-				TrailManager.getTrailTime().put(uuid, TrailManager.getTrailLength());
+				return; // If Vanished, don't do the trail.
 			}
-			else
+
+			if (playerConfig.isScheduled())
 			{
-				TrailManager.getTrailTime().replace(uuid, TrailManager.getTrailLength());
+				playerConfig.setTrailTime(TrailManager.getTrailLength());
+				return;
 			}
+
+			if (playerConfig.getParticle().equals(ParticleEffect.FOOTSTEP))
+			{
+				TrailManager.removePlayer(uuid);
+				return;
+			}
+
+			int speed = 1;
+			TrailDefaults.ParticleDefaultStorage particleDefaults = TrailDefaults.getDefaults(playerConfig.getParticle());
+			if (particleDefaults.getDisplaySpeed() > 0)
+			{
+				speed = particleDefaults.getDisplaySpeed();
+			}
+
+			TrailRunnable trailRunnable = new TrailRunnable(event.getPlayer(), playerConfig, TrailManager.getOption());
+			//Fire a test particle to ensure we can actually display it with no errors
+			try
+			{
+				trailRunnable.run();
+			}
+			catch(Exception e)
+			{
+				BUtil.logError("An error occurred while displaying " + event.getPlayer().getName() + "'s trail. It will be disabled.");
+				e.printStackTrace();
+
+				//Remove the PlayerConfig, since it is now invalid.
+				TrailManager.getTrailMap().remove(event.getPlayer().getUniqueId());
+				return;
+			}
+
+			// public TrailRunnable(BlivTrails instance, Player player, PlayerConfig playerConfig, TrailManager listener, Random rand, double[] option)
+			playerConfig.setTaskId(Bukkit.getScheduler().runTaskTimerAsynchronously(BlivTrails.getInstance(), trailRunnable, 1L, speed).getTaskId());
+
+			playerConfig.setTrailTime(TrailManager.getTrailLength());
 		}
 	}
 

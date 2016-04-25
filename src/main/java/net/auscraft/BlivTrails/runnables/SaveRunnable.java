@@ -31,14 +31,18 @@ public class SaveRunnable extends MySQLRunnable
 
 			if (particleData == null)
 			{
-				instance.getParticleStorage().create(new ParticleData(uuidBytes, playerConfig.getParticle().toString(), playerConfig.getType(), playerConfig.getLength(), playerConfig.getHeight(), playerConfig.getColour()));
+				instance.getParticleStorage().create(new ParticleData(uuidBytes, playerConfig.getParticle().toString(),
+				                                                      playerConfig.getType().getCfgId(),
+				                                                      playerConfig.getLength().getCfgId(),
+				                                                      playerConfig.getHeight().getCfgId(),
+				                                                      playerConfig.getColour()));
 			}
 			else
 			{
 				particleData.setParticle(playerConfig.getParticle().toString());
-				particleData.setType(playerConfig.getType());
-				particleData.setLength(playerConfig.getLength());
-				particleData.setHeight(playerConfig.getHeight());
+				particleData.setType(playerConfig.getType().getCfgId());
+				particleData.setLength(playerConfig.getLength().getCfgId());
+				particleData.setHeight(playerConfig.getHeight().getCfgId());
 				particleData.setColour(playerConfig.getColour());
 				instance.getParticleStorage().update(particleData);
 			}

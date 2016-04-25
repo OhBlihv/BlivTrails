@@ -5,16 +5,16 @@ import com.darkblade12.ParticleEffect.ParticleEffect.NoteColor;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleColor;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleProperty;
 import net.auscraft.BlivTrails.BlivTrails;
+import net.auscraft.BlivTrails.OptionType;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailManager;
 import net.auscraft.BlivTrails.config.TrailDefaults;
 import net.auscraft.BlivTrails.config.TrailDefaults.ParticleDefaultStorage;
+import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
-
-import java.util.UUID;
 
 import static net.auscraft.BlivTrails.BlivTrails.rand;
 
@@ -91,12 +91,12 @@ public class TrailRunnable implements Runnable
 
 	}
 
-	private BlivTrails plugin;
+	private static final BlivTrails plugin = BlivTrails.getInstance();
 
-	private UUID uuid;
 	private Player player;
 
-	double[] heightCfg = new double[3], variationCfg = new double[3];
+	double[]    heightCfg = new double[3],
+				variationCfg = new double[3];
 	double sprayCfg;
 	
 	//User Configurable
@@ -104,7 +104,7 @@ public class TrailRunnable implements Runnable
 	ParticleColor data = null;
 	double height = 0.00;
 	float xOff = (float) 0.0, yOff = (float) 0.0, zOff = (float) 0.0, speed = (float) 0.0;
-	int length = 0, type = 0;
+	OptionType length = OptionType.NONE, type = OptionType.NONE;
 	int colour = 0;
 
 	/**
@@ -120,9 +120,7 @@ public class TrailRunnable implements Runnable
 	 */
 	public TrailRunnable(Player player, PlayerConfig pcfg, double[] option)
 	{
-		this.plugin = BlivTrails.getInstance();
 		this.player = player;
-		this.uuid = player.getUniqueId();
 		particle = pcfg.getParticle();
 		ParticleDefaultStorage particleStorage = TrailDefaults.getDefaults(particle);
 
@@ -194,26 +192,12 @@ public class TrailRunnable implements Runnable
 		}
 		
 		//User Configurable
-		
 		length = pcfg.getLength();
 		type = pcfg.getType();
 		
-		if (!(type == 2)) // Standard + Dynamic
+		if (type != OptionType.TYPE_RANDOM) // Standard + Dynamic
 		{
-			int heightInt = pcfg.getHeight();
-			if (heightInt == 0) // Feet
-			{
-				height = heightCfg[0];
-			}
-			else if (heightInt == 1) // Waist
-			{
-				height = heightCfg[1];
-			}
-			else
-			// Halo
-			{
-				height = heightCfg[2];
-			}
+			height = heightCfg[pcfg.getHeight().getCfgId()];
 		}
 		
 		colour = pcfg.getColour();
@@ -329,11 +313,16 @@ public class TrailRunnable implements Runnable
 	@Override
 	public void run()
 	{
-		Float trailTime;
-		//Implementation of getOrDefault() from Map in Java 7
-		if (((trailTime = TrailManager.getTrailTime().get(uuid)) == null ? -1 : trailTime) > 0)
+		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+		if(playerConfig == null)
 		{
-			if(type == 2)
+			BUtil.logError("Attempted to spawn particle for unloaded player " + player.getName());
+			return;
+		}
+
+		if (playerConfig.canSpawnParticle())
+		{
+			if(type == OptionType.TYPE_RANDOM)
 			// Random
 			{
 				// Randomise direction of x and z (Independent of type)
@@ -363,7 +352,7 @@ public class TrailRunnable implements Runnable
 				yOff = (float) (rand.nextFloat() * variationCfg[1] * yDir);
 				zOff = (float) (rand.nextFloat() * variationCfg[2] * zDir);
 			}
-			else if (type == 3) // Random Directions from feet (Spray)
+			else if (type == OptionType.TYPE_DYNAMIC) // Random Directions from feet (Spray)
 			{
 				// (0.0-1.0)/20.00 * variation (Default is 1)
 				speed = (float) ((rand.nextFloat() / 20.00D) * sprayCfg);
@@ -388,7 +377,7 @@ public class TrailRunnable implements Runnable
 						}
 					}
 
-					if(type == 2)
+					if(type == OptionType.TYPE_RANDOM)
 					{
 						particle.display(data, player.getLocation().add(xOff, yOff, zOff), 64);
 					}
@@ -409,13 +398,13 @@ public class TrailRunnable implements Runnable
 					}
 				}
 
-				if (length > 1)
+				if (length.getCfgId() > 1)
 				{
-					for (int i = 1; i < (length + 1); i++)
+					for (int i = 1; i < (length.getCfgId() + 1); i++)
 					{
 						if (this.particle.hasProperty(ParticleProperty.COLORABLE))
 						{
-							if(type == 2)
+							if(type == OptionType.TYPE_RANDOM)
 							{
 								Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
 								                      new DisplayColourableRunnable(particle, data, player.getLocation().add(xOff, yOff, zOff)), i * 5);
@@ -447,17 +436,12 @@ public class TrailRunnable implements Runnable
 			}
 			catch (ParticleEffect.ParticleVersionException | ParticleEffect.ParticlePacket.VersionIncompatibleException e)
 			{
-				e.printStackTrace();
-				try
+				if(playerConfig.isScheduled())
 				{
-					TrailManager.getTrailMap().remove(uuid);
-				}
-				catch (NullPointerException e2)
-				{
-					//
+					Bukkit.getScheduler().cancelTask(playerConfig.getTaskId()); //Cancel Self
 				}
 
-				Bukkit.getServer().getScheduler().cancelTask(TrailManager.getTaskMap().get(uuid)); // Cancel Self
+				e.printStackTrace(); //Print Anyway :)
 			}
 		}
 	}
