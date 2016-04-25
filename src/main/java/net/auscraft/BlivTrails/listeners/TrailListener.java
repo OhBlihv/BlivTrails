@@ -70,6 +70,12 @@ public class TrailListener implements Listener
 		if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
 		{
 			saveTrail(player);
+
+			PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+			if(playerConfig.isScheduled())
+			{
+				Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
+			}
 			TrailManager.getTrailMap().remove(player.getUniqueId());
 		}
 	}
