@@ -115,12 +115,14 @@ public class TrailManager
 
 	public static void doDisable()
 	{
-		for (Player player : Bukkit.getOnlinePlayers())
+		for (PlayerConfig playerConfig : trailMap.values())
 		{
-			if (trailMap.containsKey(player.getUniqueId()))
-			{
-				saveTrail(player);
-			}
+			saveTrail(playerConfig);
+		}
+
+		if(!usingSQL())
+		{
+			flatFileStorage.saveToFile();
 		}
 	}
 
@@ -233,6 +235,7 @@ public class TrailManager
 			catch(NumberFormatException e)
 			{
 				BUtil.logError(player.getName() + " could not be loaded: One (or more) of the values were non-numerical.");
+				e.printStackTrace();
 			}
 			catch (NullPointerException e)
 			{
@@ -247,19 +250,23 @@ public class TrailManager
 
 	public static void saveTrail(OfflinePlayer player)
 	{
-		PlayerConfig playerConfig = trailMap.get(player.getUniqueId());
+		saveTrail(trailMap.get(player.getUniqueId()));
+	}
+
+	public static void saveTrail(PlayerConfig playerConfig)
+	{
 		if (playerConfig != null)
 		{
 			if (!playerConfig.hasValidParticle())
 			{
-				removePlayer(player.getUniqueId());
+				removePlayer(playerConfig.getUuid());
 				return;
 			}
 
 			if (usingSQL())
 			{
 				//Construct this here to avoid constructing it twice if the server is shutting down
-				SaveRunnable saveRunnable = new SaveRunnable(player.getUniqueId(), playerConfig);
+				SaveRunnable saveRunnable = new SaveRunnable(playerConfig.getUuid(), playerConfig);
 				try
 				{
 					// Run MySQL off the main thread to avoid lockups
@@ -282,9 +289,9 @@ public class TrailManager
 				 */
 				try
 				{
-					flatFileStorage.saveEntry(player.getUniqueId().toString(),
-					                          playerConfig.getParticle().toString() + "," + playerConfig.getType() + "," +
-						                          playerConfig.getLength() + "," + playerConfig.getHeight() + "," +
+					flatFileStorage.saveEntry(playerConfig.getUuid().toString(),
+					                          playerConfig.getParticle().toString() + "," + playerConfig.getType().getCfgId() + "," +
+						                          playerConfig.getLength().getCfgId() + "," + playerConfig.getHeight().getCfgId() + "," +
 						                          playerConfig.getColour());
 				}
 				catch (NullPointerException e)
