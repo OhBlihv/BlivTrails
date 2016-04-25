@@ -44,7 +44,7 @@ public enum OptionType
 
 	public boolean isOptionActive(OptionType activeCfgId)
 	{
-		return activeCfgId == this;
+		return activeCfgId.getCfgId() == this.getCfgId();
 	}
 
 	public static OptionType parseTypeString(String typeString)
