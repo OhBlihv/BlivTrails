@@ -26,6 +26,16 @@ public enum OptionType
 	HEIGHT_WAIST("height.waist", 1),
 	HEIGHT_HALO("height.halo", 2),
 
+	DEFAULT_X_VARIATION("trails.defaults.type.random.x-variation", 0),
+	DEFAULT_Y_VARIATION("trails.defaults.type.random.y-variation", 1),
+	DEFAULT_Z_VARIATION("trails.defaults.type.random.z-variation", 2),
+
+	DEFAULT_SPRAY_VARIATION("trails.defaults.type.dynamic.spray-variation", 3),
+
+	DEFAULT_FEET_LOCATION("trails.defaults.height.feet-location", 4),
+	DEFAULT_WAIST_LOCATION("trails.defaults.height.waist-location", 5),
+	DEFAULT_HALO_LOCATION("trails.defaults.height.halo-location", 6),
+
 	NONE("", 0);
 
 	//Colour?

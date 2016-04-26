@@ -16,12 +16,12 @@ import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.kitteh.vanish.VanishPlugin;
 
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -142,15 +142,13 @@ public class TrailManager
 		 * option[6] = height.halo-location
 		 */
 		option = new double[7];
-		option[0] = cfg.getDouble("trails.defaults.type.random.x-variation");
-		option[1] = cfg.getDouble("trails.defaults.type.random.y-variation");
-		option[2] = cfg.getDouble("trails.defaults.type.random.z-variation");
-
-		option[3] = cfg.getDouble("trails.defaults.type.dynamic.spray-variation");
-
-		option[4] = cfg.getDouble("trails.defaults.height.feet-location");
-		option[5] = cfg.getDouble("trails.defaults.height.waist-location");
-		option[6] = cfg.getDouble("trails.defaults.height.halo-location");
+		for(OptionType optionType : EnumSet.of(
+			OptionType.DEFAULT_X_VARIATION, OptionType.DEFAULT_Y_VARIATION, OptionType.DEFAULT_Z_VARIATION,
+			OptionType.DEFAULT_SPRAY_VARIATION,
+			OptionType.DEFAULT_FEET_LOCATION, OptionType.DEFAULT_WAIST_LOCATION, OptionType.DEFAULT_HALO_LOCATION))
+		{
+			option[optionType.getCfgId()] = cfg.getDouble(optionType.getConfigName());
+		}
 		
 		BUtil.logInfo("Finished Loading Defaults!");
 	}
@@ -201,7 +199,11 @@ public class TrailManager
 		else
 		{
 			/*
-			 * dataSplit[0] == Particle String dataSplit[1] == Type dataSplit[2] == Length dataSplit[3] == Height dataSplit[4] == Colour 
+			 * dataSplit[0] == Particle String
+			 * dataSplit[1] == Type
+			 * dataSplit[2] == Length
+			 * dataSplit[3] == Height
+			 * dataSplit[4] == Colour
 			 */
 			String data = flatFileStorage.loadEntry(player.getUniqueId().toString());
 
@@ -213,12 +215,12 @@ public class TrailManager
 			try
 			{
 				String[] dataSplit = data.split("[,]");
-				ParticleEffect particleEff = ParticleEffect.fromName(dataSplit[0]));
+				ParticleEffect particleEff = ParticleEffect.fromName(dataSplit[0]);
 				if(particleEff == ParticleEffect.FOOTSTEP)
 				{
 					return;
 				}
-				
+
 				trailMap.put(player.getUniqueId(),
 				             new PlayerConfig(player.getUniqueId(), particleEff,
 				                              OptionType.parseTypeInt(Integer.parseInt(dataSplit[1])),
