@@ -26,15 +26,10 @@ public class FlatFileStorage extends FlatFile
 			@Override
 			public void run()
 			{
-				save();
+				saveToFile();
 			}
 
 		}, 18000L, 18000L); //Save every 15 minutes
-	}
-
-	public void save()
-	{
-		saveToFile();
 	}
 
 	@Override

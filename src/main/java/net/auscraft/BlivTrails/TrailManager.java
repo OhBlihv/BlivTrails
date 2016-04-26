@@ -451,7 +451,11 @@ public class TrailManager
 
 	public static String removePlayer(UUID uuid)
 	{
-		PlayerConfig playerConfig = trailMap.remove(uuid);
+		return removePlayer(trailMap.remove(uuid));
+	}
+
+	public static String removePlayer(PlayerConfig playerConfig)
+	{
 		if (playerConfig != null)
 		{
 			if(playerConfig.isScheduled())
@@ -462,19 +466,11 @@ public class TrailManager
 
 			if (flatFileStorage == null)
 			{
-				scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new RemoveRunnable(uuid));
+				scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new RemoveRunnable(playerConfig.getUuid()));
 			}
 			else
 			{
-				try
-				{
-					flatFileStorage.removeEntry(uuid.toString());
-					flatFileStorage.saveToFile();
-				}
-				catch (NullPointerException e)
-				{
-					// No data
-				}
+				flatFileStorage.removeEntry(playerConfig.getUuid().toString());
 			}
 		}
 		else
