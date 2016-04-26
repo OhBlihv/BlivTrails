@@ -73,6 +73,8 @@ public class TrailManager
 	@Getter
 	private static float trailLength;
 
+	private static boolean useTrailNameColour = true;
+
 	private static BukkitScheduler scheduler;
 
 	/*
@@ -101,6 +103,8 @@ public class TrailManager
 		msg = Messages.getInstance();
 
 		trailLength = cfg.getFloat("trails.scheduler.trail-length");
+
+		useTrailNameColour = FlatFile.getInstance().getBoolean("misc.trail-name-colour");
 
 		Object saveLoc = BlivTrails.getSave();
 		if (!(saveLoc instanceof JdbcPooledConnectionSource))
@@ -181,8 +185,7 @@ public class TrailManager
 		// Trail for the first time
 		String trailName = particleDefaults.getDisplayName();
 
-		//TODO: Include global variable
-		if (!FlatFile.getInstance().getBoolean("misc.trail-name-colour"))
+		if (!useTrailNameColour)
 		{
 			trailName = BUtil.stripColours(trailName);
 		}
