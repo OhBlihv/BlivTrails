@@ -40,6 +40,8 @@ public enum OptionType
 
 	//Colour?
 
+	public static final OptionType[] values = values();
+
 	@Getter
 	private String configName;
 
@@ -82,7 +84,7 @@ public enum OptionType
 			baseValue = 1; //HEIGHT_FEET = 0, so it is functionally identical to HEIGHT
 		}
 
-		return values()[baseValue + optionType.ordinal() + valueInt];
+		return values[baseValue + optionType.ordinal() + valueInt];
 	}
 
 	public static OptionType parseLengthString(String lengthString)
