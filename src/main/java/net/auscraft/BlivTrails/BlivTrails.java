@@ -211,28 +211,29 @@ public class BlivTrails extends JavaPlugin
 
 				for(Map.Entry<UUID, PlayerConfig> entry : TrailManager.getTrailMap().entrySet())
 				{
-					if(!entry.getValue().isScheduled())
+					PlayerConfig playerConfig = entry.getValue();
+					if(!playerConfig.isScheduled())
 					{
 						continue;
 					}
 
-					taskId = entry.getValue().getTaskId();
+					taskId = playerConfig.getTaskId();
 
 					//If trail is active for the current player
 					//This is a double-check, yes.
 					if (scheduler.isQueued(taskId) || scheduler.isCurrentlyRunning(taskId))
 					{
-						resultingTime = entry.getValue().getTrailTime() - trailTimeoutCheckTime;
+						resultingTime = playerConfig.getTrailTime() - trailTimeoutCheckTime;
 						if (resultingTime > 0)
 						{
-							entry.getValue().setTrailTime(resultingTime);
+							playerConfig.setTrailTime(resultingTime);
 							continue;
 						}
 
 						scheduler.cancelTask(taskId);
 					}
 
-					entry.getValue().setTaskId(-1); // TaskID is stale and not in use anymore. Cleanup.
+					playerConfig.setTaskId(-1); // TaskID is stale and not in use anymore. Cleanup.
 				}
 			}
 		}, 20L, trailTimeoutCheckTime * 20L);
