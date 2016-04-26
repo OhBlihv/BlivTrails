@@ -223,9 +223,9 @@ public class TrailManager
 
 				trailMap.put(player.getUniqueId(),
 				             new PlayerConfig(player.getUniqueId(), particleEff,
-				                              OptionType.parseTypeInt(Integer.parseInt(dataSplit[1])),
-				                              OptionType.parseHeightInt(Integer.parseInt(dataSplit[2])),
-				                              OptionType.parseLengthInt(Integer.parseInt(dataSplit[3])),
+				                              Integer.parseInt(dataSplit[1]),
+				                              Integer.parseInt(dataSplit[2]),
+				                              Integer.parseInt(dataSplit[3]),
 				                              Integer.parseInt(dataSplit[4])));
 			}
 			catch(NumberFormatException e)

@@ -65,6 +65,18 @@ public class PlayerConfig
 		this.colour = colour;
 	}
 
+	/*
+	 * Convert from int to OptionType here instead of elsewhere to improve code reuse
+	 */
+	public PlayerConfig(UUID uuid, ParticleEffect particle, int type, int length, int height, int colour)
+	{
+		this(uuid, particle,
+			OptionType.getOptionType(OptionType.TYPE, type),
+			OptionType.getOptionType(OptionType.LENGTH, length),
+			OptionType.getOptionType(OptionType.HEIGHT, height),
+			colour);
+	}
+
 	public PlayerConfig(UUID uuid)
 	{
 		this.uuid = uuid; //Other defaults are already set

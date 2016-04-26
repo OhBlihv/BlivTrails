@@ -2,7 +2,6 @@ package net.auscraft.BlivTrails.runnables;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import de.myzelyam.api.vanish.VanishAPI;
-import net.auscraft.BlivTrails.OptionType;
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailManager;
 import net.auscraft.BlivTrails.storage.ParticleData;
@@ -62,9 +61,9 @@ public class LoadRunnable extends MySQLRunnable
 		}
 
 		PlayerConfig playerConfig =  new PlayerConfig(uuid, particleEff,
-		                                              OptionType.parseTypeInt(particleData.getType()),
-		                                              OptionType.parseLengthInt(particleData.getLength()),
-		                                              OptionType.parseHeightInt(particleData.getHeight()),
+		                                              particleData.getType(),
+		                                              particleData.getLength(),
+		                                              particleData.getHeight(),
 		                                              particleData.getColour());
 
 		TrailManager.getTrailMap().put(uuid, playerConfig);

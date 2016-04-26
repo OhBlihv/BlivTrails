@@ -74,19 +74,15 @@ public enum OptionType
 		}
 	}
 
-	public static OptionType parseTypeInt(int typeInt)
+	public static OptionType getOptionType(OptionType optionType, int valueInt)
 	{
-		switch(typeInt)
+		int baseValue = 0;
+		if(optionType == HEIGHT)
 		{
-			case 1:
-				return TYPE_TRACE;
-			case 2:
-				return TYPE_RANDOM;
-			case 3:
-				return TYPE_DYNAMIC;
-			default:
-				return NONE; //Should be invalid
+			baseValue = 1; //HEIGHT_FEET = 0, so it is functionally identical to HEIGHT
 		}
+
+		return values()[baseValue + optionType.ordinal() + valueInt];
 	}
 
 	public static OptionType parseLengthString(String lengthString)
@@ -106,21 +102,6 @@ public enum OptionType
 		}
 	}
 
-	public static OptionType parseLengthInt(int lengthInt)
-	{
-		switch(lengthInt)
-		{
-			case 1:
-				return LENGTH_SHORT;
-			case 2:
-				return LENGTH_MEDIUM;
-			case 3:
-				return LENGTH_LONG;
-			default:
-				return NONE; //Should be invalid
-		}
-	}
-
 	public static OptionType parseHeightString(String heightString)
 	{
 		if(heightString == null || heightString.isEmpty()) return HEIGHT_FEET;
@@ -132,21 +113,6 @@ public enum OptionType
 			case "waist":
 				return HEIGHT_WAIST;
 			case "halo":
-				return HEIGHT_HALO;
-			default:
-				return NONE; //Should be invalid
-		}
-	}
-
-	public static OptionType parseHeightInt(int heightInt)
-	{
-		switch(heightInt)
-		{
-			case 0:
-				return HEIGHT_FEET;
-			case 1:
-				return HEIGHT_WAIST;
-			case 2:
 				return HEIGHT_HALO;
 			default:
 				return NONE; //Should be invalid
