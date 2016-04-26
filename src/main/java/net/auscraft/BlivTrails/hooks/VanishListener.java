@@ -18,12 +18,9 @@ public abstract class VanishListener
 		if (playerConfig != null)
 		{
 			playerConfig.setVanished(isVanishing);
-			if (isVanishing)
+			if (isVanishing && playerConfig.isScheduled())
 			{
-				if(playerConfig.isScheduled())
-				{
-					Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
-				}
+				Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
 			}
 		}
 	}

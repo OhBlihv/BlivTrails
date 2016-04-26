@@ -58,7 +58,7 @@ public class ItemListener implements Listener
 
 			Player player = event.getPlayer();
 
-			if (player.getItemInHand().getType() == guiItemMaterial && player.getItemInHand().getItemMeta().getDisplayName().equals(guiItemDisplayname))
+			if (event.getItem().getType() == guiItemMaterial && event.getItem().getItemMeta().getDisplayName().equals(guiItemDisplayname))
 			{
 				event.setCancelled(true);
 				GUIListener.mainMenu(player);
