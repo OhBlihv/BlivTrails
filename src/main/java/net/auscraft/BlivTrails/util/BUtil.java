@@ -119,18 +119,21 @@ public class BUtil
 		}
 		return lines;
 	}
+
+	private static final Pattern 	FORMATTING_CODE_PATTERN = Pattern.compile("(&|§|Â§)[0-9a-fA-Fk-rK-R]");
 	
 	public static String stripColours(String toFix)
 	{
-		return Pattern.compile("[&](.)").matcher(toFix).replaceAll("");
+		return FORMATTING_CODE_PATTERN.matcher(toFix).replaceAll("");
 	}
 
 	public static String translateConsoleColours(String toFix)
 	{
 		if(!useConsoleColours)
 		{
-			return Pattern.compile("(?i)(&|Â§)([a-f0-9k-r])").matcher(toFix).replaceAll("");
+			return FORMATTING_CODE_PATTERN.matcher(toFix).replaceAll("");
 		}
+
 		toFix = Pattern.compile("(?i)(&|Â§)([a])").matcher(toFix).replaceAll("\u001B[32m\u001B[1m"); // Light Green
 		toFix = Pattern.compile("(?i)(&|Â§)([b])").matcher(toFix).replaceAll("\u001B[36m"); // Aqua
 		toFix = Pattern.compile("(?i)(&|Â§)([c])").matcher(toFix).replaceAll("\u001B[31m"); // Red
@@ -159,7 +162,7 @@ public class BUtil
 	{
 		// Convert every single colour code and formatting code, excluding
 		// 'magic' (&k), capitals and lowercase are converted.
-		return colourPattern.matcher(toFix).replaceAll("\u00A7$1");
+		return colourPattern.matcher(toFix).replaceAll("§$1");
 	}
 
 	public static List<String> translateColours(List<String> lines)
