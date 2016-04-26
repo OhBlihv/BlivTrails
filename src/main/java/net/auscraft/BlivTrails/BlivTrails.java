@@ -17,7 +17,6 @@ import net.auscraft.BlivTrails.storage.ParticleData;
 import net.auscraft.BlivTrails.storage.ParticleStorage;
 import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -26,8 +25,6 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-
-import static net.auscraft.BlivTrails.TrailManager.loadTrail;
 
 public class BlivTrails extends JavaPlugin
 {
@@ -98,13 +95,6 @@ public class BlivTrails extends JavaPlugin
 		{
 			trailTimeoutCheckTime = cfg.getInt("trails.scheduler.check-time");
 			doTrailTimeouts();
-		}
-
-		//Load all players online.
-		//Useful when unloading/reloading this plugin on a live server
-		for(Player player : BUtil.getOnlinePlayers())
-		{
-			loadTrail(player);
 		}
 	}
 
