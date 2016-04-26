@@ -16,6 +16,7 @@ import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitScheduler;
@@ -212,19 +213,12 @@ public class TrailManager
 			try
 			{
 				String[] dataSplit = data.split("[,]");
-				ParticleEffect particleEff = null;
-				for (ParticleEffect pEff : ParticleEffect.values())
+				ParticleEffect particleEff = ParticleEffect.fromName(dataSplit[0]));
+				if(particleEff == ParticleEffect.FOOTSTEP)
 				{
-					if (pEff.toString().equals(dataSplit[0]))
-					{
-						if (pEff.equals(ParticleEffect.FOOTSTEP))
-						{
-							return;
-						}
-						particleEff = pEff;
-						break;
-					}
+					return;
 				}
+				
 				trailMap.put(player.getUniqueId(),
 				             new PlayerConfig(player.getUniqueId(), particleEff,
 				                              OptionType.parseTypeInt(Integer.parseInt(dataSplit[1])),
