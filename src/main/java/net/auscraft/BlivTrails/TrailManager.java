@@ -346,7 +346,7 @@ public class TrailManager
 		if (particleEff == ParticleEffect.BARRIER)
 		{
 			// Barriers don't support anything. Give up. Leave everything default
-			return "§aTrail Successfully Applied";
+			return msg.getString("messages.generic.force-add-trail").replace("%player%", Bukkit.getOfflinePlayer(uuid).getName());
 		}
 
 		if (particleDefaults != null) // Use Trail Defaults
@@ -356,97 +356,95 @@ public class TrailManager
 			height = particleDefaults.getHeight();
 			colour = particleDefaults.getColour();
 		}
-		else
+
+		if(typeString != null && !typeString.isEmpty())
 		{
-			if(typeString != null && !typeString.isEmpty())
+			type = OptionType.parseTypeString(typeString);
+			if(type == OptionType.NONE)
 			{
-				type = OptionType.parseTypeString(typeString);
-				if(type == OptionType.NONE)
-				{
-					return "§cInvalid Type | (trace, random, dynamic)";
-				}
+				return "§cInvalid Type | (trace, random, dynamic)";
 			}
-			if (lengthString != null)
+		}
+		if (lengthString != null)
+		{
+			length = OptionType.parseLengthString(lengthString);
+			if(length == OptionType.NONE)
 			{
-				length = OptionType.parseLengthString(lengthString);
-				if(length == OptionType.NONE)
-				{
-					return "§cInvalid Length | (short, medium, long)";
-				}
+				return "§cInvalid Length | (short, medium, long)";
 			}
-			if (heightString != null)
+		}
+		if (heightString != null)
+		{
+			height = OptionType.parseHeightString(heightString);
+			if(height == OptionType.NONE)
 			{
-				height = OptionType.parseHeightString(heightString);
-				if(height == OptionType.NONE)
-				{
-					return "§cInvalid Height | (feet, waist, halo)";
-				}
+				return "§cInvalid Height | (feet, waist, halo)";
 			}
-			if (colourString != null)
+		}
+		if (colourString != null)
+		{
+			switch (colourString.toLowerCase())
 			{
-				switch (colourString.toLowerCase())
-				{
-					case "white":
-						colour = 0;
-						break;
-					case "red":
-						colour = 1;
-						break;
-					case "dark green":
-						colour = 2;
-						break;
-					case "brown":
-						colour = 3;
-						break;
-					case "dark blue":
-						colour = 4;
-						break;
-					case "purple":
-						colour = 5;
-						break;
-					case "cyan":
-						colour = 6;
-						break;
-					case "light grey":
-					case "light gray":
-						colour = 7;
-						break;
-					case "grey":
-					case "gray":
-						colour = 8;
-						break;
-					case "pink":
-						colour = 9;
-						break;
-					case "lime":
-						colour = 10;
-						break;
-					case "yellow":
-						colour = 11;
-						break;
-					case "light blue":
-						colour = 12;
-						break;
-					case "magenta":
-						colour = 13;
-						break;
-					case "orange":
-						colour = 14;
-						break;
-					case "black":
-						colour = 15;
-						break;
-					case "random":
-						colour = 16;
-						break;
-					default:
-						return "§cInvalid Colour. See /trailadmin colours | for colours";
-				}
+				case "white":
+					colour = 0;
+					break;
+				case "red":
+					colour = 1;
+					break;
+				case "dark green":
+					colour = 2;
+					break;
+				case "brown":
+					colour = 3;
+					break;
+				case "dark blue":
+					colour = 4;
+					break;
+				case "purple":
+					colour = 5;
+					break;
+				case "cyan":
+					colour = 6;
+					break;
+				case "light grey":
+				case "light gray":
+					colour = 7;
+					break;
+				case "grey":
+				case "gray":
+					colour = 8;
+					break;
+				case "pink":
+					colour = 9;
+					break;
+				case "lime":
+					colour = 10;
+					break;
+				case "yellow":
+					colour = 11;
+					break;
+				case "light blue":
+					colour = 12;
+					break;
+				case "magenta":
+					colour = 13;
+					break;
+				case "orange":
+					colour = 14;
+					break;
+				case "black":
+					colour = 15;
+					break;
+				case "random":
+					colour = 16;
+					break;
+				default:
+					return "§cInvalid Colour. See /trailadmin colours | for colours";
 			}
 		}
 
 		trailMap.put(uuid, new PlayerConfig(uuid, particleEff, type, length, height, colour));
-		return "§aTrail Successfully Applied";
+		return msg.getString("messages.generic.force-add-trail").replace("%player%", Bukkit.getOfflinePlayer(uuid).getName());
 	}
 
 	public static String removePlayer(UUID uuid)
@@ -474,7 +472,7 @@ public class TrailManager
 				{
 					flatFileStorage.removeEntry(playerConfig.getUuid().toString());
 				}
-				return msg.getString("messages.generic.trail-removed");
+				return msg.getString("messages.generic.force-remove-receive".replace("%player%", Bukkit.getOfflinePlayer(playerConfig.getUuid()).getName()));
 			}
 			catch(Exception e)
 			{

@@ -116,7 +116,7 @@ public class TrailCommand implements CommandExecutor
 						//Syntax falls through
 					}
 
-					BUtil.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> <colour>]");
+					BUtil.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> [<colour>]]");
 					return true;
 				}
 				else if (args[0].equalsIgnoreCase("reload"))
