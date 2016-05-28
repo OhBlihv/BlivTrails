@@ -4,6 +4,7 @@ import com.darkblade12.ParticleEffect.ParticleEffect;
 import com.darkblade12.ParticleEffect.ParticleEffect.NoteColor;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleColor;
 import com.darkblade12.ParticleEffect.ParticleEffect.ParticleProperty;
+import lombok.RequiredArgsConstructor;
 import net.auscraft.BlivTrails.BlivTrails;
 import net.auscraft.BlivTrails.OptionType;
 import net.auscraft.BlivTrails.PlayerConfig;
@@ -21,19 +22,13 @@ import static net.auscraft.BlivTrails.BlivTrails.rand;
 public class TrailRunnable implements Runnable
 {
 
+	@RequiredArgsConstructor
 	private static class DisplayColourableRunnable implements Runnable
 	{
 
-		ParticleEffect particle;
-		ParticleColor data;
-		Location loc;
-
-		public DisplayColourableRunnable(ParticleEffect particle, ParticleColor data, Location loc)
-		{
-			this.particle = particle;
-			this.data = data;
-			this.loc = loc;
-		}
+		final ParticleEffect particle;
+		final ParticleColor data;
+		final Location loc;
 
 		public void run()
 		{
@@ -42,25 +37,16 @@ public class TrailRunnable implements Runnable
 		}
 	}
 
+	@RequiredArgsConstructor
 	private static class DisplayRegularRunnable implements Runnable
 	{
 
-		ParticleEffect particle;
-		float xOff;
-		float yOff;
-		float zOff;
-		float speed;
-		Location loc;
-
-		public DisplayRegularRunnable(ParticleEffect particle, float xOff, float yOff, float zOff, float speed, Location loc)
-		{
-			this.particle = particle;
-			this.xOff = xOff;
-			this.yOff = yOff;
-			this.zOff = zOff;
-			this.speed = speed;
-			this.loc = loc;
-		}
+		final ParticleEffect particle;
+		final float xOff;
+		final float yOff;
+		final float zOff;
+		final float speed;
+		final Location loc;
 
 		public void run()
 		{
@@ -125,7 +111,7 @@ public class TrailRunnable implements Runnable
 		ParticleDefaultStorage particleStorage = TrailDefaults.getDefaults(particle);
 
 		// Height Global/Trail-Specific Overrides
-		// If there isnt trail-given override, use the global value
+		// If there isn't trail-given override, use the global value
 		if (particleStorage.getFeetLocation() != 0D)
 		{
 			heightCfg[0] = particleStorage.getFeetLocation();
