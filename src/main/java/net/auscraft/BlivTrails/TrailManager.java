@@ -472,7 +472,7 @@ public class TrailManager
 				{
 					flatFileStorage.removeEntry(playerConfig.getUuid().toString());
 				}
-				return msg.getString("messages.generic.force-remove-receive".replace("%player%", Bukkit.getOfflinePlayer(playerConfig.getUuid()).getName()));
+				return msg.getString("messages.generic.force-remove-receive").replace("%player%", Bukkit.getOfflinePlayer(playerConfig.getUuid()).getName());
 			}
 			catch(Exception e)
 			{
