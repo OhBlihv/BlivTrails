@@ -23,10 +23,10 @@ public class EssentialsListener implements Listener
 		// if(cmd.contains("^(evanish|vanish|ev|essentials:vanish)$"))
 		if (cmd.equals("/v") || cmd.equals("/evanish") || cmd.equals("/vanish") || cmd.equals("/ev") || cmd.equals("/essentials:vanish"))
 		{
-			if (TrailManager.getTrailMap().containsKey(event.getPlayer().getUniqueId()))
+			PlayerConfig playerConfig;
+			if ((playerConfig = TrailManager.getPlayerConfig(event.getPlayer().getUniqueId())) != null)
 			{
-				PlayerConfig pcfg = TrailManager.getTrailMap().get(event.getPlayer().getUniqueId());
-				pcfg.setVanished(!pcfg.isVanished());
+				playerConfig.setVanished(!playerConfig.isVanished());
 			}
 		}
 	}

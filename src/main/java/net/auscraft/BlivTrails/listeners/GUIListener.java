@@ -37,7 +37,7 @@ public class GUIListener implements Listener
 	private static Messages msg = null;
 
 	//Cache regularly used ItemStacks instead of using a method-call every time
-	private static ItemStack    BACK_BUTTON = null;
+	private static ItemStack BACK_BUTTON = null;
 
 	public static void reload()
 	{
@@ -89,7 +89,7 @@ public class GUIListener implements Listener
 
 			if (event.getRawSlot() == cfg.getInt("trails.remove-trail.position")) //Remove Trail
 			{
-				if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
+				if (TrailManager.getPlayerConfig(player.getUniqueId()) != null)
 				{
 					/*TrailManager.getTrailMap().put(player.getUniqueId(), new PlayerConfig(player.getUniqueId(), ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
 					int taskId = TrailManager.getTaskMap().remove(player.getUniqueId());
@@ -114,7 +114,7 @@ public class GUIListener implements Listener
 			{
 				if (player.hasPermission("blivtrails.options"))
 				{
-					PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+					PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 					if(playerConfig == null || playerConfig.getParticle() == null || playerConfig.getParticle() == ParticleEffect.FOOTSTEP)
 					{
 						BUtil.printPlain(event.getWhoClicked(), msg.getString("messages.error.no-trail"));
@@ -172,7 +172,7 @@ public class GUIListener implements Listener
 			}
 
 			Player player = (Player) event.getWhoClicked();
-			PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+			PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 
 			if (event.getRawSlot() == cfg.getInt("menu.options.config.type.position"))
 			{
@@ -244,7 +244,7 @@ public class GUIListener implements Listener
 			}
 
 			Player player = (Player) event.getWhoClicked();
-			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+			PlayerConfig pcfg = TrailManager.getPlayerConfig(player.getUniqueId());
 
 			//Here come the hardcoded options positions
 			if (event.getRawSlot() == 3)
@@ -305,7 +305,7 @@ public class GUIListener implements Listener
 			}
 
 			Player player = (Player) event.getWhoClicked();
-			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+			PlayerConfig pcfg = TrailManager.getPlayerConfig(player.getUniqueId());
 
 			if (event.getRawSlot() == 3)
 			{
@@ -358,7 +358,7 @@ public class GUIListener implements Listener
 			}
 
 			Player player = (Player) event.getWhoClicked();
-			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+			PlayerConfig pcfg = TrailManager.getPlayerConfig(player.getUniqueId());
 
 			if (event.getRawSlot() == 3)
 			{
@@ -411,7 +411,7 @@ public class GUIListener implements Listener
 			}
 
 			Player player = (Player) event.getWhoClicked();
-			PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+			PlayerConfig pcfg = TrailManager.getPlayerConfig(player.getUniqueId());
 
 			if (event.getRawSlot() == cfg.getInt("menu.options.back-button.position"))
 			{
@@ -466,13 +466,9 @@ public class GUIListener implements Listener
 	public static void mainMenu(Player player)
 	{
 		PlayerConfig pcfg;
-		if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
+		if ((pcfg = TrailManager.getPlayerConfig(player.getUniqueId())) == null)
 		{
-			pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
-		}
-		else
-		// Use a temporary/blank PlayerConfig
-		{
+			// Use a temporary/blank PlayerConfig
 			pcfg = new PlayerConfig(player.getUniqueId());
 		}
 
@@ -521,8 +517,8 @@ public class GUIListener implements Listener
 	 */
 	public static boolean optionsMenu(Player player)
 	{
-		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
-		if(pcfg == null)
+		PlayerConfig pcfg;
+		if((pcfg = TrailManager.getPlayerConfig(player.getUniqueId())) == null)
 		{
 			return false;
 		}
@@ -615,7 +611,7 @@ public class GUIListener implements Listener
 
 	public static void optionsMenuType(Player player)
 	{
-		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.type"));
 
@@ -632,7 +628,7 @@ public class GUIListener implements Listener
 
 	public static void optionsMenuLength(Player player)
 	{
-		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.length"));
 
@@ -650,7 +646,7 @@ public class GUIListener implements Listener
 
 	public static void optionsMenuHeight(Player player)
 	{
-		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.size"), msg.getString("messages.titles.height"));
 
@@ -674,7 +670,7 @@ public class GUIListener implements Listener
 
 	public static void optionsMenuColour(Player player)
 	{
-		PlayerConfig pcfg = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 		Inventory inventory = Bukkit.createInventory(null, cfg.getInt("menu.options.config.colour.size"), msg.getString("messages.titles.colours"));
 
 		ConfigurationSection colourPositionSection = cfg.getConfigurationSection("menu.options.config.colour");
@@ -690,7 +686,7 @@ public class GUIListener implements Listener
 			if (cfg.getInt("menu.options.config.colour." + colourCfgName[colourId]) != -1)
 			{
 				setInventoryItem(inventory, cfg.getInt("menu.options.config.colour." + colourCfgName[colourId]),
-				                 optionsColourItem(player, pcfg.getColour() == colourId, colourId, pcfg.getParticle()));
+				                 optionsColourItem(player, playerConfig.getColour() == colourId, colourId, playerConfig.getParticle()));
 			}
 		}
 		setInventoryItem(inventory, cfg.getInt("menu.options.config.colour.back-button-pos"), BACK_BUTTON);

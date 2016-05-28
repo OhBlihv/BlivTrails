@@ -14,7 +14,7 @@ public abstract class VanishListener
 
 	public void onVanishEvent(Player player, boolean isVanishing)
 	{
-		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 		if (playerConfig != null)
 		{
 			playerConfig.setVanished(isVanishing);
