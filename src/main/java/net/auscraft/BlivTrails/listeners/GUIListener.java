@@ -497,7 +497,7 @@ public class GUIListener implements Listener
 		{
 			setInventoryItem(inventory, cfg.getInt("trails.options-menu.position"),
 			                 menuItem(cfg.getString("trails.options-menu.material"), BUtil.translateColours(cfg.getString("trails.options-menu.name")),
-			                          BUtil.translateColours(cfg.getStringList("trails.options-menu.lore")), player.hasPermission("blivtrails.options-menu"), false));
+			                          BUtil.translateColours(cfg.getStringList("trails.options-menu.lore")), player.hasPermission("blivtrails.options"), false));
 		}
 
 		addCustomInventoryItems(inventory, "MAIN");
