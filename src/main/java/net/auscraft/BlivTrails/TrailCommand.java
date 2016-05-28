@@ -77,7 +77,11 @@ public class TrailCommand implements CommandExecutor
 						return true;
 					}
 
-					sender.sendMessage(TrailManager.removePlayer(offlinePlayer.getUniqueId()));
+					String message = TrailManager.removePlayer(offlinePlayer.getUniqueId());
+					if(message != null && !message.isEmpty())
+					{
+						sender.sendMessage(message);
+					}
 				}
 				else if (args[0].equalsIgnoreCase("add"))
 				{
@@ -98,10 +102,15 @@ public class TrailCommand implements CommandExecutor
 							BUtil.printPlain(sender, TrailManager.addTrail(offlinePlayer.getUniqueId(), particle, null, null, null, null));
 							return true;
 						}
-						else if (args.length >= 7)
+						else if (args.length >= 6)
 						{
 							BUtil.printPlain(sender,
-							                 BUtil.translateColours(TrailManager.addTrail(offlinePlayer.getUniqueId(), particle, args[3], args[4], args[5], args[6])));
+							                 BUtil.translateColours(TrailManager.addTrail(offlinePlayer.getUniqueId(),
+							                                                              particle,
+							                                                              args[3],
+							                                                              args[4],
+							                                                              args[5],
+							                                                              args.length >= 7 ? args[6] : null)));
 							return true;
 						}
 						//Syntax falls through
