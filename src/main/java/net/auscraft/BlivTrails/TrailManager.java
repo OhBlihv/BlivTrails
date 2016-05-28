@@ -458,26 +458,33 @@ public class TrailManager
 	{
 		if (playerConfig != null)
 		{
-			if(playerConfig.isScheduled())
+			try
 			{
-				Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
-				playerConfig.setTaskId(-1);
-			}
+				if(playerConfig.isScheduled())
+				{
+					Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
+					playerConfig.setTaskId(-1);
+				}
 
-			if (flatFileStorage == null)
-			{
-				scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new RemoveRunnable(playerConfig.getUuid()));
+				if (flatFileStorage == null)
+				{
+					scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new RemoveRunnable(playerConfig.getUuid()));
+				}
+				else
+				{
+					flatFileStorage.removeEntry(playerConfig.getUuid().toString());
+				}
+				return msg.getString("messages.generic.trail-removed");
 			}
-			else
+			catch(Exception e)
 			{
-				flatFileStorage.removeEntry(playerConfig.getUuid().toString());
+				return msg.getString("messages.error.unexpected");
 			}
 		}
 		else
 		{
 			return msg.getString("messages.error.player-no-trail");
 		}
-		return msg.getString("messages.error.unexpected");
 	}
 
 	public boolean isVanished(Player player)
