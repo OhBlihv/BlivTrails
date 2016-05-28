@@ -22,7 +22,7 @@ public class RemoveRunnable extends MySQLRunnable
 	@Override
 	public void run()
 	{
-		PlayerConfig playerConfig = TrailManager.getTrailMap().get(uuid);
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(uuid);
 		if(playerConfig == null)
 		{
 			return;

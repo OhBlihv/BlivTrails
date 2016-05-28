@@ -21,6 +21,7 @@ import org.bukkit.plugin.IllegalPluginAccessException;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.kitteh.vanish.VanishPlugin;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.UUID;
@@ -56,7 +57,6 @@ public class TrailManager
 	        //1.9 Trails
 			ParticleEffect.END_ROD, ParticleEffect.DRAGON_BREATH, ParticleEffect.DAMAGE_INDICATOR, ParticleEffect.SWEEP_ATTACK};
 
-	@Getter
 	private static ConcurrentHashMap<UUID, PlayerConfig> trailMap = new ConcurrentHashMap<>();
 
 	private static FlatFileStorage flatFileStorage = null;
@@ -167,7 +167,7 @@ public class TrailManager
 			if(playerConfig.isScheduled())
 			{
 				Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
-				playerConfig.setTaskId(-1);
+				playerConfig.resetTaskId();
 			}
 
 			playerConfig.setType(particleDefaults.getType());
@@ -179,7 +179,7 @@ public class TrailManager
 		{
 			playerConfig = new PlayerConfig(uuid, particle, particleDefaults.getType(), particleDefaults.getLength(),
 			                                particleDefaults.getHeight(), particleDefaults.getColour());
-			trailMap.put(uuid, playerConfig);
+			addPlayerConfig(uuid, playerConfig);
 		}
 
 		// Trail for the first time
@@ -463,7 +463,7 @@ public class TrailManager
 				if(playerConfig.isScheduled())
 				{
 					Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
-					playerConfig.setTaskId(-1);
+					playerConfig.resetTaskId();
 				}
 
 				if (flatFileStorage == null)
@@ -487,7 +487,7 @@ public class TrailManager
 		}
 	}
 
-	public boolean isVanished(Player player)
+	public static boolean isVanished(Player player)
 	{
 		boolean isVanished = false;
 		switch(vanishHook)
@@ -517,6 +517,26 @@ public class TrailManager
 		}
 
 		return isVanished;
+	}
+
+	public static void addPlayerConfig(UUID uuid, PlayerConfig playerConfig)
+	{
+		trailMap.put(uuid, playerConfig);
+	}
+
+	public static PlayerConfig getPlayerConfig(UUID uuid)
+	{
+		return trailMap.get(uuid);
+	}
+
+	public static void removePlayerConfig(UUID uuid)
+	{
+		trailMap.remove(uuid);
+	}
+
+	public static Collection<PlayerConfig> getPlayerConfigs()
+	{
+		return trailMap.values();
 	}
 
 }

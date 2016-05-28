@@ -114,4 +114,9 @@ public class PlayerConfig
 		return trailTime > 0;
 	}
 
+	public void resetTaskId()
+	{
+		taskId = -1;
+	}
+
 }

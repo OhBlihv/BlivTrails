@@ -66,7 +66,7 @@ public class LoadRunnable extends MySQLRunnable
 		                                              particleData.getHeight(),
 		                                              particleData.getColour());
 
-		TrailManager.getTrailMap().put(uuid, playerConfig);
+		TrailManager.addPlayerConfig(uuid, playerConfig);
 
 		if (TrailManager.hasVanishHook())
 		{
@@ -93,6 +93,7 @@ public class LoadRunnable extends MySQLRunnable
 				if(playerConfig.isScheduled())
 				{
 					Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
+					playerConfig.resetTaskId();
 				}
 			}
 		}

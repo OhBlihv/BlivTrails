@@ -67,16 +67,17 @@ public class TrailListener implements Listener
 	public void onPlayerLeave(PlayerQuitEvent event)
 	{
 		Player player = event.getPlayer();
-		if (TrailManager.getTrailMap().containsKey(player.getUniqueId()))
+
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
+		if (playerConfig != null)
 		{
 			saveTrail(player);
 
-			PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
 			if(playerConfig.isScheduled())
 			{
 				Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
 			}
-			TrailManager.getTrailMap().remove(player.getUniqueId());
+			TrailManager.removePlayer(player.getUniqueId());
 		}
 	}
 
@@ -90,7 +91,7 @@ public class TrailListener implements Listener
 		}
 
 		UUID uuid = event.getPlayer().getUniqueId();
-		PlayerConfig playerConfig = TrailManager.getTrailMap().get(uuid);
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(uuid);
 		if (playerConfig != null)
 		{
 			if (TrailManager.hasVanishHook() && playerConfig.isVanished())
@@ -129,7 +130,7 @@ public class TrailListener implements Listener
 				e.printStackTrace();
 
 				//Remove the PlayerConfig, since it is now invalid.
-				TrailManager.getTrailMap().remove(event.getPlayer().getUniqueId());
+				TrailManager.removePlayer(uuid);
 				return;
 			}
 

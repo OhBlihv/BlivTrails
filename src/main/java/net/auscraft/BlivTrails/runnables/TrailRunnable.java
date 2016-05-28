@@ -299,7 +299,7 @@ public class TrailRunnable implements Runnable
 	@Override
 	public void run()
 	{
-		PlayerConfig playerConfig = TrailManager.getTrailMap().get(player.getUniqueId());
+		PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 		if(playerConfig == null)
 		{
 			BUtil.logError("Attempted to spawn particle for unloaded player " + player.getName());

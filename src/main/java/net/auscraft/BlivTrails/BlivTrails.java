@@ -22,9 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitScheduler;
 
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 
 public class BlivTrails extends JavaPlugin
 {
@@ -209,9 +207,8 @@ public class BlivTrails extends JavaPlugin
 				int taskId;
 				float resultingTime;
 
-				for(Map.Entry<UUID, PlayerConfig> entry : TrailManager.getTrailMap().entrySet())
+				for(PlayerConfig playerConfig : TrailManager.getPlayerConfigs())
 				{
-					PlayerConfig playerConfig = entry.getValue();
 					if(!playerConfig.isScheduled())
 					{
 						continue;
@@ -233,7 +230,7 @@ public class BlivTrails extends JavaPlugin
 						scheduler.cancelTask(taskId);
 					}
 
-					playerConfig.setTaskId(-1); // TaskID is stale and not in use anymore. Cleanup.
+					playerConfig.resetTaskId(); // TaskID is stale and not in use anymore. Cleanup.
 				}
 			}
 		}, 20L, trailTimeoutCheckTime * 20L);
