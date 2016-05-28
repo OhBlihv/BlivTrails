@@ -68,21 +68,6 @@ public class TrailCommand implements CommandExecutor
 						                   "| §fblack, red, green, brown, blue, purple, cyan, light-grey/light-gray," +
 						                   " grey/gray, pink, lime, yellow, light-blue, magenta, orange, white, random");
 				}
-				else if (args[0].equalsIgnoreCase("remove"))
-				{
-					OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
-					if (offlinePlayer == null || !offlinePlayer.isOnline())
-					{
-						BUtil.printError(sender, "Player is not currently online. Cannot remove this players trail.");
-						return true;
-					}
-
-					String message = TrailManager.removePlayer(offlinePlayer.getUniqueId());
-					if(message != null && !message.isEmpty())
-					{
-						sender.sendMessage(message);
-					}
-				}
 				else if (args[0].equalsIgnoreCase("add"))
 				{
 					if (args.length >= 3)
@@ -118,6 +103,27 @@ public class TrailCommand implements CommandExecutor
 
 					BUtil.printError(sender, "Usage: /trailadmin add <name> <trail> [<type> <length> <height> [<colour>]]");
 					return true;
+				}
+				else if (args[0].equalsIgnoreCase("remove"))
+				{
+					if(args.length > 1)
+					{
+						OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
+						if (offlinePlayer == null || !offlinePlayer.isOnline())
+						{
+							BUtil.printError(sender, "Player is not currently online. Cannot remove this players trail.");
+							return true;
+						}
+
+						String message = TrailManager.removePlayer(offlinePlayer.getUniqueId());
+						if(message != null && !message.isEmpty())
+						{
+							sender.sendMessage(message);
+						}
+						return true;
+					}
+
+					BUtil.printError(sender, "Usage: /trailadmin remove <name>");
 				}
 				else if (args[0].equalsIgnoreCase("reload"))
 				{
