@@ -5,7 +5,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import lombok.Getter;
 import lombok.Setter;
 import net.auscraft.BlivTrails.storage.mysql.ByteArray;
-import net.auscraft.BlivTrails.util.UUIDUtils;
+import net.auscraft.BlivTrails.util.BUtil;
 import org.bukkit.entity.Player;
 
 import java.util.UUID;
@@ -51,7 +51,7 @@ public class ParticleData
 
 	public ParticleData(Player player)
 	{
-		id = UUIDUtils.toBytes(player.getUniqueId());
+		id = BUtil.toBytes(player.getUniqueId());
 		uuid = player.getUniqueId();
 	}
 
@@ -69,7 +69,7 @@ public class ParticleData
 	{
 		if (uuid == null)
 		{
-			uuid = UUIDUtils.fromBytes(id);
+			uuid = BUtil.fromBytes(id);
 		}
 		return uuid;
 	}

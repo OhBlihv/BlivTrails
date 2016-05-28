@@ -1,7 +1,7 @@
 package net.auscraft.BlivTrails.runnables;
 
 import net.auscraft.BlivTrails.BlivTrails;
-import net.auscraft.BlivTrails.util.UUIDUtils;
+import net.auscraft.BlivTrails.util.BUtil;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ public abstract class MySQLRunnable implements Runnable
 	public MySQLRunnable(UUID uuid)
 	{
 		this.uuid = uuid;
-		this.uuidBytes = UUIDUtils.toBytes(uuid);
+		this.uuidBytes = BUtil.toBytes(uuid);
 	}
 
 	public abstract void run();
