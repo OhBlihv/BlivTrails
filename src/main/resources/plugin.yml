@@ -16,6 +16,11 @@ permissions:
     blivtrails.*:
         description: Gives access to all BlivTrails commands/menus
         default: op
+        children:
+        	blivtrails.admin: true
+        	blivtrails.trails: true
+        	blivtrails.remove-trail: true
+        	blivtrails.options: true
     blivtrails.admin:
         description: Access to the BlivTrails Admin Panel (Reload/Force Remove Trails)
         default: op
