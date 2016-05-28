@@ -162,25 +162,34 @@ public class TrailManager
 		ParticleDefaultStorage particleDefaults = TrailDefaults.getDefaults(particle);
 
 		PlayerConfig playerConfig = trailMap.get(uuid);
-		if(playerConfig != null)
-		{
-			if(playerConfig.isScheduled())
-			{
-				Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
-				playerConfig.resetTaskId();
-			}
-
-			playerConfig.setType(particleDefaults.getType());
-			playerConfig.setLength(particleDefaults.getLength());
-			playerConfig.setHeight(particleDefaults.getHeight());
-			playerConfig.setColour(particleDefaults.getColour());
-		}
-		else
+		if(playerConfig == null)
 		{
 			playerConfig = new PlayerConfig(uuid, particle, particleDefaults.getType(), particleDefaults.getLength(),
 			                                particleDefaults.getHeight(), particleDefaults.getColour());
 			addPlayerConfig(uuid, playerConfig);
 		}
+
+		doDefaultTrail(playerConfig, particleDefaults, particle);
+	}
+
+	public static void doDefaultTrail(PlayerConfig playerConfig, ParticleEffect particle)
+	{
+		doDefaultTrail(playerConfig, TrailDefaults.getDefaults(particle), particle);
+	}
+
+	public static void doDefaultTrail(PlayerConfig playerConfig, ParticleDefaultStorage particleDefaults, ParticleEffect particle)
+	{
+		if(playerConfig.isScheduled())
+		{
+			Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
+			playerConfig.resetTaskId();
+		}
+
+		playerConfig.setParticle(particle);
+		playerConfig.setType(particleDefaults.getType());
+		playerConfig.setLength(particleDefaults.getLength());
+		playerConfig.setHeight(particleDefaults.getHeight());
+		playerConfig.setColour(particleDefaults.getColour());
 
 		// Trail for the first time
 		String trailName = particleDefaults.getDisplayName();
@@ -190,7 +199,7 @@ public class TrailManager
 			trailName = BUtil.stripColours(trailName);
 		}
 
-		BUtil.printPlain(Bukkit.getPlayer(uuid), msg.getString("messages.generic.trail-applied").replace("%trail%", trailName));
+		BUtil.printPlain(Bukkit.getPlayer(playerConfig.getUuid()), msg.getString("messages.generic.trail-applied").replace("%trail%", trailName));
 	}
 
 	public static void loadTrail(Player player)
@@ -462,11 +471,13 @@ public class TrailManager
 				{
 					Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
 					playerConfig.resetTaskId();
+
+					playerConfig.setParticle(ParticleEffect.FOOTSTEP);
 				}
 
 				if (flatFileStorage == null)
 				{
-					scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new RemoveRunnable(playerConfig.getUuid()));
+					scheduler.runTaskAsynchronously(BlivTrails.getInstance(), new RemoveRunnable(playerConfig.getUuid(), playerConfig));
 				}
 				else
 				{

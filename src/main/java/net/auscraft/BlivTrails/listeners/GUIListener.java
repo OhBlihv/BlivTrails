@@ -86,17 +86,12 @@ public class GUIListener implements Listener
 			}
 
 			Player player = (Player) event.getWhoClicked();
+			PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 
 			if (event.getRawSlot() == cfg.getInt("trails.remove-trail.position")) //Remove Trail
 			{
-				if (TrailManager.getPlayerConfig(player.getUniqueId()) != null)
+				if (playerConfig != null)
 				{
-					/*TrailManager.getTrailMap().put(player.getUniqueId(), new PlayerConfig(player.getUniqueId(), ParticleEffect.FOOTSTEP, 0, 0, 0, 0));
-					int taskId = TrailManager.getTaskMap().remove(player.getUniqueId());
-					if(taskId > 0)
-					{
-						Bukkit.getServer().getScheduler().cancelTask(taskId);
-					}*/
 					TrailManager.removePlayer(player.getUniqueId());
 					BUtil.printPlain(player, msg.getString("messages.generic.trail-removed"));
 				}
@@ -114,7 +109,6 @@ public class GUIListener implements Listener
 			{
 				if (player.hasPermission("blivtrails.options"))
 				{
-					PlayerConfig playerConfig = TrailManager.getPlayerConfig(player.getUniqueId());
 					if(playerConfig == null || playerConfig.getParticle() == null || playerConfig.getParticle() == ParticleEffect.FOOTSTEP)
 					{
 						BUtil.printPlain(event.getWhoClicked(), msg.getString("messages.error.no-trail"));
@@ -147,6 +141,14 @@ public class GUIListener implements Listener
 
 						if (player.hasPermission("blivtrails." + particleString))
 						{
+							if(playerConfig != null && playerConfig.isScheduled())
+							{
+								Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
+								playerConfig.resetTaskId();
+
+								playerConfig.setParticle(ParticleEffect.FOOTSTEP);
+							}
+
 							TrailManager.doDefaultTrail(player.getUniqueId(), particleEff);
 							if (cfg.getBoolean("menu.main.minimise-on-select"))
 							{

@@ -2,7 +2,6 @@ package net.auscraft.BlivTrails.runnables;
 
 import net.auscraft.BlivTrails.PlayerConfig;
 import net.auscraft.BlivTrails.TrailManager;
-import org.bukkit.Bukkit;
 
 import java.sql.SQLException;
 import java.util.UUID;
@@ -14,23 +13,28 @@ import java.util.UUID;
 public class RemoveRunnable extends MySQLRunnable
 {
 
+	private PlayerConfig playerConfig;
+
 	public RemoveRunnable(UUID uuid)
 	{
 		super(uuid);
+
+		this.playerConfig = TrailManager.getPlayerConfig(uuid);
+	}
+
+	public RemoveRunnable(UUID uuid, PlayerConfig playerConfig)
+	{
+		super(uuid);
+
+		this.playerConfig = playerConfig;
 	}
 
 	@Override
 	public void run()
 	{
-		PlayerConfig playerConfig = TrailManager.getPlayerConfig(uuid);
 		if(playerConfig == null)
 		{
 			return;
-		}
-
-		if(playerConfig.isScheduled())
-		{
-			Bukkit.getScheduler().cancelTask(playerConfig.getTaskId());
 		}
 
 		try
