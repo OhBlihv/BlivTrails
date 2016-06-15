@@ -341,7 +341,7 @@ public class FlatFile
 			BUtil.logError("Your Options Menu GUI is not a multiple of 9, and cannot be displayed. (Size: " + this.getInt("menu.options.size") + ")");
 			invalid = true;
 		}
-		String particleString = "";
+		String particleString;
 		for (ParticleEffect pEff : ParticleEffect.values()) // Check every particle effect used in the config
 		{
 			/*

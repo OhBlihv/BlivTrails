@@ -1454,7 +1454,9 @@ public enum ParticleEffect {
 				return;
 			}
 			try {
-				version = Integer.parseInt(Character.toString(PackageType.getServerVersion().charAt(3)));
+				version = Integer.parseInt(PackageType.getServerVersion().length() > 4 ?
+					                                   PackageType.getServerVersion().substring(3, 4):
+						                               Character.toString(PackageType.getServerVersion().charAt(3)));
 				if (version > 7) {
 					enumParticle = PackageType.MINECRAFT_SERVER.getClass("EnumParticle");
 				}
