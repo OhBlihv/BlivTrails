@@ -623,14 +623,12 @@ public class GUIUtil
 		ItemStack[] mergedStacks = new ItemStack[itemStacks.size() + 1];
 		for(ItemStack item : itemStacks)
 		{
-			//BUtil.logInfo("Processing: " + item.toString());
 			//Items shouldn't be over their stack size
 			if(item.getAmount() >= stackSize)
 			{
 				ItemStack tempItem = mergedStacks[currentStackCount];
 				mergedStacks[currentStackCount++] = item;
 				mergedStacks[currentStackCount] = tempItem;
-				//BUtil.logInfo("Over Stack Size!");
 				continue;
 			}
 
@@ -639,12 +637,10 @@ public class GUIUtil
 			if(currentStack == null)
 			{
 				mergedStacks[currentStackCount] = item;
-				//BUtil.logInfo("Replacing Null Object");
 				continue;
 			}
 
 			int newAmount = currentStack.getAmount() + item.getAmount();
-			//BUtil.logInfo("New Amount " + newAmount + " | Current Stack: " + currentStack.getAmount() + " | Item " + item.getAmount());
 			if(newAmount <= stackSize)
 			{
 				mergedStacks[currentStackCount].setAmount(newAmount);
@@ -658,7 +654,6 @@ public class GUIUtil
 				int tempLeftOver = newAmount - stackSize;
 				mergedStacks[currentStackCount++].setAmount(newAmount - tempLeftOver);
 				leftOver += tempLeftOver;
-				//BUtil.logInfo("Adding " + tempLeftOver + " to leftOver equalling " + leftOver);
 			}
 		}
 
@@ -743,8 +738,7 @@ public class GUIUtil
 				verticalSlots[invSlot] = currentSlot;
 			}
 		}
-
-		//BUtil.logInfo("Vertical Slots: " + Arrays.toString(verticalSlots));
+		
 		return verticalSlots;
 	}
 	

@@ -4,7 +4,7 @@
   <groupId>net.auscraft</groupId>
   <artifactId>BlivTrails</artifactId>
   <name>BlivTrails</name>
-  <version>1.1.4</version>
+  <version>1.1.5</version>
   <build>
     <defaultGoal>clean package install</defaultGoal>
     <resources>
@@ -66,10 +66,6 @@
       <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
     </repository>
     <repository>
-      <id>sk89q-repo</id>
-      <url>http://maven.sk89q.com/repo/</url>
-    </repository>
-    <repository>
       <id>ess-repo</id>
       <url>http://repo.ess3.net/content/groups/essentials</url>
     </repository>
@@ -78,7 +74,7 @@
     <dependency>
       <groupId>org.spigotmc</groupId>
       <artifactId>spigot-api</artifactId>
-      <version>1.9.2-R0.1-SNAPSHOT</version>
+      <version>1.10-R0.1-SNAPSHOT</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
@@ -90,7 +86,7 @@
     <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
-      <version>1.16.4</version>
+      <version>1.16.10</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
