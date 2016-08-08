@@ -48,20 +48,6 @@
 			<version>2.13-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.kitteh</groupId>
-			<artifactId>vanish</artifactId>
-			<version>3.19.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/VanishNoPacket-3.19.1.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>de.myzelyam</groupId>
-			<artifactId>SuperVanish</artifactId>
-			<version>5.6.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/lib/SuperVanish.jar</systemPath>
-		</dependency>
 	</dependencies>
 	
 	<modules>
@@ -76,6 +62,7 @@
 		<module>modules/v1_9_R1</module>
 		<module>modules/v1_9_R2</module>
 		<module>modules/v1_10_R1</module>
+		<module>modules/Cauldron-v1_7_R4</module>
 		<module>BlivTrails</module>
 	</modules>
 	
