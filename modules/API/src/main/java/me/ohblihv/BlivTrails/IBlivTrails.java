@@ -1,5 +1,6 @@
 package me.ohblihv.BlivTrails;
 
+import com.darkblade12.ParticleEffect.IParticlePacketFactory;
 import me.ohblihv.BlivTrails.util.nms.INMSHelper;
 
 /**
@@ -9,5 +10,7 @@ public interface IBlivTrails
 {
 	
 	INMSHelper getNMSHelper();
+	
+	IParticlePacketFactory getParticleFactoryInstance() throws IllegalArgumentException;
 	
 }
