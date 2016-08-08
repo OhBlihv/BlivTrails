@@ -2,6 +2,7 @@ package com.darkblade12.ParticleEffect.ParticlePacket;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import com.darkblade12.ParticleEffect.ReflectionUtils;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayer;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -104,7 +105,22 @@ public class ParticlePacket_Cauldron_1_7_R4 extends ParticlePacket
 		}
 		catch(Exception exception)
 		{
-			throw new com.darkblade12.ParticleEffect.ParticlePacket.ParticlePacket.PacketSendingException("Failed to send the packet to player '" + player.getName() + "'", exception);
+			throw new PacketSendingException("Failed to send the packet to player '" + player.getName() + "'", exception);
+		}
+	}
+	
+	@Override
+	public void sendToCheapPlayer(Location center, CheapPlayer player) throws PacketInstantiationException, PacketSendingException
+	{
+		initialize(center);
+		
+		try
+		{
+			sendPacket.invoke(player.getPlayerConnection(), packet);
+		}
+		catch(Exception exception)
+		{
+			throw new PacketSendingException("Failed to send the packet to player '" + player.getPlayer() + "'", exception);
 		}
 	}
 	

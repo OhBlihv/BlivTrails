@@ -1,8 +1,10 @@
 package com.darkblade12.ParticleEffect.ParticlePacket;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayer;
 import net.minecraft.server.v1_9_R1.EnumParticle;
 import net.minecraft.server.v1_9_R1.PacketPlayOutWorldParticles;
+import net.minecraft.server.v1_9_R1.PlayerConnection;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
@@ -72,6 +74,14 @@ public class ParticlePacket_1_9_R1 extends ParticlePacket
 		
 		//PlayerConnection is only used once per packet, so retrieving it here is a non-issue
 		((CraftPlayer) player).getHandle().playerConnection.sendPacket(particlePacket);
+	}
+	
+	@Override
+	public void sendToCheapPlayer(Location center, CheapPlayer player) throws PacketInstantiationException, PacketSendingException
+	{
+		initialize(center);
+		
+		((PlayerConnection) player.getPlayerConnection()).sendPacket(particlePacket);
 	}
 	
 }

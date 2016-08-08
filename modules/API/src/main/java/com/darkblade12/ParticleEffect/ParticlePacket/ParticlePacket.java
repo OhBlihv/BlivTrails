@@ -2,12 +2,13 @@ package com.darkblade12.ParticleEffect.ParticlePacket;
 
 import com.darkblade12.ParticleEffect.ParticleEffect;
 import lombok.Getter;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Represents a particle effect packet with all attributes which is used for sending packets to the players
@@ -142,6 +143,17 @@ public abstract class ParticlePacket
 	public abstract void sendTo(Location center, Player player) throws PacketInstantiationException, PacketSendingException;
 	
 	/**
+	 * Sends the packet to a single player and caches it
+	 *
+	 * @param center Center location of the effect
+	 * @param player Receiver of the packet
+	 * @throws PacketInstantiationException If instantion fails due to an unknown error
+	 * @throws PacketSendingException       If sending fails due to an unknown error
+	 * @see #initializePacket(Location)
+	 */
+	public abstract void sendToCheapPlayer(Location center, CheapPlayer player) throws PacketInstantiationException, PacketSendingException;
+	
+	/**
 	 * Sends the packet to all players in the list
 	 *
 	 * @param center  Center location of the effect
@@ -149,7 +161,7 @@ public abstract class ParticlePacket
 	 * @throws IllegalArgumentException If the player list is empty
 	 * @see #sendTo(Location center, Player player)
 	 */
-	public void sendTo(Location center, List<Player> players) throws IllegalArgumentException
+	public void sendTo(Location center, Collection<Player> players) throws IllegalArgumentException
 	{
 		if(players.isEmpty())
 		{
@@ -159,6 +171,27 @@ public abstract class ParticlePacket
 		for(Player player : players)
 		{
 			sendTo(center, player);
+		}
+	}
+	
+	/**
+	 * Sends the packet to all players in the list
+	 *
+	 * @param center  Center location of the effect
+	 * @param players Receivers of the packet
+	 * @throws IllegalArgumentException If the player list is empty
+	 * @see #sendTo(Location center, Player player)
+	 */
+	public void sendToCheapPlayer(Location center, Collection<CheapPlayer> players) throws IllegalArgumentException
+	{
+		if(players.isEmpty())
+		{
+			throw new IllegalArgumentException("The player list is empty");
+		}
+		
+		for(CheapPlayer player : players)
+		{
+			sendToCheapPlayer(center, player);
 		}
 	}
 	

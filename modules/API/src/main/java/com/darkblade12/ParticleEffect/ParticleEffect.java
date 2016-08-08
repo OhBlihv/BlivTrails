@@ -3,6 +3,7 @@ package com.darkblade12.ParticleEffect;
 import com.darkblade12.ParticleEffect.ParticlePacket.ParticlePacket;
 import lombok.Setter;
 import me.ohblihv.BlivTrails.IBlivTrails;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -12,6 +13,7 @@ import org.bukkit.util.Vector;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -583,12 +585,27 @@ public enum ParticleEffect
 	 * @param location Location to check
 	 * @return Whether the distance exceeds 256 or not
 	 */
-	private static boolean isLongDistance(Location location, List<Player> players)
+	private static boolean isLongDistance(Location location, Collection<Player> players)
 	{
 		String world = location.getWorld().getName();
 		for(Player player : players)
 		{
 			Location playerLocation = player.getLocation();
+			if(!world.equals(playerLocation.getWorld().getName()) || playerLocation.distanceSquared(location) < 65536)
+			{
+				continue;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	private static boolean isLongDistanceCheapPlayer(Location location, Collection<CheapPlayer> players)
+	{
+		String world = location.getWorld().getName();
+		for(CheapPlayer player : players)
+		{
+			Location playerLocation = player.getPlayer().getLocation();
 			if(!world.equals(playerLocation.getWorld().getName()) || playerLocation.distanceSquared(location) < 65536)
 			{
 				continue;
@@ -672,7 +689,7 @@ public enum ParticleEffect
 	 * @see ParticlePacket
 	 * @see ParticlePacket#sendTo(Location, List)
 	 */
-	public void display(float offsetX, float offsetY, float offsetZ, float speed, int amount, Location center, List<Player> players) throws ParticleVersionException, ParticleDataException, IllegalArgumentException
+	public void display(float offsetX, float offsetY, float offsetZ, float speed, int amount, Location center, Collection<Player> players) throws ParticleVersionException, ParticleDataException, IllegalArgumentException
 	{
 		if(!isSupported())
 		{
@@ -688,6 +705,25 @@ public enum ParticleEffect
 		}
 		
 		pluginInstance.getParticleFactoryInstance().getParticlePacket(this, offsetX, offsetY, offsetZ, speed, amount, isLongDistance(center, players), null).sendTo(center, players);
+	}
+	
+	public void displayToCheapPlayer(float offsetX, float offsetY, float offsetZ, float speed, int amount, Location center, Collection<CheapPlayer> players) throws ParticleVersionException, ParticleDataException, IllegalArgumentException
+	{
+		if(!isSupported())
+		{
+			throw new ParticleVersionException("This particle effect is not supported by your server version");
+		}
+		if(hasProperty(ParticleProperty.REQUIRES_DATA))
+		{
+			throw new ParticleDataException("This particle effect requires additional data");
+		}
+		if(hasProperty(ParticleProperty.REQUIRES_WATER) && !isWater(center))
+		{
+			throw new IllegalArgumentException("There is no water at the center location");
+		}
+		
+		pluginInstance.getParticleFactoryInstance().getParticlePacket(this, offsetX, offsetY, offsetZ, speed, amount,
+		                                                              isLongDistanceCheapPlayer(center, players), null).sendToCheapPlayer(center, players);
 	}
 	
 	/**
