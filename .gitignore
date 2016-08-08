@@ -14,7 +14,7 @@ dependency-reduced-pom.xml
 *.war
 *.ear
 
-/target
+**/target/**
 
 dependency-reduced-pom.xml
 dependency-reduced-pom.xml
