@@ -18,10 +18,10 @@
 	<dependencies>
 		<dependency>
 			<groupId>org.bukkit</groupId>
-			<artifactId>cauldron</artifactId>
-			<version>Cauldron_v1_7_R4</version>
+			<artifactId>craftbukkit</artifactId>
+			<version>v1_7_R4</version>
 			<scope>system</scope>
-			<systemPath>${project.basedir}/../../lib/cauldron-1.7.10.jar</systemPath>
+			<systemPath>${project.basedir}/../../lib/craftbukkit-1.7.10.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>me.ohblihv</groupId>
