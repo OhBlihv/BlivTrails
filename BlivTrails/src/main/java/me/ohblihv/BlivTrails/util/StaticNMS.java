@@ -12,6 +12,17 @@ import com.darkblade12.ParticleEffect.ParticlePacketFactory_1_8_R3;
 import com.darkblade12.ParticleEffect.ParticlePacketFactory_1_9_R1;
 import com.darkblade12.ParticleEffect.ParticlePacketFactory_1_9_R2;
 import com.darkblade12.ParticleEffect.ParticlePacketFactory_Cauldron_1_7_R4;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_10_R1;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_7_R1;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_7_R2;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_7_R3;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_7_R4;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_8_R1;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_8_R2;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_8_R3;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_9_R1;
+import me.ohblihv.BlivTrails.objects.player.CheapPlayerFactory_1_9_R2;
+import me.ohblihv.BlivTrails.objects.player.ICheapPlayerFactory;
 import me.ohblihv.BlivTrails.util.nms.INMSHelper;
 import me.ohblihv.BlivTrails.util.nms.NMSHelper_1_10_R1;
 import me.ohblihv.BlivTrails.util.nms.NMSHelper_1_7_R1;
@@ -58,7 +69,7 @@ public class StaticNMS
 	}
 	
 	private static INMSHelper nmsHelper = null;
-	public static INMSHelper getNMSHelper()
+	public static INMSHelper getNMSHelper() throws IllegalArgumentException
 	{
 		if(nmsHelper == null)
 		{
@@ -113,19 +124,11 @@ public class StaticNMS
 				case "v_1_10_R1": particleFactoryInstance = new ParticlePacketFactory_1_10_R1(); break;
 				default: //Check if we're running forge
 				{
-					String serverName = "null";
-					try //Forge is always the slowest D:
+					if(isForge)
 					{
-						if(isForge)
-						{
-							//Cauldron is 1.7.10 -> v1_7_R4
-							particleFactoryInstance = new ParticlePacketFactory_Cauldron_1_7_R4();
-							break;
-						}
-					}
-					catch(Exception e)
-					{
-						//Handled below if particleFactoryInstance is not set.
+						//Cauldron is 1.7.10 -> v1_7_R4
+						particleFactoryInstance = new ParticlePacketFactory_Cauldron_1_7_R4();
+						break;
 					}
 					
 					if(particleFactoryInstance == null)
@@ -137,6 +140,44 @@ public class StaticNMS
 		}
 		
 		return particleFactoryInstance;
+	}
+	
+	private static ICheapPlayerFactory cheapPlayerFactoryInstance = null;
+	public static ICheapPlayerFactory getCheapPlayerFactoryInstance() throws IllegalArgumentException
+	{
+		if(cheapPlayerFactoryInstance != null)
+		{
+			switch(BUtil.getNMSVersion())
+			{
+				//TODO: Convert to Factory
+				case "v_1_7_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R1(); break;
+				case "v_1_7_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R2(); break;
+				case "v_1_7_R3": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R3(); break;
+				case "v_1_7_R4": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R4(); break;
+				case "v_1_8_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R1(); break;
+				case "v_1_8_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R2(); break;
+				case "v_1_8_R3": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R3(); break;
+				case "v_1_9_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_9_R1(); break;
+				case "v_1_9_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_9_R2(); break;
+				case "v_1_10_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_10_R1(); break;
+				default: //Check if we're running forge
+				{
+					if(isForge)
+					{
+						//Cauldron is 1.7.10 -> v1_7_R4
+						cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R4();
+						break;
+					}
+					
+					if(particleFactoryInstance == null)
+					{
+						throw new IllegalArgumentException("This server version is not supported '" + serverName + "'");
+					}
+				}
+			}
+		}
+		
+		return cheapPlayerFactoryInstance;
 	}
 	
 }
