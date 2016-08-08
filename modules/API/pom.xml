@@ -14,15 +14,5 @@
 		<version>parent</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
-	
-	<dependencies>
-		<!-- Spigot API -->
-		<dependency>
-			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot-api</artifactId>
-			<version>1.10-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
     
 </project>

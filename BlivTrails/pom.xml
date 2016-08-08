@@ -9,46 +9,7 @@
 	<version>2.x</version> <!-- Project Version is defined here, not in Parent -->
 	<packaging>jar</packaging>
 	
-	<repositories>
-		<repository>
-			<id>md_5-snapshots</id>
-			<url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
-		</repository>
-		<repository>
-			<id>ess-repo</id>
-			<url>http://repo.ess3.net/content/groups/essentials</url>
-		</repository>
-	</repositories>
-	
 	<dependencies>
-		<!-- Spigot API -->
-		<dependency>
-			<groupId>org.spigotmc</groupId>
-			<artifactId>spigot-api</artifactId>
-			<version>1.10-R0.1-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>net.ess3</groupId>
-			<artifactId>Essentials</artifactId>
-			<version>2.13-SNAPSHOT</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.kitteh</groupId>
-			<artifactId>vanish</artifactId>
-			<version>3.19.1</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/../lib/VanishNoPacket-3.19.1.jar</systemPath>
-		</dependency>
-		<dependency>
-			<groupId>de.myzelyam</groupId>
-			<artifactId>SuperVanish</artifactId>
-			<version>5.6.2</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/../lib/SuperVanish.jar</systemPath>
-		</dependency>
 		<dependency>
 			<groupId>com.j256.ormlite</groupId>
 			<artifactId>ormlite-core</artifactId>
@@ -60,12 +21,6 @@
 			<artifactId>ormlite-jdbc</artifactId>
 			<version>4.48</version>
 			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.16.10</version>
-			<scope>provided</scope>
 		</dependency>
 		
 		<!-- CraftBukkit Version Dependencies -->

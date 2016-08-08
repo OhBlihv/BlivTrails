@@ -25,6 +25,45 @@
         </repository>
     </repositories>
 	
+	<dependencies>
+		<!-- Spigot API -->
+		<dependency>
+			<groupId>org.spigotmc</groupId>
+			<artifactId>spigot-api</artifactId>
+			<version>1.10-R0.1-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- Lombok Annotations -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.16.10</version>
+		</dependency>
+		
+		<!-- Plugin Dependencies -->
+		<dependency>
+			<groupId>net.ess3</groupId>
+			<artifactId>Essentials</artifactId>
+			<version>2.13-SNAPSHOT</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.kitteh</groupId>
+			<artifactId>vanish</artifactId>
+			<version>3.19.1</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/VanishNoPacket-3.19.1.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>de.myzelyam</groupId>
+			<artifactId>SuperVanish</artifactId>
+			<version>5.6.2</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/SuperVanish.jar</systemPath>
+		</dependency>
+	</dependencies>
+	
 	<modules>
 		<module>modules/API</module>
 		<module>modules/v1_7_R1</module>
