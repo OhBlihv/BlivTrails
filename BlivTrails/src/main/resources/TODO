@@ -1,0 +1,30 @@
+2.x Milestone Feature Set
+
+Multi-World/Per-World Trails
+- Grouped through config (string names?)
+
+Multiple Trails Per Player
+
+New Trail Display Types
+(All Trail Display Types will have per-trail display options to change
+height, width, length, speed, etc)
+- Spiral
+- Tornado?
+- Circle
+
+Per-Player configuration types: Basic/Advanced
+- Would move from simple toggles, to the greater configuration system for radius and other types
+
+Option Types:
+Speed (How often to display)
+Radius (For random/radius types)
+Height (Unless already defined)
+Length (Amount of times to duplicate behind player)
+
+
+Block Break Types
+Block Types (Packet/Client-Side spawned blocks)
+
+Static Particle (Particle effects not attached to a player)
+
+Re-Implement Forge implementation (Packets are slightly different)

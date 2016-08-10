@@ -6,8 +6,8 @@ import me.ohblihv.BlivTrails.objects.player.CheapPlayer;
 import me.ohblihv.BlivTrails.util.StaticNMS;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.util.NumberConversions;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -33,7 +33,6 @@ public class ActiveCosmetic
 	public void updateNearbyPlayers()
 	{
 		Location activatingPlayerLocation = getLocation();
-		World.Environment activatingPlayerEnvironment = activatingPlayerLocation.getWorld().getEnvironment();
 		
 		for(Player player : Bukkit.getOnlinePlayers())
 		{
@@ -41,14 +40,7 @@ public class ActiveCosmetic
 			
 			Location playerLocation = player.getLocation();
 			
-			if(playerLocation.getWorld().getEnvironment() != activatingPlayerEnvironment)
-			{
-				inRange = false;
-			}
-			//If boss is in view distance of the player, make sure to add this player to the nearbyPlayers collection
-			else if( Math.abs(playerLocation.getBlockX()) - activatingPlayerLocation.getX() > viewDistance ||
-				         Math.abs(playerLocation.getBlockY()) - activatingPlayerLocation.getY() > viewDistance ||
-				         Math.abs(playerLocation.getBlockZ()) - activatingPlayerLocation.getZ() > viewDistance)
+			if(activatingPlayerLocation.getWorld() != playerLocation.getWorld() || getDistance(activatingPlayerLocation, playerLocation) > viewDistance)
 			{
 				inRange = false;
 			}
@@ -74,6 +66,16 @@ public class ActiveCosmetic
 				//Otherwise, do nothing
 			}
 		}
+	}
+	
+	private static int getDistance(Location location, Location comparedLocation)
+	{
+		int blockX = location.getBlockX(), comparedBlockX = comparedLocation.getBlockX(),
+			blockZ = location.getBlockZ(), comparedBlockZ = comparedLocation.getBlockZ();
+		
+		double squaredDistance = NumberConversions.square(blockX - comparedBlockX) + NumberConversions.square(blockZ - comparedBlockZ);
+		
+		return (int) Math.sqrt(squaredDistance);
 	}
 	
 	public Location getLocation()
