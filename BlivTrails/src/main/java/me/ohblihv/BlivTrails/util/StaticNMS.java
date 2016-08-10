@@ -110,7 +110,7 @@ public class StaticNMS
 	private static IParticlePacketFactory particleFactoryInstance = null;
 	public static IParticlePacketFactory getParticleFactoryInstance() throws IllegalArgumentException
 	{
-		if(particleFactoryInstance != null)
+		if(particleFactoryInstance == null)
 		{
 			switch(BUtil.getNMSVersion())
 			{
@@ -148,7 +148,7 @@ public class StaticNMS
 	private static ICheapPlayerFactory cheapPlayerFactoryInstance = null;
 	public static ICheapPlayerFactory getCheapPlayerFactoryInstance() throws IllegalArgumentException
 	{
-		if(cheapPlayerFactoryInstance != null)
+		if(cheapPlayerFactoryInstance == null)
 		{
 			switch(BUtil.getNMSVersion())
 			{
