@@ -2,7 +2,7 @@ name: ${project.artifactId}
 version: ${project.version}
 author: OhBlihv
 website: http://www.spigotmc.org/resources/blivtrails.4544/
-main: net.auscraft.BlivTrails.BlivTrails
+main: ${project.groupId}.${project.artifactId}.${project.artifactId}
 description: Fancy trails for Fancy people
 softdepend: [VanishNoPacket, Essentials, SuperVanish, PremiumVanish]
 commands:
