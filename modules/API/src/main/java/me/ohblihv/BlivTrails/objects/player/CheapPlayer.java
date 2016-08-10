@@ -1,5 +1,6 @@
 package me.ohblihv.BlivTrails.objects.player;
 
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -8,6 +9,7 @@ import java.lang.ref.WeakReference;
 /**
  * Created by Chris Brown (OhBlihv) on 19/05/2016.
  */
+@RequiredArgsConstructor
 public abstract class CheapPlayer
 {
 
@@ -33,7 +35,7 @@ public abstract class CheapPlayer
 		return player != null && player.get() != null && player.get().isOnline();
 	}
 	
-	String playerName;
+	final String playerName;
 	private WeakReference<Player> player; //I wouldn't normally do this, but this needs easy access to a player's location.
 
 	public abstract Object getPlayerConnection();

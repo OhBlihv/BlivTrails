@@ -21,6 +21,8 @@ public class CheapPlayer_1_10_R1 extends CheapPlayer
 	
 	public CheapPlayer_1_10_R1(Player player)
 	{
+		super(player.getName());
+		
 		entityPlayer = ((CraftPlayer) player).getHandle();
 		
 		playerConnection = entityPlayer.playerConnection;
