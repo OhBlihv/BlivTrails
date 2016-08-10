@@ -47,17 +47,17 @@ public class StaticNMS
 	private static String serverName = "null";
 	static
 	{
-		String serverName = "null";
+		String packageServerName = "null";
 		try //Forge is always the slowest D:
 		{
 			Class craftServerClass = Class.forName("org.bukkit.craftbukkit." + Bukkit.getServer().getClass().getPackage().getName().substring(23) + ".CraftServer");
 			Field serverNameField = craftServerClass.getDeclaredField("serverName");
 			serverNameField.setAccessible(true);
 			
-			serverName = (String) serverNameField.get(Bukkit.getServer());
+			packageServerName = (String) serverNameField.get(Bukkit.getServer());
 			
 			//Very primitive Forge check, only really tested with Thermos
-			if(serverName.equals("Cauldron"))
+			if(packageServerName.equals("Cauldron"))
 			{
 				isForge = true;
 			}
@@ -66,6 +66,8 @@ public class StaticNMS
 		{
 			//Handled below if particleFactoryInstance is not set.
 		}
+		
+		serverName = packageServerName;
 	}
 	
 	private static INMSHelper nmsHelper = null;
@@ -73,18 +75,19 @@ public class StaticNMS
 	{
 		if(nmsHelper == null)
 		{
+			BUtil.logInfo(BUtil.getNMSVersion());
 			switch(BUtil.getNMSVersion())
 			{
-				case "v_1_7_R1": nmsHelper = new NMSHelper_1_7_R1(); break;
-				case "v_1_7_R2": nmsHelper = new NMSHelper_1_7_R2(); break;
-				case "v_1_7_R3": nmsHelper = new NMSHelper_1_7_R3(); break;
-				case "v_1_7_R4": nmsHelper = new NMSHelper_1_7_R4(); break;
-				case "v_1_8_R1": nmsHelper = new NMSHelper_1_8_R1(); break;
-				case "v_1_8_R2": nmsHelper = new NMSHelper_1_8_R2(); break;
-				case "v_1_8_R3": nmsHelper = new NMSHelper_1_8_R3(); break;
-				case "v_1_9_R1": nmsHelper = new NMSHelper_1_9_R2(); break;
-				case "v_1_9_R2": nmsHelper = new NMSHelper_1_9_R2(); break;
-				case "v_1_10_R1": nmsHelper = new NMSHelper_1_10_R1(); break;
+				case "v1_7_R1": nmsHelper = new NMSHelper_1_7_R1(); break;
+				case "v1_7_R2": nmsHelper = new NMSHelper_1_7_R2(); break;
+				case "v1_7_R3": nmsHelper = new NMSHelper_1_7_R3(); break;
+				case "v1_7_R4": nmsHelper = new NMSHelper_1_7_R4(); break;
+				case "v1_8_R1": nmsHelper = new NMSHelper_1_8_R1(); break;
+				case "v1_8_R2": nmsHelper = new NMSHelper_1_8_R2(); break;
+				case "v1_8_R3": nmsHelper = new NMSHelper_1_8_R3(); break;
+				case "v1_9_R1": nmsHelper = new NMSHelper_1_9_R2(); break;
+				case "v1_9_R2": nmsHelper = new NMSHelper_1_9_R2(); break;
+				case "v1_10_R1": nmsHelper = new NMSHelper_1_10_R1(); break;
 				default: //Check if we're running forge
 				{
 					if(isForge)
@@ -93,7 +96,7 @@ public class StaticNMS
 						nmsHelper = new NMSHelper_1_7_R4();
 					}
 					
-					if(particleFactoryInstance == null)
+					if(nmsHelper == null)
 					{
 						throw new IllegalArgumentException("This server version is not supported '" + serverName + "'");
 					}
@@ -112,16 +115,16 @@ public class StaticNMS
 			switch(BUtil.getNMSVersion())
 			{
 				//TODO: Convert to Factory
-				case "v_1_7_R1": particleFactoryInstance = new ParticlePacketFactory_1_7_R1(); break;
-				case "v_1_7_R2": particleFactoryInstance = new ParticlePacketFactory_1_7_R2(); break;
-				case "v_1_7_R3": particleFactoryInstance = new ParticlePacketFactory_1_7_R3(); break;
-				case "v_1_7_R4": particleFactoryInstance = new ParticlePacketFactory_1_7_R4(); break;
-				case "v_1_8_R1": particleFactoryInstance = new ParticlePacketFactory_1_8_R1(); break;
-				case "v_1_8_R2": particleFactoryInstance = new ParticlePacketFactory_1_8_R2(); break;
-				case "v_1_8_R3": particleFactoryInstance = new ParticlePacketFactory_1_8_R3(); break;
-				case "v_1_9_R1": particleFactoryInstance = new ParticlePacketFactory_1_9_R1(); break;
-				case "v_1_9_R2": particleFactoryInstance = new ParticlePacketFactory_1_9_R2(); break;
-				case "v_1_10_R1": particleFactoryInstance = new ParticlePacketFactory_1_10_R1(); break;
+				case "v1_7_R1": particleFactoryInstance = new ParticlePacketFactory_1_7_R1(); break;
+				case "v1_7_R2": particleFactoryInstance = new ParticlePacketFactory_1_7_R2(); break;
+				case "v1_7_R3": particleFactoryInstance = new ParticlePacketFactory_1_7_R3(); break;
+				case "v1_7_R4": particleFactoryInstance = new ParticlePacketFactory_1_7_R4(); break;
+				case "v1_8_R1": particleFactoryInstance = new ParticlePacketFactory_1_8_R1(); break;
+				case "v1_8_R2": particleFactoryInstance = new ParticlePacketFactory_1_8_R2(); break;
+				case "v1_8_R3": particleFactoryInstance = new ParticlePacketFactory_1_8_R3(); break;
+				case "v1_9_R1": particleFactoryInstance = new ParticlePacketFactory_1_9_R1(); break;
+				case "v1_9_R2": particleFactoryInstance = new ParticlePacketFactory_1_9_R2(); break;
+				case "v1_10_R1": particleFactoryInstance = new ParticlePacketFactory_1_10_R1(); break;
 				default: //Check if we're running forge
 				{
 					if(isForge)
@@ -150,16 +153,16 @@ public class StaticNMS
 			switch(BUtil.getNMSVersion())
 			{
 				//TODO: Convert to Factory
-				case "v_1_7_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R1(); break;
-				case "v_1_7_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R2(); break;
-				case "v_1_7_R3": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R3(); break;
-				case "v_1_7_R4": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R4(); break;
-				case "v_1_8_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R1(); break;
-				case "v_1_8_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R2(); break;
-				case "v_1_8_R3": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R3(); break;
-				case "v_1_9_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_9_R1(); break;
-				case "v_1_9_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_9_R2(); break;
-				case "v_1_10_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_10_R1(); break;
+				case "v1_7_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R1(); break;
+				case "v1_7_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R2(); break;
+				case "v1_7_R3": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R3(); break;
+				case "v1_7_R4": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_7_R4(); break;
+				case "v1_8_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R1(); break;
+				case "v1_8_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R2(); break;
+				case "v1_8_R3": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_8_R3(); break;
+				case "v1_9_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_9_R1(); break;
+				case "v1_9_R2": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_9_R2(); break;
+				case "v1_10_R1": cheapPlayerFactoryInstance = new CheapPlayerFactory_1_10_R1(); break;
 				default: //Check if we're running forge
 				{
 					if(isForge)
@@ -169,7 +172,7 @@ public class StaticNMS
 						break;
 					}
 					
-					if(particleFactoryInstance == null)
+					if(cheapPlayerFactoryInstance == null)
 					{
 						throw new IllegalArgumentException("This server version is not supported '" + serverName + "'");
 					}
