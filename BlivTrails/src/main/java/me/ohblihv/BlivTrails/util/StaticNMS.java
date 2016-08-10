@@ -75,16 +75,16 @@ public class StaticNMS
 		{
 			switch(BUtil.getNMSVersion())
 			{
-				case "v_1_7_R1": nmsHelper = new NMSHelper_1_7_R1();
-				case "v_1_7_R2": nmsHelper = new NMSHelper_1_7_R2();
-				case "v_1_7_R3": nmsHelper = new NMSHelper_1_7_R3();
-				case "v_1_7_R4": nmsHelper = new NMSHelper_1_7_R4();
-				case "v_1_8_R1": nmsHelper = new NMSHelper_1_8_R1();
-				case "v_1_8_R2": nmsHelper = new NMSHelper_1_8_R2();
-				case "v_1_8_R3": nmsHelper = new NMSHelper_1_8_R3();
-				case "v_1_9_R1": nmsHelper = new NMSHelper_1_9_R2();
-				case "v_1_9_R2": nmsHelper = new NMSHelper_1_9_R2();
-				case "v_1_10_R1": nmsHelper = new NMSHelper_1_10_R1();
+				case "v_1_7_R1": nmsHelper = new NMSHelper_1_7_R1(); break;
+				case "v_1_7_R2": nmsHelper = new NMSHelper_1_7_R2(); break;
+				case "v_1_7_R3": nmsHelper = new NMSHelper_1_7_R3(); break;
+				case "v_1_7_R4": nmsHelper = new NMSHelper_1_7_R4(); break;
+				case "v_1_8_R1": nmsHelper = new NMSHelper_1_8_R1(); break;
+				case "v_1_8_R2": nmsHelper = new NMSHelper_1_8_R2(); break;
+				case "v_1_8_R3": nmsHelper = new NMSHelper_1_8_R3(); break;
+				case "v_1_9_R1": nmsHelper = new NMSHelper_1_9_R2(); break;
+				case "v_1_9_R2": nmsHelper = new NMSHelper_1_9_R2(); break;
+				case "v_1_10_R1": nmsHelper = new NMSHelper_1_10_R1(); break;
 				default: //Check if we're running forge
 				{
 					if(isForge)
