@@ -1,7 +1,6 @@
 package me.ohblihv.BlivTrails.cosmetics;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import me.ohblihv.BlivTrails.objects.player.CheapPlayer;
 import me.ohblihv.BlivTrails.util.StaticNMS;
 import org.bukkit.Bukkit;
@@ -14,7 +13,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 /**
  * Created by Chris Brown (OhBlihv) on 6/08/2016.
  */
-@RequiredArgsConstructor
 public class ActiveCosmetic
 {
 	
@@ -30,12 +28,26 @@ public class ActiveCosmetic
 	@Getter
 	final int viewDistance;
 	
+	public ActiveCosmetic(BaseCosmetic cosmetic, Player activatingPlayer, int viewDistance)
+	{
+		this.cosmetic = cosmetic;
+		this.activatingPlayer = activatingPlayer;
+		this.viewDistance = viewDistance;
+		
+		this.nearbyPlayers.add(StaticNMS.getCheapPlayerFactoryInstance().getCheapPlayer(activatingPlayer));
+	}
+	
 	public void updateNearbyPlayers()
 	{
 		Location activatingPlayerLocation = getLocation();
 		
 		for(Player player : Bukkit.getOnlinePlayers())
 		{
+			if(player == activatingPlayer)
+			{
+				continue;
+			}
+			
 			boolean inRange = true;
 			
 			Location playerLocation = player.getLocation();
@@ -85,7 +97,7 @@ public class ActiveCosmetic
 	
 	public void onTick(long tick)
 	{
-		cosmetic.onTick(tick, activatingPlayer.getLocation());
+		cosmetic.onTick(tick, activatingPlayer.getLocation(), nearbyPlayers);
 	}
 	
 }
