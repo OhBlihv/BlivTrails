@@ -75,7 +75,6 @@ public class StaticNMS
 	{
 		if(nmsHelper == null)
 		{
-			BUtil.logInfo(BUtil.getNMSVersion());
 			switch(BUtil.getNMSVersion())
 			{
 				case "v1_7_R1": nmsHelper = new NMSHelper_1_7_R1(); break;
@@ -102,6 +101,8 @@ public class StaticNMS
 					}
 				}
 			}
+			
+			BUtil.logInfo("Hooked NMS Version: " + BUtil.getNMSVersion());
 		}
 		
 		return nmsHelper;
