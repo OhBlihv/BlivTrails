@@ -18,11 +18,11 @@ Version 2.x is a major rewrite to BlivTrails, with the same and many more projec
 * New Trail Display Types
   * (All Trail Display Types will have per-trail display options to change
 height, width, length, speed, etc)  
-  * Spiral
-  * Tornado?
-  * Circle
+  * Spiral (And other rotational effects)
+  * Rain Cloud
+  * Wings
 
-* Per-Player configuration types: Basic/Advanced
+* Per-Player configuration types: Basic/Advanced(?)
   * Would move from simple toggles, to the greater configuration system for radius and other types
 
 * Option Types:  
@@ -32,7 +32,10 @@ height, width, length, speed, etc)
   * Length (Amount of times to duplicate behind player)
 
 * Cosmetic Types
+  * Particle
   * Block Types (Break, Dust)
   * Physical Blocks (Carpet)
 
 * Static Particles (Particle effects not attached to a player)
+
+* Hide Cosmetics in Combat
