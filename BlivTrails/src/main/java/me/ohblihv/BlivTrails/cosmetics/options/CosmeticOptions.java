@@ -79,16 +79,24 @@ public class CosmeticOptions
 		CosmeticOptionStorage cosmeticOptions = null;
 		if(baseCosmetic instanceof BaseParticleEffect)
 		{
+			//Hold a temporary 'best fit' options object when using a CosmeticModifier filter
+			//Get most specific options, and override if we find our filter.
+			
 			//Retrieve the specific defaults for this cosmetic
 			if(cosmeticOptionsMap.containsKey(baseCosmetic))
 			{
 				cosmeticOptions = cosmeticOptionsMap.get(baseCosmetic);
 			}
 			//Retrieve the most generic defaults
-			else
+			//If a modifier filter is provided
+			if(cosmeticOptions == null || (containsModifier != null && cosmeticOptions.getModifier(containsModifier) == containsModifier.defaultValue))
 			{
 				//This may still not be defined, but the blank fallback is still provided at this point.
-				cosmeticOptions = cosmeticOptionsMap.get(particleDefaultKey);
+				CosmeticOptionStorage tempCosmeticOptions = cosmeticOptionsMap.get(particleDefaultKey);
+				if(cosmeticOptions == null || (tempCosmeticOptions != null && tempCosmeticOptions.getModifier(containsModifier) != containsModifier.defaultValue))
+				{
+					cosmeticOptions = tempCosmeticOptions;
+				}
 			}
 		}
 		
